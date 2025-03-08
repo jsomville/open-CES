@@ -1,0 +1,16 @@
+body {
+    max-width: 800px;
+    margin: auto;
+    text-align: center;
+    background: gray;
+    color: dodgerblue;
+}
+
+h2 {
+    text-align: center;
+}
+
+p{
+    color : white
+}
+  
