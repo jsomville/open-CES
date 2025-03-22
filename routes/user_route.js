@@ -4,7 +4,6 @@ import {getUsers, getUser, createUser, updateUser, deleteUser} from '../controll
 
 const router = express.Router();
 
-
 // get all users
 router.get('/', getUsers)
 

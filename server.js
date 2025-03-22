@@ -10,6 +10,7 @@ import notFoundHandler from './middleware/notFound.js';
 //Routes
 import home_route from './routes/home_route.js';
 import test_route from './routes/user_route.js';
+import idp_route from './routes/idp_route.js';
 
 //Server Configurations
 const VERSION = process.version
@@ -40,6 +41,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //Add the routes
 app.use('/', home_route);
 app.use('/api/users', test_route);
+app.use('/api/idp', idp_route);
 
 
 //Add error Handler
