@@ -23,6 +23,10 @@
   },
   "homepage": "https://github.com/jsomville/open-CES#readme",
   "dependencies": {
+    "@prisma/client": "^6.5.0",
     "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "prisma": "^6.5.0"
   }
 }
