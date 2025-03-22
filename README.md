@@ -12,8 +12,10 @@ Open **C**urrency **E**xchange **S**ystem is a back-end solution for local curre
 
 # To run the server
 use :
+
     ```npm run dev```
 or :
+
     ```npm run start```
 
 ---
