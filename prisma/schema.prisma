@@ -18,8 +18,8 @@ model Currency {
   symbol    String   @db.VarChar(5)
   name      String   @db.VarChar(255)
   balance   Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   Vouchers     Voucher[]     @relation("Vouchers")
   Transactions Transaction[] @relation("Transactions")
@@ -28,16 +28,16 @@ model Currency {
 
 model User {
   id           Int      @id @default(autoincrement())
-  merchantId   Int?
-  firstName    String   @db.VarChar(255)
-  lastName     String   @db.VarChar(255)
+  merchantId   Int?     @map("merchant_id")
+  firstname    String   @db.VarChar(255)
+  lastname     String   @db.VarChar(255)
   email        String   @unique @db.VarChar(255)
   phone        String?
   region       String?
-  passwordHash String   @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
   role         String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   Account  Account[]
   Merchant Merchant? @relation(fields: [merchantId], references: [id])
@@ -49,8 +49,8 @@ model Merchant {
   email     String?
   phone     String?
   region    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   User    User[]
   Account Account[]
@@ -58,12 +58,12 @@ model Merchant {
 
 model Account {
   id         Int      @id @default(autoincrement())
-  userId     Int
-  merchantId Int
-  currencyId Int
+  userId     Int      @map("user_id")
+  merchantId Int      @map("merchant_id")
+  currencyId Int      @map("currency_id")
   balance    Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   Merchant Merchant @relation(fields: [merchantId], references: [id])
   User     User     @relation(fields: [userId], references: [id])
@@ -76,14 +76,14 @@ model Account {
 
 model Transaction {
   id                Int      @id @default(autoincrement())
-  senderAccountId   Int
-  receiverAccountId Int
+  senderAccountId   Int      @map("sender_account_id")
+  receiverAccountId Int      @map("receiver_account_id")
   amount            Int
-  currencyId        Int
-  transactionType   String   @db.VarChar(20)
+  currencyId        Int      @map("currency_id")
+  transactionType   String   @map("transaction_type") @db.VarChar(20)
   status            String   @db.VarChar(20)
   description       String   @db.VarChar(255)
-  createdAt         DateTime @default(now())
+  createdAt         DateTime @default(now()) @map("created_at")
 
   SenderAccount   Account  @relation("TransactionsBySender", fields: [senderAccountId], references: [id])
   ReceiverAccount Account  @relation("TransactionsByRecieved", fields: [receiverAccountId], references: [id])
@@ -93,13 +93,13 @@ model Transaction {
 model Voucher {
   id               Int       @id @default(autoincrement())
   code             String    @db.VarChar(20)
-  currencyId       Int
+  currencyId       Int       @map("currency_id")
   amount           Int
   expiration       DateTime
   status           String    @db.VarChar(20)
-  claimedAccountId Int?
-  createdAt        DateTime  @default(now())
-  claimedAt        DateTime? @default(now())
+  claimedAccountId Int?      @map("claimed_account_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  claimedAt        DateTime? @default(now()) @map("claimed_at")
 
   Currency       Currency @relation("Vouchers", fields: [currencyId], references: [id])
   ClaimedAccount Account? @relation("ClaimedAccount", fields: [claimedAccountId], references: [id])
