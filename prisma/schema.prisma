@@ -17,7 +17,7 @@ model Currency {
   id        Int      @id @default(autoincrement())
   symbol    String   @db.VarChar(5)
   name      String   @db.VarChar(255)
-  balance   Int
+  balance   Decimal  @db.Decimal(10, 2)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -61,7 +61,7 @@ model Account {
   userId     Int      @map("user_id")
   merchantId Int      @map("merchant_id")
   currencyId Int      @map("currency_id")
-  balance    Int
+  balance    Decimal  @db.Decimal(10, 2)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
@@ -78,7 +78,7 @@ model Transaction {
   id                Int      @id @default(autoincrement())
   senderAccountId   Int      @map("sender_account_id")
   receiverAccountId Int      @map("receiver_account_id")
-  amount            Int
+  amount            Decimal  @db.Decimal(10, 2)
   currencyId        Int      @map("currency_id")
   transactionType   String   @map("transaction_type") @db.VarChar(20)
   status            String   @db.VarChar(20)
@@ -94,7 +94,7 @@ model Voucher {
   id               Int       @id @default(autoincrement())
   code             String    @db.VarChar(20)
   currencyId       Int       @map("currency_id")
-  amount           Int
+  amount           Decimal   @db.Decimal(10, 2)
   expiration       DateTime
   status           String    @db.VarChar(20)
   claimedAccountId Int?      @map("claimed_account_id")
