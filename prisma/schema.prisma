@@ -17,7 +17,7 @@ model Currency {
   id        Int      @id @default(autoincrement())
   symbol    String   @db.VarChar(5)
   name      String   @db.VarChar(255)
-  balance   Decimal  @db.Decimal(10, 2)
+  balance   Decimal  @default(0) @db.Decimal(10, 2)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -61,7 +61,7 @@ model Account {
   userId     Int      @map("user_id")
   merchantId Int      @map("merchant_id")
   currencyId Int      @map("currency_id")
-  balance    Decimal  @db.Decimal(10, 2)
+  balance    Decimal  @default(0) @db.Decimal(10, 2)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
