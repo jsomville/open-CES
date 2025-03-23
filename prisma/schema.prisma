@@ -14,89 +14,93 @@ datasource db {
 }
 
 model Currency {
-  id        Int       @id @default(autoincrement())
-  symbol    String    @db.VarChar(5)
-  name      String    @db.VarChar(255)
-  balance   Int     
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  symbol    String   @db.VarChar(5)
+  name      String   @db.VarChar(255)
+  balance   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  Vouchers      Voucher[]   @relation("Vouchers")
-  Transactions  Transaction @relation("Transactions")
+  Vouchers     Voucher[]     @relation("Vouchers")
+  Transactions Transaction[] @relation("Transactions")
+  Account      Account[]
 }
 
 model User {
-  id              Int      @id @default(autoincrement())
-  merchant_id     Int 
-  first_name      String   @db.VarChar(255)
-  last_name       String   @db.VarChar(255)
-  email           String   @db.VarChar(255) @unique
-  phone           String?
-  region          String?
-  password_hash   String   @db.VarChar(255)
-  role            String?
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  merchantId   Int?
+  firstName    String   @db.VarChar(255)
+  lastName     String   @db.VarChar(255)
+  email        String   @unique @db.VarChar(255)
+  phone        String?
+  region       String?
+  passwordHash String   @db.VarChar(255)
+  role         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  merchant        Merchant @relation(fields: [merchant_id], references: [id])
+  Account  Account[]
+  Merchant Merchant? @relation(fields: [merchantId], references: [id])
 }
 
 model Merchant {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(255)
-  email       String?  
-  phone       String?
-  region      String?
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  email     String?
+  phone     String?
+  region    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  Vouchers    Voucher[]     @relation("Vouchers")
+  User    User[]
+  Account Account[]
 }
 
 model Account {
-  id            Int      @id @default(autoincrement())
-  user_id       Int
-  merchant_id   Int
-  currency_id   Int
-  balance       Int
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  merchantId Int
+  currencyId Int
+  balance    Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  merchant      Merchant @relation(fields: [merchant_id], references: [id])
-  user          User @relation(fields: [user_id], references: [id])
-  curency       Currency @relation(fields: [currency_id], references: [id])
+  Merchant Merchant @relation(fields: [merchantId], references: [id])
+  User     User     @relation(fields: [userId], references: [id])
+  Currency Currency @relation(fields: [currencyId], references: [id])
 
-  Transactions  Transaction[] @relation("Transactions")
-  Claimed_Vouchers      Voucher[]     @relation("Vouchers")
+  TransactionsBySender   Transaction[] @relation("TransactionsBySender")
+  TransactionsByRecieved Transaction[] @relation("TransactionsByRecieved")
+  Vouchers               Voucher[]     @relation("ClaimedAccount")
 }
 
 model Transaction {
-  id                  Int     @id @default(autoincrement())
-  sender_account_id   Int
-  receiver_account_id Int
-  amount              Int
-  currency_id         Int
-  transaction_type    String   @db.VarChar(20)
-  status              String   @db.VarChar(20)
-  description         String   @db.VarChar(255)
-  created_at          DateTime @default(now())
+  id                Int      @id @default(autoincrement())
+  senderAccountId   Int
+  receiverAccountId Int
+  amount            Int
+  currencyId        Int
+  transactionType   String   @db.VarChar(20)
+  status            String   @db.VarChar(20)
+  description       String   @db.VarChar(255)
+  createdAt         DateTime @default(now())
 
-  sender_account      Account  @relation("Sender", fields: [sender_account_id], references: [id])
-  receiver_account    Account  @relation("Receiver", fields: [receiver_account_id], references: [id])
-  currency            Currency @relation(fields: [currency_id], references: [id])
+  SenderAccount   Account  @relation("TransactionsBySender", fields: [senderAccountId], references: [id])
+  ReceiverAccount Account  @relation("TransactionsByRecieved", fields: [receiverAccountId], references: [id])
+  Currency        Currency @relation("Transactions", fields: [currencyId], references: [id])
 }
 
 model Voucher {
-  id                  Int     @id @default(autoincrement())
-  code                String   @db.VarChar(20)
-  currency_id         Int
-  amount              Int
-  expiration          DateTime
-  status              String   @db.VarChar(20)
-  claimed_account_id  Int?
-  created_at          DateTime @default(now())
-  claimed_at          DateTime? @default(now())
+  id               Int       @id @default(autoincrement())
+  code             String    @db.VarChar(20)
+  currencyId       Int
+  amount           Int
+  expiration       DateTime
+  status           String    @db.VarChar(20)
+  claimedAccountId Int?
+  createdAt        DateTime  @default(now())
+  claimedAt        DateTime? @default(now())
 
-  currency            Currency @relation(fields: [currency_id], references: [id])
-  claimed_account     Account  @relation(fields: [claimed_account_id], references: [id])
+  Currency       Currency @relation("Vouchers", fields: [currencyId], references: [id])
+  ClaimedAccount Account? @relation("ClaimedAccount", fields: [claimedAccountId], references: [id])
 }
