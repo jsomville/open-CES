@@ -11,6 +11,7 @@ import notFoundHandler from './middleware/notFound.js';
 import home_route from './routes/home_route.js';
 import test_route from './routes/user_route.js';
 import idp_route from './routes/idp_route.js';
+import currency_route from './routes/currency_route.js'
 
 //Server Configurations
 const VERSION = process.version
@@ -42,6 +43,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', home_route);
 app.use('/api/users', test_route);
 app.use('/api/idp', idp_route);
+app.use('/api/currency', currency_route);
 
 
 //Add error Handler
