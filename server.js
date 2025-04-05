@@ -14,6 +14,8 @@ import user_route from './routes/user_route.js';
 import currency_route from './routes/currency_route.js'
 import account_route from './routes/account_route.js'
 import merchant_route from './routes/merchant_route.js'
+import voucher_route from './routes/voucher_route.js'
+
 
 //Server Configurations
 const VERSION = process.version
@@ -48,6 +50,7 @@ app.use('/api/currency', currency_route);
 app.use('/api/user', user_route);
 app.use('/api/account', account_route);
 app.use('/api/merchant', merchant_route);
+app.use('/api/voucher', voucher_route);
 
 
 //Add error Handler

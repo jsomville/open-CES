@@ -99,7 +99,7 @@ model Voucher {
   status           String    @db.VarChar(20)
   claimedAccountId Int?      @map("claimed_account_id")
   createdAt        DateTime  @default(now()) @map("created_at")
-  claimedAt        DateTime? @default(now()) @map("claimed_at")
+  claimedAt        DateTime? @map("claimed_at")
 
   Currency       Currency @relation("Vouchers", fields: [currencyId], references: [id])
   ClaimedAccount Account? @relation("ClaimedAccount", fields: [claimedAccountId], references: [id])
