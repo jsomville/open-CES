@@ -9,9 +9,11 @@ import notFoundHandler from './middleware/notFound.js';
 
 //Routes
 import home_route from './routes/home_route.js';
-import test_route from './routes/user_route.js';
 import idp_route from './routes/idp_route.js';
+import user_route from './routes/user_route.js';
 import currency_route from './routes/currency_route.js'
+import account_route from './routes/account_route.js'
+import merchant_route from './routes/merchant_route.js'
 
 //Server Configurations
 const VERSION = process.version
@@ -43,7 +45,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', home_route);
 app.use('/api/idp', idp_route);
 app.use('/api/currency', currency_route);
-app.use('/api/user', test_route);
+app.use('/api/user', user_route);
+app.use('/api/account', account_route);
+app.use('/api/merchant', merchant_route);
 
 
 //Add error Handler

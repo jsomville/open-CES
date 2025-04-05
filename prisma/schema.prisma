@@ -59,15 +59,15 @@ model Merchant {
 model Account {
   id         Int      @id @default(autoincrement())
   userId     Int      @map("user_id")
-  merchantId Int      @map("merchant_id")
+  merchantId Int?     @map("merchant_id")
   currencyId Int      @map("currency_id")
   balance    Decimal  @default(0) @db.Decimal(10, 2)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
-  Merchant Merchant @relation(fields: [merchantId], references: [id])
-  User     User     @relation(fields: [userId], references: [id])
-  Currency Currency @relation(fields: [currencyId], references: [id])
+  Merchant Merchant[]
+  User     User       @relation(fields: [userId], references: [id])
+  Currency Currency   @relation(fields: [currencyId], references: [id])
 
   TransactionsBySender   Transaction[] @relation("TransactionsBySender")
   TransactionsByRecieved Transaction[] @relation("TransactionsByRecieved")
