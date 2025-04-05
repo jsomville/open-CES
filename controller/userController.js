@@ -24,9 +24,7 @@ export const getUser =  async(req, res, next) => {
         const user = await prisma.user.findUnique({where : {id : parseInt(req.params.id)}})
 
         if (!user){
-            const error = new Error(`User not found`);
-            error.status = 404;
-            return next(error);
+            return res.status(404).json({ error: "User Not found"})
         }
         
         return res.status(200).json(user);
