@@ -1,87 +1,155 @@
-let users = [
-    {id : 1, username:"john.doe@gmail.com", paswordHash:"1234", email:"john.doe@gmail.com", phone:"0791010101", region:"1160", createdAt:"2025-03-08T11:10:01" },
-    {id : 2, username:"jane.doe@gmail.com", paswordHash:"1234", email:"jane.doe@gmail.com", phone:"0791010102", region:"1000", createdAt:"2025-03-08T11:10:01" },
-    {id : 3, username:"john@hotmail.com", paswordHash:"1234", email:"john@hotmail.com", phone:"0791010103", region:"1050", createdAt:"2025-01-01T11:10:01" },
-    {id : 4, username:"jane@gmail.com", paswordHash:"1234", email:"jane@gmail.com", phone:"0791010104", region:"1140", createdAt:"2025-01-01T11:10:01" },
-    {id : 5, username:"jim@gmail.com", paswordHash:"1234", email:"jim@gmail.com", phone:"0791010105", region:"1000", createdAt:"2025-01-01T11:10:01" },
-]
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 // @desc Get users
-// @route GET /api/users
-export const getUsers = (req, res, next) => {
-    const limit = parseInt(req.query.limit);
-    if (!isNaN(limit) && limit > 0){
-        return res.status(200).json(users.slice(0,limit));
+// @route GET /api/user
+export const getAllUsers = async (req, res, next) => {
+    try{
+        const users = await prisma.user.findMany()
+
+        //TODO : Remove Password Hash
+
+        return res.status(200).json(users);
     }
-    res.status(200).json(users);
+    catch(error){
+        return res.status(500).json({ error: error.message })
+    }
 }
 
 // @desc Get one user
-// @toute GET /api/users:id
-export const getUser = (req, res, next) => {
-    const id = parseInt(req.params.id);
-    const post = users.find((post) => post.id === id);
+// @toute GET /api/user:id
+export const getUser =  async(req, res, next) => {
+    try{
+        const user = await prisma.user.findUnique({where : {id : parseInt(req.params.id)}})
 
-    if (!post){
-        const error = new Error(`Post with id ${id} was not found`);
-        error.status = 404;
-        return next(error);
+        if (!user){
+            const error = new Error(`User not found`);
+            error.status = 404;
+            return next(error);
+        }
+        
+        return res.status(200).json(user);
+    }
+    catch(error){
+        return res.status(500).json({ error: error.message })
     }
     
-    res.status(200).json(user);
 };
 
 // @desc Create a User
-// @route POST /api/users
-export const createUser = (req, res, next) => {
-    //console.log(req.body);
+// @route POST /api/user
+export const createUser = async (req, res, next) => {
 
-    const newUser = {
-        id : users.length +1,
-        title : req.body.title,
+    if (!req.body.firstname){
+        return res.status(422).json({error : "firstname field is requied"})
+    }
+    if (!req.body.lastname){
+        return res.status(422).json({error : "lastname field is requied"})
+    }
+    if (!req.body.email){
+        return res.status(422).json({error : "email field is requied"})
+    }
+    if (!req.body.phone){
+        return res.status(422).json({error : "phone field is requied"})
+    }
+    if (!req.body.region){
+        return res.status(422).json({error : "region field is requied"})
+    }
+    if (!req.body.password){
+        return res.status(422).json({error : "password field is requied"})
     }
 
-    if (!newPost.title){
-        const error = new Error('Please include a title');
-        error.status = 400;
-        return next(error);
-    }
+    //TODO : Check email is unique
 
-    users.push(newUser);
-    res.status(201).json(users)
+    //TODO : Hash the password
+    const passwordHash = req.body.password
+
+    //TODO : confirm email
+
+    //TODO : Confirm Phone
+
+
+    const newUser = await prisma.user.create({
+        data:{
+            firstname : req.body.firstname,
+            lastname : req.body.lastname,
+            email : req.body.email,
+            phone : req.body.phone,
+            region : req.body.region,
+            passwordHash : passwordHash,
+            role : "user"
+        }
+    })
+
+    return res.status(201).json(newUser)
 };
 
-// @desc Update a User
-// @route PUT /api/users
-export const updateUser = (req, res, next) =>{
+// @desc Modify User
+// @route PUT /api/user
+export const updateUser = async (req, res, next) =>{
 
-    const id = parseInt(req.params.id);
-    const user = users.find((user) => user.id === id);
+    //TODO: Remove Password hash
 
-    if (!user){
-        const error = new Error(`User with id ${id} was not found`);
-        error.status = 400;
-        return next(error);
+    if (!req.body.firstname){
+        return res.status(422).json({error : "firstname field is requied"})
     }
-    user.title = req.body.title
+    if (!req.body.lastname){
+        return res.status(422).json({error : "lastname field is requied"})
+    }
+    if (!req.body.phone){
+        return res.status(422).json({error : "phone field is requied"})
+    }
+    if (!req.body.region){
+        return res.status(422).json({error : "region field is requied"})
+    }
 
-    res.status(201).json(users)
+    // User exists
+    if (!await prisma.user.findUnique({where: {id : parseInt(req.params.id)}})){
+        return res.status(404).json({ error: "User not found" })
+    }
 
+    const updatedUser = await prisma.user.update({
+        data: {
+            firstname : req.body.firstname,
+            lastname : req.body.lastname,
+            phone : req.body.phone,
+            region : req.body.region
+        },
+        where :{
+            id : parseInt(req.params.id)
+        }
+    })
+
+    return res.status(201).json(updatedUser)
 };
 
 // @desc Delete a User
 // @route DELETE /api/user
-export const deleteUser = (req, res, next) =>{
+export const deleteUser = async (req, res, next) =>{
 
-    const id = parseInt(req.params.id);
-    const post = users.find((user) => user.id === id);
-
-    if (!user){
-        const error = new Error(`User with id ${id} was not found`);
-        error.status = 404;
-        return next(error);
+    // User exists
+    if (!await prisma.user.findUnique({where : { id: parseInt(req.params.id)}})){
+        return res.status(404).json({ error: "User not found" })
     }
 
-    users = users.filter((user) => user.id !== id);
-    res.status(200).json(users)
+    //Get Number of Account 
+    const accountCount  = await prisma.account.count({
+        where: {
+            userId: parseInt(req.params.id)
+        }
+    })
+    // Number of accounts must be zero
+    if (accountCount){
+        return res.status(409).json({ error: `User is still assigned to an account` })
+    }
+
+    //Demete user
+    await prisma.user.delete({
+        where:{
+            id : parseInt(req.params.id)
+        }
+    })
+
+    return res.status(204).send()
 };
