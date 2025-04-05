@@ -1,12 +1,14 @@
 import express from 'express';
 
-import { createCurrency, getAllCurrencies, updateCurrency, deleteCurrency} from '../controller/currencyController.js'
+import { getCurrency, createCurrency, getAllCurrencies, updateCurrency, deleteCurrency} from '../controller/currencyController.js'
 
 const router = express.Router();
 
-router.post('/', createCurrency)
-
 router.get('/', getAllCurrencies)
+
+router.get('/:id', getCurrency)
+
+router.post('/', createCurrency)
 
 router.put('/:id', updateCurrency)
 

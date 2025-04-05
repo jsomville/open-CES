@@ -2,6 +2,38 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// @desc Get Currencies
+// @route GET /api/currency
+export const getAllCurrencies = async (req, res, next) => {
+    try { 
+        const currencies = await prisma.currency.findMany()
+
+        return res.status(200).json(currencies)
+    }
+    catch(error){
+        return res.status(500).json({ error: error.message })
+    }
+}
+
+// @desc Get Currency
+// @route GET /api/currency
+export const getCurrency = async (req, res, next) => {
+    try { 
+        const currency = await prisma.currency.findUnique( {where : {id : parseInt(req.params.id)}})
+
+        //Currency exists
+        if (!currency){
+            return res.status(404).json({ error: "Currency not found" })
+        }
+
+        return res.status(200).json(currency)
+    }
+    catch(error){
+        return res.status(500).json({ error: error.message })
+    }
+}
+
+
 // @desc Create Currency
 // @route POST /api/currency
 export const createCurrency = async (req, res, next) => {
@@ -27,34 +59,21 @@ export const createCurrency = async (req, res, next) => {
     }
 }
 
-// @desc Get Currencies
-// @route GET /api/currency
-export const getAllCurrencies = async (req, res, next) => {
-    try { 
-        const currencies = await prisma.currency.findMany()
-
-        return res.status(200).json(currencies)
-    }
-    catch(error){
-        return res.status(500).json({ error: error.message })
-    }
-}
-
 // @desc Modify Currencies
 // @route PUT /api/currency
 export const updateCurrency = async (req, res, next) => {
     try {
-        //Currency exists
-        if (!await prisma.currency.findUnique({where: {id : parseInt(req.params.id)}})){
-            return res.status(404).json({ error: "Currency not found" })
-        }
-        //Symbol is required
+
         if (!req.body.symbol){
             return res.status(422).json({error : "Symbol field is requied"})
         }
-        //Name is required
         if (!req.body.name){
             return res.status(422).json({error : "Name field is requied"})
+        }
+
+        //Currency exists
+        if (!await prisma.currency.findUnique({where: {id : parseInt(req.params.id)}})){
+            return res.status(404).json({ error: "Currency not found" })
         }
 
         const updatedCurrency = await prisma.currency.update({
@@ -67,7 +86,7 @@ export const updateCurrency = async (req, res, next) => {
             }
         })
 
-        return res.status(200).json(updatedCurrency)
+        return res.status(201).json(updatedCurrency)
     }
     catch(error){
         return res.status(500).json({ error: error.message })
@@ -75,7 +94,7 @@ export const updateCurrency = async (req, res, next) => {
 }
 
 // @desc Delete Currencies
-// @route Delete /api/currency
+// @route DELETE /api/currency
 export const deleteCurrency = async (req, res, next) => {
     try {
         //Currency exists

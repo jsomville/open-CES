@@ -41,9 +41,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //Add the routes
 app.use('/', home_route);
-app.use('/api/users', test_route);
 app.use('/api/idp', idp_route);
 app.use('/api/currency', currency_route);
+app.use('/api/user', test_route);
 
 
 //Add error Handler
