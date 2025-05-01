@@ -38,11 +38,13 @@ export const getCurrency = async (req, res, next) => {
 // @route POST /api/currency
 export const createCurrency = async (req, res, next) => {
     try { 
-        if (!req.body.symbol){
-            return res.status(422).json({error : "Symbol field is requied"})
+        const symbol = req.body.symbol;
+        if (!symbol || symbol.length > 6){
+            return res.status(422).json({error : "Symbol field is requied or too long"})
         }
-        if (!req.body.name){
-            return res.status(422).json({error : "Name field is requied"})
+        const name = req.body.name;
+        if (!name || name.length < 4){
+            return res.status(422).json({error : "Name field is requied or too short"})
         }
 
         const newCurrency = await prisma.currency.create({

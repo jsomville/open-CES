@@ -8,17 +8,19 @@ const prisma = new PrismaClient()
 // @toute POST /api/idp/login
 export const login = async (req, res, next) => {
     try{
-        //Username is required
-        if (!req.body.username){
-            return res.status(422).json({error : "username field is required"});
-        }
-        //Password is required
-        if (!req.body.password){
-            return res.status(422).json({error : "password field is required"});
-        }
 
         const username = req.body.username;
         const password = req.body.password;
+
+        //Username is required
+        if (!username){
+            return res.status(422).json({error : "username field is required"});
+        }
+
+        //Password is required
+        if (!password){
+            return res.status(422).json({error : "password field is required"});
+        }
 
         //Get User
         // User exists
