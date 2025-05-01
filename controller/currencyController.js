@@ -8,7 +8,10 @@ export const getAllCurrencies = async (req, res, next) => {
     try { 
         const currencies = await prisma.currency.findMany()
 
-        return res.status(200).json(currencies)
+        // Remove Balance in list of Currencies
+        const safeCurrency = currencies.map(({ balance, ...currencies }) => currencies);
+
+        return res.status(200).json(safeCurrency)
     }
     catch(error){
         return res.status(500).json({ error: error.message })

@@ -2,13 +2,23 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 import request from 'supertest';
 import app from "../app.js"
+import {admin_access_token, user_access_token} from './test.setup.js'
 
 describe("Test Currency", () => {
 
-    // Get - List all currency
-    it('List all currencies', async () => {
-      const res = await request(app).get('/api/currency');
-      assert.equal(res.statusCode, 200);
+    it('List all currencies - User', async () => {
+        const res = await request(app)
+            .get('/api/currency')
+            .set('Authorization', `Bearer ${user_access_token}`);
+
+        assert.equal(res.statusCode, 200);
+    });
+
+    it('List all currencies - Admin', async () => {
+        const res = await request(app)
+            .get('/api/currency')
+            .set('Authorization', `Bearer ${admin_access_token}`);
+        assert.equal(res.statusCode, 200);
     });
 
     let new_currency_id = 0
@@ -18,13 +28,12 @@ describe("Test Currency", () => {
     };
 
     const test_token = "abc";
-    
 
     // Post - Add currency
     it('Add currency', async () => {
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(currency_payload)
 
         assert.equal(res.statusCode, 201);
@@ -37,10 +46,18 @@ describe("Test Currency", () => {
         new_currency_id = res.body.id
     });
 
+    it('Add currency - User', async () => {
+        const res = await request(app)
+            .post('/api/currency')
+            .set('Authorization', `Bearer ${user_access_token}`);
+
+        assert.equal(res.statusCode, 403);
+    });
+
     it('Add currency - No Payload', async () => {
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 422);
     });
@@ -52,7 +69,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -65,7 +82,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -78,7 +95,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -92,7 +109,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -106,7 +123,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 500);
@@ -120,7 +137,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 500);
@@ -134,7 +151,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -148,7 +165,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .post('/api/currency')
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -158,7 +175,7 @@ describe("Test Currency", () => {
     it ('Get Currency', async () => {
         const res = await request(app)
             .get(`/api/currency/${new_currency_id}`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
 
         assert.equal(res.statusCode, 200);
         assert.equal(res.body.name, currency_payload.name);
@@ -171,7 +188,7 @@ describe("Test Currency", () => {
     it ('Get Currency - Invalid ID', async () => {
         const res = await request(app)
             .get(`/api/currency/9999`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
 
         assert.equal(res.statusCode, 404);
     });
@@ -186,7 +203,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 201);
@@ -197,10 +214,18 @@ describe("Test Currency", () => {
         assert.ok(res.body.updatedAt)
     });
 
+    it ('Modify Currency -User Token', async () => {
+        const res = await request(app)
+            .put(`/api/currency/${new_currency_id}`)
+            .set('Authorization', `Bearer ${user_access_token}`);
+
+        assert.equal(res.statusCode, 403);
+    });
+
     it ('Modify Currency - No Payload', async () => {
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 422);
     });
@@ -213,7 +238,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -226,7 +251,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -240,7 +265,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -254,7 +279,7 @@ describe("Test Currency", () => {
 
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
         assert.equal(res.statusCode, 422);
@@ -266,15 +291,23 @@ describe("Test Currency", () => {
     it ('Delete Currency', async () => {
         const res = await request(app)
             .delete(`/api/currency/${new_currency_id}`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 204);
+    });
+
+    it ('Delete Currency', async () => {
+        const res = await request(app)
+            .delete(`/api/currency/${new_currency_id}`)
+            .set('Authorization', `Bearer ${user_access_token}`);
+
+        assert.equal(res.statusCode, 403);
     });
 
     it ('Delete Currency - Invalid ID', async () => {
         const res = await request(app)
             .delete(`/api/currency/99999`)
-            .set('token', test_token)
+            .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 404);
     });

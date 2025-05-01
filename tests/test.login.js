@@ -1,11 +1,11 @@
-import { describe, it, test } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
 import app from "../app.js";
 
-import config from "./config.js";
+import config from "./test.config.js";
 
 describe("Login Test", () => {
 
@@ -24,7 +24,6 @@ describe("Login Test", () => {
     assert.ok(res.body.accessToken);
     assert.ok(res.body.refreshToken);
 
-   
     // Access Token 
     const decoded_access_token = jwt.verify(res.body.accessToken, process.env.JWT_ACCESS_SECRET_KEY );
     assert.equal(decoded_access_token.sub, config.userEmail);

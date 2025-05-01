@@ -101,8 +101,6 @@ export const createUser = async (req, res, next) => {
 // @route PUT /api/user
 export const updateUser = async (req, res, next) =>{
     try{
-        //TODO: Remove Password hash
-
         if (!req.body.firstname){
             return res.status(422).json({error : "firstname field is requied"})
         }
@@ -142,6 +140,35 @@ export const updateUser = async (req, res, next) =>{
         return res.status(500).json({ error: error.message })
     }
 };
+
+// @desc Modify User
+// @route PUT /api/user
+export const setUserAdmin = async (req, res, next) =>{
+    try{
+
+        if (!req.body.email){
+            return res.status(422).json({error : "email field is requied"})
+        }
+
+        // User exists
+        if (!await prisma.user.findUnique({where: {id : parseInt(req.params.id)}})){
+            return res.status(404).json({ error: "User not found" })
+        }
+
+        const updatedUser = await prisma.user.update({
+            data: {
+                role : "admin"
+            },
+            where :{ id : parseInt(req.params.id)}
+        })
+
+        return res.status(204).send()
+    }
+    catch(error){
+        return res.status(500).json({ error: error.message })
+    }
+};
+
 
 // @desc Delete a User
 // @route DELETE /api/user
