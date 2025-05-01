@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { PrismaClient } from '@prisma/client'
-import { v4 as uuidv4 } from 'uuid'; 
+import { v4 as uuidv4 } from 'uuid';
+import argon2 from 'argon2';
 
 const prisma = new PrismaClient()
 
@@ -30,7 +31,8 @@ export const login = async (req, res, next) => {
         }
 
         //Verify User
-        if (!user.passwordHash === password){
+        const passwordHash = await argon2.hash(password);
+        if (!user.passwordHash === passwordHash){
             return res.status(401).json({ error: "Invalid Credentials" })
         }
 

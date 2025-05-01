@@ -24,6 +24,7 @@
   "homepage": "https://github.com/jsomville/open-CES#readme",
   "dependencies": {
     "@prisma/client": "^6.5.0",
+    "argon2": "^0.43.0",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "supertest": "^7.1.0",

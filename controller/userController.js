@@ -1,3 +1,4 @@
+import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -9,9 +10,10 @@ export const getAllUsers = async (req, res, next) => {
     try{
         const users = await prisma.user.findMany()
 
-        //TODO : Remove Password Hash
+        // Remove password hash
+        const safeUsers = users.map(({ passwordHash, ...user }) => user);
 
-        return res.status(200).json(users);
+        return res.status(200).json(safeUsers);
     }
     catch(error){
         return res.status(500).json({ error: error.message })
@@ -27,8 +29,11 @@ export const getUser =  async(req, res, next) => {
         if (!user){
             return res.status(404).json({ error: "User Not found"})
         }
+
+        // Remove password hash
+        const { passwordHash, ...safeUser } = user;
         
-        return res.status(200).json(user);
+        return res.status(200).json(safeUser);
     }
     catch(error){
         return res.status(500).json({ error: error.message })
@@ -55,14 +60,15 @@ export const createUser = async (req, res, next) => {
         if (!req.body.region){
             return res.status(422).json({error : "region field is requied"})
         }
-        if (!req.body.password){
+        const password = req.body.password
+        if (!password || password.lenght < 10){
             return res.status(422).json({error : "password field is requied"})
         }
 
         //TODO : Check email is unique
 
         //TODO : Hash the password
-        const passwordHash = req.body.password
+        const passwordHashed = await argon2.hash(password);
 
         //TODO : confirm email
 
@@ -76,12 +82,15 @@ export const createUser = async (req, res, next) => {
                 email : req.body.email,
                 phone : req.body.phone,
                 region : req.body.region,
-                passwordHash : passwordHash,
+                passwordHash : passwordHashed,
                 role : "user"
             }
         })
 
-        return res.status(201).json(newUser)
+        // Remove password hash
+        const { passwordHash, ...safeUser } = newUser;
+
+        return res.status(201).json(safeUser)
     }
     catch(error){
         return res.status(500).json({ error: error.message })
@@ -124,7 +133,10 @@ export const updateUser = async (req, res, next) =>{
             }
         })
 
-        return res.status(201).json(updatedUser)
+        // Remove password hash
+        const { passwordHash, ...safeUser } = newUser;
+
+        return res.status(201).json(safeUser)
     }
     catch(error){
         return res.status(500).json({ error: error.message })
@@ -151,7 +163,7 @@ export const deleteUser = async (req, res, next) =>{
             return res.status(409).json({ error: `User is still assigned to an account` })
         }
 
-        //Demete user
+        //Delete user
         await prisma.user.delete({
             where:{
                 id : parseInt(req.params.id)
