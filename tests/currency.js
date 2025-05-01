@@ -4,7 +4,7 @@ import request from 'supertest';
 import app from "../app.js"
 
 describe("Test Currency", () => {
-    
+
     // Get - List all currency
     it('List all currencies', async () => {
       const res = await request(app).get('/api/currency');

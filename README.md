@@ -21,6 +21,10 @@ or :
 
     npm run start
 
+to run the tests :
+
+    node run-test.js
+
 ---
 
 # Configuration
