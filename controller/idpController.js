@@ -27,13 +27,13 @@ export const login = async (req, res, next) => {
         // User exists
         const user = await prisma.user.findUnique({where: {email : username}})
         if (!user){
-            return res.status(404).json({ error: "User not found" })
+            return res.status(401).json({ error: "Invalid username or password" })
         }
 
-        //Verify User
-        const passwordHash = await argon2.hash(password);
-        if (!user.passwordHash === passwordHash){
-            return res.status(401).json({ error: "Invalid Credentials" })
+        //Verify User Password
+        const isPasswordMatch = await argon2.verify(user.passwordHash, password )
+        if (!isPasswordMatch){
+            return res.status(401).json({ error: "Invalid username or password" })
         }
 
         // Get Access Token

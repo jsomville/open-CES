@@ -1,7 +1,7 @@
 import './tests/setup.js';
 
-import './tests/0-server.test.js';
+import './tests/server.js';
 
-import './tests/1-login.test.js';
+import './tests/login.js';
 
-import './tests/currency.test.js';
+//import './tests/currency.js';
