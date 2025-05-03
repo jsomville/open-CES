@@ -27,7 +27,7 @@ export const getUser =  async(req, res, next) => {
         const user = await prisma.user.findUnique({where : {id : parseInt(req.params.id)}})
 
         if (!user){
-            return res.status(404).json({ error: "User Not found"})
+            return res.status(404).json({ error: "User not found"})
         }
 
         // Remove password hash
@@ -46,34 +46,47 @@ export const getUser =  async(req, res, next) => {
 export const createUser = async (req, res, next) => {
     try{
         if (!req.body.firstname){
-            return res.status(422).json({error : "firstname field is requied"})
+            return res.status(422).json({error : "Firstname field mandatory"})
         }
         if (!req.body.lastname){
-            return res.status(422).json({error : "lastname field is requied"})
+            return res.status(422).json({error : "Lastname field mandatory"})
         }
         if (!req.body.email){
-            return res.status(422).json({error : "email field is requied"})
+            return res.status(422).json({error : "Email field mandatory"})
         }
         if (!req.body.phone){
-            return res.status(422).json({error : "phone field is requied"})
+            return res.status(422).json({error : "Phone field mandatory"})
         }
         if (!req.body.region){
-            return res.status(422).json({error : "region field is requied"})
+            return res.status(422).json({error : "Region field mandatory"})
         }
         const password = req.body.password
-        if (!password || password.lenght < 10){
-            return res.status(422).json({error : "password field is requied"})
+        if (!password){
+            return res.status(422).json({error : "Password field mandatory"})
+        }
+        if (password.length < 10){
+            return res.status(422).json({error : "Invalid Password policy"}) 
         }
 
-        //TODO : Check email is unique
+        //Check email is unique
+        const user_email = await prisma.user.findUnique({where: {email : req.body.email}})
+        if (user_email){
+            return res.status(409).json({ error: "Email already used" })
+        }
 
-        //TODO : Hash the password
+        //Check phone is unique
+        const user_phone = await prisma.user.findUnique({where: {phone : req.body.phone}})
+        if (user_phone){
+            return res.status(409).json({ error: "Phone already used" })
+        }
+
+        //Hash the password
         const passwordHashed = await argon2.hash(password);
+
 
         //TODO : confirm email
 
         //TODO : Confirm Phone
-
 
         const newUser = await prisma.user.create({
             data:{
@@ -93,6 +106,7 @@ export const createUser = async (req, res, next) => {
         return res.status(201).json(safeUser)
     }
     catch(error){
+        console.log(error.message);
         return res.status(500).json({ error: error.message })
     }
 };
@@ -102,21 +116,29 @@ export const createUser = async (req, res, next) => {
 export const updateUser = async (req, res, next) =>{
     try{
         if (!req.body.firstname){
-            return res.status(422).json({error : "firstname field is requied"})
+            return res.status(422).json({error : "Firstname field mandatory"})
         }
         if (!req.body.lastname){
-            return res.status(422).json({error : "lastname field is requied"})
+            return res.status(422).json({error : "Lastname field mandatory"})
         }
         if (!req.body.phone){
-            return res.status(422).json({error : "phone field is requied"})
+            return res.status(422).json({error : "Phone field mandatory"})
         }
         if (!req.body.region){
-            return res.status(422).json({error : "region field is requied"})
+            return res.status(422).json({error : "Region field mandatory"})
         }
+
+        //TODO : Allow modification of self
 
         // User exists
         if (!await prisma.user.findUnique({where: {id : parseInt(req.params.id)}})){
             return res.status(404).json({ error: "User not found" })
+        }
+
+        //Check phone is unique and not self
+        const user_phone = await prisma.user.findUnique({where: {phone : req.body.phone}})
+        if (user_phone && user_phone.id != req.params.id){
+            return res.status(409).json({ error: "Phone already used" })
         }
 
         const updatedUser = await prisma.user.update({
@@ -132,7 +154,7 @@ export const updateUser = async (req, res, next) =>{
         })
 
         // Remove password hash
-        const { passwordHash, ...safeUser } = newUser;
+        const { passwordHash, ...safeUser } = updatedUser;
 
         return res.status(201).json(safeUser)
     }
@@ -147,7 +169,7 @@ export const setUserAdmin = async (req, res, next) =>{
     try{
 
         if (!req.body.email){
-            return res.status(422).json({error : "email field is requied"})
+            return res.status(422).json({error : "Email field mandatory"})
         }
 
         // User exists

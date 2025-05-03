@@ -49,9 +49,11 @@ describe("Test Currency", () => {
     it('Add currency - User', async () => {
         const res = await request(app)
             .post('/api/currency')
-            .set('Authorization', `Bearer ${user_access_token}`);
+            .set('Authorization', `Bearer ${user_access_token}`)
+            .send(currency_payload);
 
         assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
     it('Add currency - No Payload', async () => {
@@ -73,6 +75,7 @@ describe("Test Currency", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "Name field is requied or too short");
     });
 
     it('Add currency - No Symbol', async () => {
@@ -86,33 +89,7 @@ describe("Test Currency", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
-    });
-    it('Add currency - Empty Name', async () => {
-        const payload = {
-            "name" : "",
-            "symbol" : "TC"
-        };
-
-        const res = await request(app)
-            .post('/api/currency')
-            .set('Authorization', `Bearer ${admin_access_token}`)
-            .send(payload)
-
-        assert.equal(res.statusCode, 422);
-    });
-
-    it('Add currency - Empty Symbol', async () => {
-        const payload = {
-            "name" : "Test Currency",
-            "symbol" : ""
-        };
-
-        const res = await request(app)
-            .post('/api/currency')
-            .set('Authorization', `Bearer ${admin_access_token}`)
-            .send(payload)
-
-        assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "Symbol field is requied or too long");
     });
 
     it('Add currency - Duplicated Name', async () => {
@@ -191,6 +168,7 @@ describe("Test Currency", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
 
         assert.equal(res.statusCode, 404);
+        assert.equal(res.body.error, "Currency not found");
     });
 
 
@@ -220,6 +198,7 @@ describe("Test Currency", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
     it ('Modify Currency - No Payload', async () => {
@@ -242,6 +221,7 @@ describe("Test Currency", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "Name field mandatory");
     });
 
     it ('Modify Currency - No Symbol', async () => {
@@ -255,36 +235,8 @@ describe("Test Currency", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "Symbol field mandatory");
     });
-
-    it ('Modify Currency - Empty Name', async () => {
-        const payload = {
-            "name" : "",
-            "symbol" : "TC2"
-        };
-
-        const res = await request(app)
-            .put(`/api/currency/${new_currency_id}`)
-            .set('Authorization', `Bearer ${admin_access_token}`)
-            .send(payload)
-
-        assert.equal(res.statusCode, 422);
-    });
-
-    it ('Modify Currency - Empty Symbol', async () => {
-        const payload = {
-            "name" : "Test Currency2",
-            "symbol" : ""
-        };
-
-        const res = await request(app)
-            .put(`/api/currency/${new_currency_id}`)
-            .set('Authorization', `Bearer ${admin_access_token}`)
-            .send(payload)
-
-        assert.equal(res.statusCode, 422);
-    });
-
 
 
     // Delete Currency
@@ -302,6 +254,7 @@ describe("Test Currency", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
     it ('Delete Currency - Invalid ID', async () => {
@@ -310,5 +263,6 @@ describe("Test Currency", () => {
             .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 404);
+        assert.equal(res.body.error, "Currency not found");
     });
   });

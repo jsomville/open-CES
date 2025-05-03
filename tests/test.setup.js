@@ -25,7 +25,7 @@ before(async () =>{
       firstname : "user",
       lastname : "test",
       email : config.userEmail,
-      phone : "123456789",
+      phone : "+32471040204",
       region : "EU",
       passwordHash : userPwdHash,
       role : "user"
@@ -50,7 +50,7 @@ before(async () =>{
       firstname : "admin",
       lastname : "test",
       email : config.adminEmail,
-      phone : "123456789",
+      phone : "+32471040205",
       region : "EU",
       passwordHash : passwordHash,
       role : "admin"

@@ -1,25 +1,31 @@
 import express from 'express';
 
+import { authenticateToken } from '../middleware/auth.js'
+import { authorizeRole } from '../middleware/authorizeRole.js'
+
 import {getAllUsers, getUser, createUser, updateUser, deleteUser, setUserAdmin} from '../controller/userController.js'
 
 const router = express.Router();
 
-// get all users
-router.get('/', getAllUsers)
+// Use the Auth Middleware for all routes
+router.use(authenticateToken)
 
 // get all users
-router.get('/:id', getUser)
+router.get('/', authorizeRole("admin"), getAllUsers)
+
+// get user by ID
+router.get('/:id', authorizeRole("admin"), getUser)
 
 // create user
-router.post('/', createUser)
+router.post('/', authorizeRole("admin"), createUser)
 
 // modify user
-router.put('/:id', updateUser)
+router.put('/:id', authorizeRole("admin"), updateUser)
 
 // delete user
-router.delete('/:id', deleteUser)
+router.delete('/:id', authorizeRole("admin"), deleteUser)
 
 //set as admin
-router.post('/:id/set-admin', setUserAdmin)
+router.post('/:id/set-admin', authorizeRole("admin"), setUserAdmin)
 
 export default router;

@@ -70,10 +70,10 @@ export const updateCurrency = async (req, res, next) => {
     try {
 
         if (!req.body.symbol){
-            return res.status(422).json({error : "Symbol field is requied"})
+            return res.status(422).json({error : "Symbol field mandatory"})
         }
         if (!req.body.name){
-            return res.status(422).json({error : "Name field is requied"})
+            return res.status(422).json({error : "Name field mandatory"})
         }
 
         //Currency exists

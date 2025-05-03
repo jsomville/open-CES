@@ -32,10 +32,10 @@ model User {
   firstname    String   @db.VarChar(255)
   lastname     String   @db.VarChar(255)
   email        String   @unique @db.VarChar(255)
-  phone        String?
-  region       String?
+  phone        String   @unique @db.VarChar(15)
+  region       String
   passwordHash String   @map("password_hash") @db.VarChar(255)
-  role         String?
+  role         String
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
