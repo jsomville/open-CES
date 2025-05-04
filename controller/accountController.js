@@ -7,7 +7,6 @@ const prisma = new PrismaClient()
 export const getAllAccount = async (req, res, next) => {
     try{
         const accounts = await prisma.account.findMany()
-
         return res.status(200).json(accounts);
     }
     catch(error){

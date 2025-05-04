@@ -23,7 +23,7 @@ or :
 
 to run the tests :
 
-    node run-test.js
+    npm run test
 
 ---
 

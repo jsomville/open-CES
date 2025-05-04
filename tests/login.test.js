@@ -1,13 +1,12 @@
-import { describe, it } from "node:test";
+//import { describe, it } from "node:test";
 import assert from "node:assert";
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
 import app from "../app.js";
-
 import config from "./config.test.js";
 
-describe.skip("Login Test", () => {
+describe("Login Test", () => {
 
   // Check a normal user can login
   it('User Login', async () => {

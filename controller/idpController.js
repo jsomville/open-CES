@@ -64,7 +64,7 @@ export const login = async (req, res, next) => {
 }
 
 //Generate Access Token
-function getAccessToken(user){
+export function getAccessToken(user) {
     // JWT Access Token
     const accessToken = jwt.sign({
             sub : user.email,

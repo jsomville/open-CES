@@ -3,7 +3,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getAllAccount, getAccount, createAccount, deleteAccount} from '../controller/accountController.js'
+import { getAllAccount, getAccount, createAccount, deleteAccount } from '../controller/accountController.js'
 
 const router = express.Router();
 

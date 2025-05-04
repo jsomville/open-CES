@@ -1,37 +1,55 @@
-import { describe, it } from "node:test";
 import assert from "node:assert";
 import request from 'supertest';
 import jwt from "jsonwebtoken";
 
 import app from "../app.js";
-import { admin_access_token, user_access_token } from './setup.test.js';
-
-import { getUserByEmail } from '../controller/userController.js';
-
-let new_account_id;
-let account_payload;
-
-before(() => {
-    console.log("account - before all");
-
-    //const token = user_access_token;
-    /*const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqYW5lLmRvZUBlbWFpbC5jb20iLCJqdGkiOiJiZjYxMGE3MS0yYWJiLTQ4MTktYjhmOS1kYWViMTRmMzNlOTMiLCJyb2xlIjoiYWRtaW4iLCJhdWQiOiJPcGVuQ0VTIiwiaWF0IjoxNzQ2Mjk0NDc3LCJleHAiOjE3NDYyOTc0NzcsImlzcyI6Ik9wZW4tQ0VTIn0.Al_JAJTmLm4RAbVpCswB-g5C2KEB83VyT6jASec0hCY";
-    console.log(token);
-    
-    const decoded_token = jwt.decode(token);
-    console.log(decoded_token);
-
-    const accountNumber = await getUserByEmail(decoded_token.sub);
-    console.log(accountNumber);
-
-    new_account_id = accountNumber;
-    account_payload = {
-        "userId" : new_account_id,
-        "currencyId" : 1
-    };*/
-});
+import config from "./config.test.js";
+import { getAccessToken } from "../controller/idpController.js";
+//import { getUserByEmail } from '../controller/userController.js';
 
 describe("Test Account", () => {
+    //let new_account_id;
+    //let account_payload;
+    let admin_access_token;
+    let user_access_token;
+
+    before(async () => {
+        //Wait for 1 sec --> bug before
+        await new Promise(resolve => setTimeout(resolve, 500)); // 1 second
+
+        //console.log("Account - Before")
+        
+        // Create User Token
+        const user_token_parameters = {
+            "email" : config.userEmail,
+            "role" : "user"
+        }
+        user_access_token = getAccessToken(user_token_parameters)
+        
+        //console.log(global.uat)
+
+        // Create Admin Token
+        const admin_token_parameters = {
+            "email" : config.adminEmail,
+            "role" : "admin"
+        }
+        admin_access_token = getAccessToken(admin_token_parameters);
+
+        //console.log(global.aat)
+
+
+        /*const decoded_token = jwt.decode(token);
+        console.log(decoded_token);
+    
+        const accountNumber = ""//await getUserByEmail(decoded_token.sub);
+        console.log(accountNumber);
+    
+        new_account_id = accountNumber;
+        account_payload = {
+            "userId" : new_account_id,
+            "currencyId" : 1
+        };*/
+    });
 
     it('List all Account - Admin', async () => {
         const res = await request(app)
@@ -51,7 +69,7 @@ describe("Test Account", () => {
     });
 
 
-     // Post - Add currency
+     // Post - Add Account
      /*it('Add account- User', async () => {
         const res = await request(app)
             .post('/api/account')

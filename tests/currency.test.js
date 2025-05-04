@@ -1,10 +1,30 @@
-import { describe, it } from "node:test";
+//import { describe, it } from "node:test";
 import assert from "node:assert";
 import request from 'supertest';
-import app from "../app.js"
-import {admin_access_token, user_access_token} from './setup.test.js'
 
-describe.skip("Test Currency", () => {
+import app from "../app.js";
+import config from "./config.test.js";
+import { getAccessToken } from "../controller/idpController.js"
+
+describe("Test Currency", () => {
+    let admin_access_token;
+    let user_access_token;
+
+    before(async () => {
+        // Create User Token
+        const user_token_parameters = {
+            "email" : config.userEmail,
+            "role" : "user"
+        }
+        user_access_token = getAccessToken(user_token_parameters)
+        
+        // Create Admin Token
+        const admin_token_parameters = {
+            "email" : config.adminEmail,
+            "role" : "admin"
+        }
+        admin_access_token = getAccessToken(admin_token_parameters);
+    });
 
     it('List all currencies - User', async () => {
         const res = await request(app)
