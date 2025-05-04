@@ -1,18 +1,20 @@
 import express from 'express';
 
 import {getAllVouchers, getVoucher, createVoucher, updateVoucher} from '../controller/voucherController.js'
+import { authenticateToken } from '../middleware/auth.js'
+import { authorizeRole } from '../middleware/authorizeRole.js'
 
 const router = express.Router();
 
-// get all vouchers
-router.get('/', getAllVouchers)
+router.use(authenticateToken)
 
-// get voucher
-router.get('/:id', getVoucher)
+router.get('/', authorizeRole("admin"), getAllVouchers)
 
-router.post('/', createVoucher)
+router.get('/:id', authorizeRole("admin"), getVoucher)
 
-router.put('/:id', updateVoucher)
+router.post('/', authorizeRole("admin"), createVoucher)
+
+router.put('/:id', authorizeRole("admin"), updateVoucher)
 
 // NO delete Voucher required
 
