@@ -38,16 +38,16 @@ export const getMerchant =  async(req, res, next) => {
 export const createMerchant = async (req, res, next) => {
     try{
         if (!req.body.name){
-            return res.status(422).json({error : "name field is requied"})
+            return res.status(422).json({error : "Name field mandatory"})
         }
         if (!req.body.email){
-            return res.status(422).json({error : "email field is requied"})
+            return res.status(422).json({error : "Email field mandatory"})
         }
         if (!req.body.phone){
-            return res.status(422).json({error : "phone field is requied"})
+            return res.status(422).json({error : "Phone field mandatory"})
         }
         if (!req.body.region){
-            return res.status(422).json({error : "region field is requied"})
+            return res.status(422).json({error : "Region field mandatory"})
         }
 
         const newMerchant = await prisma.merchant.create({
@@ -71,16 +71,16 @@ export const createMerchant = async (req, res, next) => {
 export const updateMerchant = async (req, res, next) =>{
     try{
         if (!req.body.name){
-            return res.status(422).json({error : "name field is requied"})
+            return res.status(422).json({error : "Name field mandatory"})
         }
         if (!req.body.email){
-            return res.status(422).json({error : "email field is requied"})
+            return res.status(422).json({error : "Email field mandatory"})
         }
         if (!req.body.phone){
-            return res.status(422).json({error : "phone field is requied"})
+            return res.status(422).json({error : "Phone field mandatory"})
         }
         if (!req.body.region){
-            return res.status(422).json({error : "region field is requied"})
+            return res.status(422).json({error : "Region field mandatory"})
         }
 
         // User exists
