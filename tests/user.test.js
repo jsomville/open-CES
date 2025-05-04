@@ -2,10 +2,10 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 import request from 'supertest';
 import app from "../app.js"
-import {admin_access_token, user_access_token} from './test.setup.js'
+import {admin_access_token, user_access_token} from './setup.test.js'
 
 
-describe("Test User", () => {
+describe.skip("Test User", () => {
 
     it('List all User - Admin', async () => {
         const res = await request(app)

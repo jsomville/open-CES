@@ -4,7 +4,7 @@ import request from 'supertest';
 import jwt from "jsonwebtoken";
 
 import app from "../app.js";
-import { admin_access_token, user_access_token } from './test.setup.js';
+import { admin_access_token, user_access_token } from './setup.test.js';
 
 import { getUserByEmail } from '../controller/userController.js';
 
@@ -39,7 +39,6 @@ describe("Test Account", () => {
             .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 200);
-        console.log(res.body);
     });
 
     it('List all Account - User', async () => {

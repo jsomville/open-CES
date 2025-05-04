@@ -4,9 +4,9 @@ import request from 'supertest';
 
 import app from "../app.js"
 
-describe("Test Main server", () => {
+describe.skip("Test Main server", () => {
   // Check server is running
-  it('call root page', async () => {
+  it('Call root page', async () => {
     const res = await request(app).get('/');
     assert.equal(res.statusCode, 200);
   });

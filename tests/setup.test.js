@@ -10,13 +10,13 @@ const prisma = new PrismaClient()
 let user = "";
 let admin = "";
 
-import config from "./test.config.js";
+import config from "./config.test.js";
 
 let user_access_token;
 let admin_access_token;
 
 before(async () =>{
-  console.log("Test - Before");
+  console.log("Config - Before");
 
   //Create User for testing
   const userPwdHash = await argon2.hash(config.userPassword);
@@ -70,7 +70,7 @@ before(async () =>{
 });
 
 after(async () => {
-  console.log("Test - After");
+  console.log("Config - After");
   
   // Delete User for testing
   await prisma.user.delete({

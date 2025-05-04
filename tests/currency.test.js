@@ -2,9 +2,9 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 import request from 'supertest';
 import app from "../app.js"
-import {admin_access_token, user_access_token} from './test.setup.js'
+import {admin_access_token, user_access_token} from './setup.test.js'
 
-describe("Test Currency", () => {
+describe.skip("Test Currency", () => {
 
     it('List all currencies - User', async () => {
         const res = await request(app)

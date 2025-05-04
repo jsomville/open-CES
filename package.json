@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node server",
     "dev": "node --watch --env-file=.env server",
-    "test": "mocha"
+    "test": "mocha tests/**/*.js"
   },
   "repository": {
     "type": "git",
