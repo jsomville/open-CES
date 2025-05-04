@@ -1,15 +1,28 @@
 import express from 'express';
 
+import { authenticateToken } from '../middleware/auth.js'
+import { authorizeRole } from '../middleware/authorizeRole.js'
+
 import { getAllAccount, getAccount, createAccount, deleteAccount} from '../controller/accountController.js'
 
 const router = express.Router();
 
-router.get('/', getAllAccount)
+// Use the Auth Middleware for all routes
+router.use(authenticateToken)
 
-router.get('/:id', getAccount)
+//get All account
+router.get('/', authorizeRole("admin"), getAllAccount)
 
-router.post('/', createAccount)
+//gte accoutn by id
+router.get('/:id', authorizeRole("admin"), getAccount)
 
-router.delete('/:id', deleteAccount)
+//create account
+router.post('/', authorizeRole("admin"), createAccount)
+
+//Modify account
+//Account cannot be modified
+
+//delete account
+router.delete('/:id', authorizeRole("admin"), deleteAccount)
 
 export default router;

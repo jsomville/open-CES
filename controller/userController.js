@@ -111,6 +111,10 @@ export const createUser = async (req, res, next) => {
     }
 };
 
+export const getUserByEmail = async (email) =>{
+    return user_email = await prisma.user.findUnique({where: {email : req.body.email}});
+};
+
 // @desc Modify User
 // @route PUT /api/user
 export const updateUser = async (req, res, next) =>{

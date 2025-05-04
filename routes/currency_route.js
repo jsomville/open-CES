@@ -10,7 +10,7 @@ const router = express.Router();
 // Use the Auth Middleware for all routes
 router.use(authenticateToken)
 
-//gte all currency
+//get all currency
 router.get('/', authorizeRole("admin", "user"), getAllCurrencies, )
 
 //get currency by ID
