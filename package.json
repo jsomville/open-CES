@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "node server",
-    "dev": "node --watch --env-file=.env server"
+    "dev": "node --watch --env-file=.env server",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,7 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "mocha": "^11.2.2",
     "prisma": "^6.5.0"
   }
 }
