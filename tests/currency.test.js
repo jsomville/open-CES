@@ -49,8 +49,7 @@ describe("Test Currency", () => {
 
     const test_token = "abc";
 
-    // Post - Add currency
-    it('Add currency', async () => {
+    it('Add currency - Admin', async () => {
         const res = await request(app)
             .post('/api/currency')
             .set('Authorization', `Bearer ${admin_access_token}`)
@@ -191,8 +190,6 @@ describe("Test Currency", () => {
         assert.equal(res.body.error, "Currency not found");
     });
 
-
-    // Modify Currency
     it ('Modify Currency', async () => {
         const payload = {
             "name" : "Test Currency2",
@@ -259,7 +256,6 @@ describe("Test Currency", () => {
     });
 
 
-    // Delete Currency
     it ('Delete Currency', async () => {
         const res = await request(app)
             .delete(`/api/currency/${new_currency_id}`)

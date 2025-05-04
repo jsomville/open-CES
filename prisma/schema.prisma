@@ -67,6 +67,7 @@ model Account {
 
   Merchant Merchant[]
   User     User       @relation(fields: [userId], references: [id])
+  //User     User       @relation(fields: [userId], references: [id])
   Currency Currency   @relation(fields: [currencyId], references: [id])
 
   TransactionsBySender   Transaction[] @relation("TransactionsBySender")

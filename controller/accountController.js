@@ -45,8 +45,8 @@ export const createAccount = async (req, res, next) => {
 
         const newAccount = await prisma.account.create({
             data:{
-                userId : req.body.userId,
-                currencyId : req.body.currencyId,
+                userId : parseInt(req.body.userId),
+                currencyId : parseInt(req.body.currencyId),
             }
         })
 

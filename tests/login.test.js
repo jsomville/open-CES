@@ -9,7 +9,7 @@ import config from "./config.test.js";
 describe("Login Test", () => {
 
   // Check a normal user can login
-  it('User Login', async () => {
+  it('Login - User', async () => {
     const payload = {
       "username" : config.userEmail,
       "password" : config.userPassword
@@ -40,7 +40,7 @@ describe("Login Test", () => {
     assert.ok(decoded_refresh_token.exp);
   });
 
-  it('Admin User Login', async () => {
+  it('Login - Admin', async () => {
     const payload = {
       "username" : config.adminEmail,
       "password" : config.adminPassword
@@ -71,7 +71,7 @@ describe("Login Test", () => {
     assert.ok(decoded_refresh_token.exp);
   });
 
-  it('User Login - Invalid User Credentials', async () => {
+  it('Login - Invalid User Credentials', async () => {
     const payload = {
       "username" : config.userEmail,
       "password" : "123"
@@ -84,7 +84,7 @@ describe("Login Test", () => {
     assert.equal(res.statusCode, 401);
   });
 
-  it('User Login - Invalid Admin Credentials', async () => {
+  it('Login - Invalid Admin Credentials', async () => {
     const payload = {
       "username" : config.adminEmail,
       "password" : "123"
@@ -97,7 +97,7 @@ describe("Login Test", () => {
     assert.equal(res.statusCode, 401);
   });
 
-  it('User Login - Invalid Credentials', async () => {
+  it('Login - Invalid Credentials', async () => {
     const payload = {
       "username" : "a@b.com",
       "password" : "123"
@@ -110,7 +110,7 @@ describe("Login Test", () => {
     assert.equal(res.statusCode, 401);
   });
 
-  it('User Login - Missing Username', async () => {
+  it('Login - Missing Username', async () => {
     const payload = {
       "password" : "123"
     }
@@ -122,7 +122,7 @@ describe("Login Test", () => {
       assert.equal(res.statusCode, 422);
   });
 
-  it('User Login - Missing Password', async () => {
+  it('Login - Missing Password', async () => {
     const payload = {
       "username" : "a@b.com"
     }
