@@ -8,7 +8,7 @@ import { getAllAccount, getAccount, createAccount, deleteAccount } from '../cont
 const router = express.Router();
 
 // Use the Auth Middleware for all routes
-router.use(authenticateToken)
+router.use(authenticateToken);
 
 //get All account
 router.get('/', authorizeRole("admin"), getAllAccount)

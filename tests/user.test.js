@@ -65,7 +65,7 @@ describe("Test User", () => {
         assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
-     it('Add User - Admin', async () => {
+    it('Add User - Admin', async () => {
         const res = await request(app)
             .post('/api/user')
             .set('Authorization', `Bearer ${admin_access_token}`)

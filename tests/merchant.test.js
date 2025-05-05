@@ -1,6 +1,5 @@
 import assert from "node:assert";
 import request from 'supertest';
-import jwt from 'jsonwebtoken';
 
 import app from "../app.js";
 import { getAccessToken } from "../controller/idpController.js"
@@ -41,7 +40,6 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 200);
-
     });
 
     it('List All Merchant - User', async () => {
