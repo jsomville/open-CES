@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node server",
     "dev": "node --watch --env-file=.env server",
-    "test": "NODE_ENV=test mocha tests/**/*.js"
+    "test": "NODE_ENV=test mocha tests/**/*.js",
+    "init": "node prisma/initdb.js"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,5 @@
 import { before, after } from "node:test";
 import argon2 from 'argon2';
-import request from 'supertest';
 import { PrismaClient } from '@prisma/client'
 
 import app from "../app.js";
@@ -31,12 +30,6 @@ before(async () =>{
       
       user_id = user.id;
 
-      const user_token_parameters = {
-        "email" : config.userEmail,
-        "role" : "user"
-      }
-      const user_access_token = getAccessToken(user_token_parameters)
-
       //Create Admin User for testing
       const passwordHash = await argon2.hash(config.adminPassword);
       const admin = await prisma.user.create({
@@ -52,12 +45,19 @@ before(async () =>{
       });
       
       admin_id = admin.id;
-      
-      const admin_token_parameters = {
-        "email" : config.adminEmail,
-        "role" : "admin"
+
+      //Create Currency if id 1 dosent exists
+      const exists = await prisma.currency.findUnique({where: {id : 1}});
+      if (!exists){
+        const newCurrency = await prisma.currency.create({
+          data:{
+              id : 1,
+              symbol: "CES",
+              name: "Open CES"
+          }
+        });
       }
-      const admin_access_token = getAccessToken(admin_token_parameters);
+    
   }
   catch(error){
     console.log(error);
