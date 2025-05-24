@@ -4,6 +4,7 @@ import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
 import {getAllUsers, getUser, createUser, updateUser, deleteUser, setUserAdmin} from '../controller/userController.js'
+import {getUserDetail} from '../controller/userDetailController.js'
 
 const router = express.Router();
 
@@ -27,5 +28,8 @@ router.delete('/:id', authorizeRole("admin"), deleteUser)
 
 //set as admin
 router.post('/:id/set-admin', authorizeRole("admin"), setUserAdmin)
+
+// get user by ID
+router.get('/by-email/:email', authorizeRole("admin", "user"), getUserDetail)
 
 export default router;
