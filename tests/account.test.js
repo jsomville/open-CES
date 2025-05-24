@@ -44,7 +44,8 @@ describe("Test Account", () => {
         // Create payload
         account_payload = {
             "userId" : user.id,
-            "currencyId" : 1
+            "currencyId" : 1,
+            "accountType" : 1,
         };
         
     });
@@ -74,8 +75,10 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 201);
         assert.ok(res.body.id);
-        assert.equal(res.body.userId, user_id);
+        assert.equal(res.body.userId, account_payload.userId);
         assert.equal(res.body.merchantId, null);
+        assert.equal(res.body.currencyId, account_payload.currencyId);
+        assert.equal(res.body.accountType, account_payload.accountType);
         assert.equal(res.body.balance, 0);
         assert.ok(res.body.createdAt)
         assert.ok(res.body.updatedAt)
@@ -103,7 +106,8 @@ describe("Test Account", () => {
     it('Add user account - No UserID', async () => {
         const payload = {
             //"userId" : user.id,
-            "currencyId" : 1
+            "currencyId" : 1,
+            "accountType" : 0
         };
         const res = await request(app)
             .post('/api/account')
@@ -111,12 +115,14 @@ describe("Test Account", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "userId field mandatory")
     });
 
     it('Add user account - No Currency', async () => {
         const payload = {
             "userId" : user_id,
             //"currencyId" : 1
+            "accountType" : 0
         };
         const res = await request(app)
             .post('/api/account')
@@ -124,6 +130,22 @@ describe("Test Account", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "currencyId field mandatory")
+    });
+
+    it('Add user account - No Account Type', async () => {
+        const payload = {
+            "userId" : user_id,
+            "currencyId" : 1
+            //"accountType" : 0
+        };
+        const res = await request(app)
+            .post('/api/account')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "accountType field mandatory")
     });
 
     it('Get user account - Admin', async () => {
