@@ -99,6 +99,11 @@ export const updateCurrency = async (req, res, next) => {
             return res.status(422).json({error : "Name field is requied 2 or 3 characters"})
         }
 
+        const accountMax = req.body.accountMax;
+        if (!accountMax){
+            return res.status(422).json({error : "AccountMax field is requied 2 or 3 characters"})
+        }
+
         //Currency exists
         if (!await prisma.currency.findUnique({where: {id : parseInt(req.params.id)}})){
             return res.status(404).json({ error: "Currency not found" })
@@ -108,7 +113,8 @@ export const updateCurrency = async (req, res, next) => {
             data: {
                 symbol : req.body.symbol,
                 name : req.body.name,
-                country : country
+                country : country,
+                accountMax : accountMax
             },
             where :{
                 id : parseInt(req.params.id)

@@ -46,6 +46,23 @@ export const createAccount = async (req, res, next) => {
             return res.status(422).json({error : "accountType field mandatory"})
         }
 
+        //Currency exists
+        const currency = await prisma.currency.findUnique({where: {id : parseInt(req.body.currencyId)}})
+        if (!currency){
+            return res.status(404).json({ error: "Currency not found" })
+        }
+
+        //Check Currency User Limit
+        const accountCount = await prisma.account.count({
+            where :{
+                currencyId : req.body.currencyId
+            }
+        })
+        if (accountCount >= currency.accountMax){
+            return res.status(403).json({ error: "Account quota reached" })
+        }
+
+        //Create the New account
         const newAccount = await prisma.account.create({
             data:{
                 userId : parseInt(req.body.userId),
@@ -53,7 +70,6 @@ export const createAccount = async (req, res, next) => {
                 accountType : parseInt(req.body.accountType)
             }
         })
-
         return res.status(201).json(newAccount)
     }
     catch(error){

@@ -87,6 +87,7 @@ describe("Test Currency", () => {
         assert.equal(res.body.symbol, currency_payload.symbol);
         assert.equal(res.body.country, currency_payload.country);
         assert.equal(res.body.balance, 0);
+        assert.equal(res.body.accountMax, 100);
         assert.ok(res.body.createdAt)
         assert.ok(res.body.updatedAt)
 
@@ -248,7 +249,8 @@ describe("Test Currency", () => {
         const payload = {
             "name" : "Test Currency2",
             "symbol" : new_symbol,
-            "country" : "BE"
+            "country" : "BE",
+            "accountMax" : 150,
         };
 
         const res = await request(app)
@@ -260,6 +262,7 @@ describe("Test Currency", () => {
         assert.equal(res.body.name, payload.name);
         assert.equal(res.body.symbol, payload.symbol);
         assert.equal(res.body.country, payload.country);
+        assert.equal(res.body.accountMax, payload.accountMax);
         assert.equal(res.body.balance, 0);
         assert.ok(res.body.createdAt)
         assert.ok(res.body.updatedAt)
