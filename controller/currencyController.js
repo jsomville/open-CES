@@ -49,17 +49,33 @@ export const createCurrency = async (req, res, next) => {
         if (!name || name.length < 4){
             return res.status(422).json({error : "Name field is requied or too short"})
         }
+        const country = req.body.country;
+        if (!country || country.length < 2 || country.length > 3){
+            return res.status(422).json({error : "Country field is requied 2 or 3 characters"})
+        }
+
+        //Check if Name is unique
+        if (await prisma.currency.findUnique({where: {name : name}})){
+            return res.status(409).json({ error: "Name must be unique" })
+        }
+
+        //Check if Symbol is unique
+        if (await prisma.currency.findUnique({where: {symbol : symbol}})){
+            return res.status(409).json({ error: "Symbol must be unique" })
+        }
 
         const newCurrency = await prisma.currency.create({
             data:{
-                symbol: req.body.symbol,
-                name: req.body.name
+                symbol: symbol,
+                name: name,
+                country : country
             }
         })
 
         return res.status(201).json(newCurrency)
     }
     catch(error){
+        console.log(error.message)
         return res.status(500).json({ error: error.message })
     }
 }
@@ -69,11 +85,18 @@ export const createCurrency = async (req, res, next) => {
 export const updateCurrency = async (req, res, next) => {
     try {
 
-        if (!req.body.symbol){
-            return res.status(422).json({error : "Symbol field mandatory"})
+        const symbol = req.body.symbol;
+        if (!symbol || symbol.length > 6){
+            return res.status(422).json({error : "Symbol field mandatory or too long"})
         }
-        if (!req.body.name){
-            return res.status(422).json({error : "Name field mandatory"})
+        const name = req.body.name;
+        if (!name || name.length < 4){
+            return res.status(422).json({error : "Name field mandatory or too short"})
+        }
+
+        const country = req.body.country;
+        if (!country || country.length < 2 || country.length > 3){
+            return res.status(422).json({error : "Name field is requied 2 or 3 characters"})
         }
 
         //Currency exists
@@ -85,6 +108,7 @@ export const updateCurrency = async (req, res, next) => {
             data: {
                 symbol : req.body.symbol,
                 name : req.body.name,
+                country : country
             },
             where :{
                 id : parseInt(req.params.id)

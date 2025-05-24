@@ -15,6 +15,16 @@ let admin_id;
 before(async () =>{
   console.log("Setup - Before");
   try{
+      //delete user if exists
+      const usr = await prisma.user.findUnique({where: {email : config.userEmail}});
+      if (usr){
+        await prisma.user.delete({
+          where :{
+            "email" : config.userEmail,
+          }
+        });
+      }
+
       const userPwdHash = await argon2.hash(config.userPassword);
       const user = await prisma.user.create({
         data:{
@@ -27,8 +37,18 @@ before(async () =>{
           role : "user"
         }
       });
-      
       user_id = user.id;
+
+      //delete admin if exists
+      const adm = await prisma.user.findUnique({where: {email : config.adminPassword}})
+      if (adm){
+        console.log("admin duplicated fond -- delete require")
+        await prisma.user.delete({
+          where :{
+            "email" : config.adminPassword,
+          }
+        });
+      }
 
       //Create Admin User for testing
       const passwordHash = await argon2.hash(config.adminPassword);
@@ -43,7 +63,6 @@ before(async () =>{
           role : "admin"
         }
       });
-      
       admin_id = admin.id;
 
       //Create Currency if id 1 dosent exists
