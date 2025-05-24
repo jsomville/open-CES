@@ -84,7 +84,7 @@ model Transaction {
   currencyId        Int      @map("currency_id")
   transactionType   String   @map("transaction_type") @db.VarChar(20)
   status            String   @db.VarChar(20)
-  description       String   @db.VarChar(255)
+  description       String?  @db.VarChar(255)
   createdAt         DateTime @default(now()) @map("created_at")
 
   SenderAccount   Account  @relation("TransactionsBySender", fields: [senderAccountId], references: [id])

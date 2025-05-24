@@ -94,56 +94,99 @@ export const deleteAccount = async (req, res, next) =>{
 
 // @desc Transfer to an Account
 // @route POST /api/account/id/transfer
-/*export const transfer = async (req, res, next) =>{
+export const transferTo = async (req, res, next) =>{
     try{
-        //Destination account is mandatory
+        //Account is mandatory
         const accountNumber = req.body.account;
         if (!accountNumber){
-            return res.status(422).json({error : "Account field is requied"})
+            return res.status(422).json({error : "Account field mandatory"})
         }
 
         //Amount is mandatory
-        const amount = req.body.amount;
-        if (!amount){
-            return res.status(422).json({error : "Amount field is requied"})
+        if (!req.body.amount){
+            return res.status(422).json({error : "Amount field mandatory"})
+        }
+
+        // Amount is a positive float
+        const amount = Number(req.body.amount)
+        if (isNaN(amount) || amount < 0 ){
+            return res.status(422).json({error : "Amount must be a positive number"})
         }
 
         // Source account exists
-        const destinationaccount = await prisma.account.findUnique({where : { id: parseInt(req.params.id)}})
-        if (!destinationaccount){
-            return res.status(404).json({ error: "Destination account not found" })
-        }
-
-        // Source account exists
-        const sourceaccount = await prisma.account.findUnique({where : { id: parseInt(req.params.id)}})
-        if (!sourceaccount){
+        const sourceAccountNumber = parseInt(req.params.id)
+        const sourceAccount = await prisma.account.findUnique({where : { id: sourceAccountNumber}})
+        if (!sourceAccount){
             return res.status(404).json({ error: "Source account not found" })
         }
 
-        //Amount is required
-
-
-
-        //Balance in source account positive
-        if (account.balance > 0 )
-        {
-            return res.status(409).json({ error: "Balance must be zero" })
+        // Destination account exists
+        const destinationAccountNumber = parseInt(req.body.account)
+        const destinationAccount = await prisma.account.findUnique({where : { id: destinationAccountNumber}})
+        if (!destinationAccount){
+            return res.status(404).json({ error: "Destination account not found" })
         }
 
-        //Destination account exists
+        //Source and Destination using the same currency
+        if (sourceAccount.currencyId != destinationAccount.currencyId){
+            return res.status(422).json({error : "Accounts must be from the same currency"})
+        }
 
-        //Delete account
-        await prisma.account.delete({
-            where:{
-                id : parseInt(req.params.id)
-            }
-        })
+        //Sufficient Funds
+        if (sourceAccount.balance < amount )
+        {
+            return res.status(400).json({ error: "Insufficient funds" })
+        }
 
-        return res.status(204).send()
+        try{
+            //Create a Transaction
+            const transaction = await prisma.transaction.create({
+                 data:{
+                    senderAccountId : sourceAccount.id,
+                    receiverAccountId : destinationAccount.id,
+                    amount : amount,
+                    currencyId : sourceAccount.currencyId,
+                    transactionType : "Transfer",
+                    status : "Started"
+                }
+            });
+
+            //Deduct Main Account funds
+            let newBalance;
+            newBalance = Number(sourceAccount.balance) - Number(amount)
+            await prisma.account.update({
+                where: {id : sourceAccount.id},
+                data: {balance : newBalance},
+            });
+
+            //Add to Destination Account
+            newBalance = Number(destinationAccount.balance) + Number(amount)
+            await prisma.account.update({
+                where: {id : destinationAccount.id},
+                data: {balance : newBalance},
+            });
+
+            //Completed the Transaction
+            await prisma.transaction.update({
+                where:{
+                    id : transaction.id
+                },
+                data:{
+                    status : "Completed"
+                }
+            })
+        }
+        catch(error){
+            console.log(error);
+
+            return res.status(500).json({ error: "Transfer Failed" })
+        }
+
+        return res.status(201).send()
     }
     catch(error){
         return res.status(500).json({ error: error.message })
     }
     
-};*/
+};
 

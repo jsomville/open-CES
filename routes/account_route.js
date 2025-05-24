@@ -3,7 +3,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getAllAccount, getAccount, createAccount, deleteAccount } from '../controller/accountController.js'
+import { getAllAccount, getAccount, createAccount, deleteAccount, transferTo} from '../controller/accountController.js'
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ router.use(authenticateToken);
 //get All account
 router.get('/', authorizeRole("admin"), getAllAccount)
 
-//gte accoutn by id
+//get account by id
 router.get('/:id', authorizeRole("admin"), getAccount)
 
 //create account
@@ -24,5 +24,8 @@ router.post('/', authorizeRole("admin"), createAccount)
 
 //delete account
 router.delete('/:id', authorizeRole("admin"), deleteAccount)
+
+//Transfer To
+router.post("/:id/transferTo", authorizeRole("admin", "user"), transferTo)
 
 export default router;

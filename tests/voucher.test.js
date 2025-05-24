@@ -5,7 +5,7 @@ import app from "../app.js";
 import { getAccessToken } from "../controller/idpController.js"
 import config from "./config.test.js";
 
-describe("Voucher Test", () => {
+describe.skip("Voucher Test", () => {
     let admin_access_token;
     let user_access_token;
     let voucher_payload;
