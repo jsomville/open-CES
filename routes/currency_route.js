@@ -3,7 +3,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getCurrency, createCurrency, getAllCurrencies, updateCurrency, deleteCurrency} from '../controller/currencyController.js'
+import { getCurrency, createCurrency, getAllCurrencies, updateCurrency, deleteCurrency, fundAccount} from '../controller/currencyController.js'
 
 const router = express.Router();
 
@@ -24,5 +24,8 @@ router.put('/:id', authorizeRole("admin"), updateCurrency)
 
 //delete currency
 router.delete('/:id', authorizeRole("admin"), deleteCurrency)
+
+//Top Off account
+router.post('/:id/fundAccount', authorizeRole("admin"), fundAccount)
 
 export default router;

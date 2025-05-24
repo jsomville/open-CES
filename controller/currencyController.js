@@ -160,4 +160,94 @@ export const deleteCurrency = async (req, res, next) => {
         return res.status(500).json({ error: error.message })
     }
 }
+//@desc Fund acount
+//@route POST /api/currency/id/fundAccount
+export const fundAccount = async (req, res, next) => {
+    try {
+        //Account is mandatory
+        const accountNumber = req.body.account;
+        if (!accountNumber){
+            return res.status(422).json({error : "Account field mandatory"})
+        }
+
+        //Amount is mandatory
+        if (!req.body.amount){
+            return res.status(422).json({error : "Amount field mandatory"})
+        }
+
+        // Amount is a positive float
+        const amount = Number(req.body.amount)
+        if (isNaN(amount) || amount < 0 ){
+            return res.status(422).json({error : "Amount must be a positive number"})
+        }
+
+        //Currency exists
+        const currency = await prisma.currency.findUnique({where: {id : parseInt(req.params.id)}})
+        if (!currency){
+            return res.status(404).json({ error: "Currency not found" })
+        }
+
+        // Destination account exists
+        const destinationAccountNumber = parseInt(req.body.account)
+        const destinationAccount = await prisma.account.findUnique({where : { id: destinationAccountNumber}})
+        if (!destinationAccount){
+            return res.status(404).json({ error: "Destination account not found" })
+        }
+
+        //Destination acount is the same currency
+        if (currency.id != destinationAccount.currencyId){
+            return res.status(422).json({error : "Accounts must be from the same currency"})
+        }
+
+        //Fund the account
+        try{
+             //Create a Transaction
+            const transaction = await prisma.transaction.create({
+                 data:{
+                    receiverAccountId : destinationAccount.id,
+                    senderAccountId : 22, // to fix
+                    amount : amount,
+                    currencyId : currency.id,
+                    transactionType : "Fund Account",
+                    description : "", // to fix
+                    status : "Started"
+                }
+            });
+
+            //Deduct the Currency Balance
+            let newBalance;
+            newBalance = Number(currency.balance) - Number(amount);
+            await prisma.currency.update({
+                where: {id : currency.id},
+                data:{balance : newBalance}
+            })
+
+            //Add to Destination Account
+            newBalance = Number(destinationAccount.balance) + Number(amount);
+            await prisma.account.update({
+                where: {id : destinationAccount.id},
+                data: {balance : newBalance},
+            });
+
+            //Completed the Transaction
+            await prisma.transaction.update({
+                where:{
+                    id : transaction.id
+                },
+                data:{
+                    status : "Completed"
+                }
+            })
+        }
+        catch(error){
+            console.log(error)
+            return res.status(500).json({ error: "Fund Account Failed" })
+        }
+
+        return res.status(201).send()
+    }
+    catch(error){
+        return res.status(500).json({ error: error.message })
+    }
+}
 
