@@ -2,7 +2,6 @@ import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
-//test
 
 // @desc Get users
 // @route GET /api/user
@@ -38,7 +37,6 @@ export const getUser =  async(req, res, next) => {
     catch(error){
         return res.status(500).json({ error: error.message })
     }
-    
 };
 
 // @desc Create a User

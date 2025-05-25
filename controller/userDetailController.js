@@ -16,10 +16,7 @@ export const getUserDetail =  async(req, res, next) => {
         const { passwordHash, ...safeUser } = user;
 
         const accounts = await prisma.account.findMany({where : {userId : user.id}});
-        console.log(accounts);
-        console.log("***");
         for (const account of accounts){
-            console.log(account);
             const latestTransactions = await prisma.transaction.findMany({
                 where : {senderAccountId : account.id},
                 orderBy :{ createdAt: 'desc'},
@@ -30,7 +27,6 @@ export const getUserDetail =  async(req, res, next) => {
             }
         }
         
-
         const userDetail = {
             ...safeUser,
             accounts : accounts.map(account => ({
