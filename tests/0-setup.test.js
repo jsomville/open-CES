@@ -7,36 +7,8 @@ import app from "../app.js";
 import { getAccessToken } from "../controller/idpController.js";
 import { getUserByEmail } from '../controller/userController.js';
 import {getCurrencyBySymbol} from '../controller/currencyController.js';
-import { deleteUserAndAccount } from '../controller/helper.js';
+import { deleteUserAndAccount, createUserAndAccount } from '../controller/helper.js';
 import config from "./config.test.js";
-
-const createUserAndAccount = async(email, password, phone, role, currencyId) =>{
-  const pwdHash = await argon2.hash(password);
-  const user = await prisma.user.create({
-    data:{
-      firstname : "user",
-      lastname : "test",
-      email : email,
-      phone : phone,
-      region : "EU",
-      passwordHash : pwdHash,
-      role : role
-    }
-  });
-
-  if (role == "user")
-  {
-    // Create Account
-    await prisma.account.create({
-      data:{
-        userId : user.id,
-        currencyId : currencyId,
-        accountType : 1, // TO FIX
-      }
-    })
-  }
-}
-
 
 //This is Global Before hook
 before(async () =>{

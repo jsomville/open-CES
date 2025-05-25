@@ -1,4 +1,3 @@
-//import { describe, it } from "node:test";
 import assert from "node:assert";
 import request from 'supertest';
 
@@ -7,7 +6,7 @@ const prisma = new PrismaClient();
 
 import app from "../app.js";
 import config from "./config.test.js";
-import { getAccessToken } from "../controller/idpController.js"
+import { getAccessToken } from "../controller/idpController.js";
 
 describe("Test Currency", () => {
     let admin_access_token;
@@ -24,7 +23,7 @@ describe("Test Currency", () => {
         try{
             // Create User Token
             const user_token_parameters = {
-                "email" : config.userEmail,
+                "email" : config.user1Email,
                 "role" : "user"
             }
             user_access_token = getAccessToken(user_token_parameters)
@@ -36,7 +35,7 @@ describe("Test Currency", () => {
             }
             admin_access_token = getAccessToken(admin_token_parameters);
 
-            //Delete currency of exist
+            //Delete currency if exist
             const cur = await prisma.currency.findUnique({where: {symbol : currency_payload.symbol}})
             if (cur){
                 await prisma.currency.delete({
@@ -76,6 +75,16 @@ describe("Test Currency", () => {
         assert.equal(res.statusCode, 200);
     });
 
+    it('Add currency - User', async () => {
+        const res = await request(app)
+            .post('/api/currency')
+            .set('Authorization', `Bearer ${user_access_token}`)
+            .send(currency_payload);
+
+        assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
+    });
+
     it('Add currency - Admin', async () => {
         const res = await request(app)
             .post('/api/currency')
@@ -92,16 +101,6 @@ describe("Test Currency", () => {
         assert.ok(res.body.updatedAt)
 
         new_currency_id = res.body.id
-    });
-
-    it('Add currency - User', async () => {
-        const res = await request(app)
-            .post('/api/currency')
-            .set('Authorization', `Bearer ${user_access_token}`)
-            .send(currency_payload);
-
-        assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
     it('Add currency - No Payload', async () => {
@@ -268,7 +267,7 @@ describe("Test Currency", () => {
         assert.ok(res.body.updatedAt)
     });
 
-    it ('Modify Currency -User Token', async () => {
+    it ('Modify Currency - User', async () => {
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
             .set('Authorization', `Bearer ${user_access_token}`);
@@ -314,16 +313,7 @@ describe("Test Currency", () => {
         assert.equal(res.body.error, "Symbol field mandatory or too long");
     });
 
-
-    it ('Delete Currency', async () => {
-        const res = await request(app)
-            .delete(`/api/currency/${new_currency_id}`)
-            .set('Authorization', `Bearer ${admin_access_token}`);
-
-        assert.equal(res.statusCode, 204);
-    });
-
-    it ('Delete Currency', async () => {
+    it ('Delete Currency - user', async () => {
         const res = await request(app)
             .delete(`/api/currency/${new_currency_id}`)
             .set('Authorization', `Bearer ${user_access_token}`);
@@ -340,4 +330,13 @@ describe("Test Currency", () => {
         assert.equal(res.statusCode, 404);
         assert.equal(res.body.error, "Currency not found");
     });
+
+    it ('Delete Currency - Admin', async () => {
+        const res = await request(app)
+            .delete(`/api/currency/${new_currency_id}`)
+            .set('Authorization', `Bearer ${admin_access_token}`);
+
+        assert.equal(res.statusCode, 204);
+    });
   });
+
