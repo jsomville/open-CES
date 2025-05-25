@@ -53,15 +53,15 @@ export const createAccount = async (req, res, next) => {
         }
 
         //Account exist for this user and this currency
-        /*const account = await prisma.account.findUnique({
+        const account = await prisma.account.findFirst({
             where: {
                 userId : parseInt(req.body.userId),
                 currencyId : parseInt(req.body.currencyId)
             },
         });
         if (account){
-             return res.status(404).json({ error: "Accoutn for this user and this currecny already exists" })
-        }*/
+             return res.status(409).json({ error: "Account for this user and this currecny already exists" })
+        }
 
         //Check Currency User Limit
         const accountCount = await prisma.account.count({

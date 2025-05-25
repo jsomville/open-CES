@@ -1,31 +1,14 @@
 //import { before, after } from "node:test";
 import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient();
 
 import app from "../app.js";
-import { getAccessToken } from "../controller/idpController.js"
+import { getAccessToken } from "../controller/idpController.js";
 import { getUserByEmail } from '../controller/userController.js';
-import {getCurrencyBySymbol} from '../controller/currencyController.js'
+import {getCurrencyBySymbol} from '../controller/currencyController.js';
+import { deleteUserAndAccount } from '../controller/helper.js';
 import config from "./config.test.js";
-
-const prisma = new PrismaClient()
-
-const deleteUserAndAccount = async (email) =>{
-  const user = await getUserByEmail(email);
-  if (user) {
-    //Delete User's Account
-    await prisma.account.deleteMany({
-      where : { 
-        userId : user.id
-      }
-    });
-
-    //Delete User
-    await prisma.user.delete({
-      where : { id : user.id}
-    });
-  }
-}
 
 const createUserAndAccount = async(email, password, phone, role, currencyId) =>{
   const pwdHash = await argon2.hash(password);
@@ -58,6 +41,7 @@ const createUserAndAccount = async(email, password, phone, role, currencyId) =>{
 //This is Global Before hook
 before(async () =>{
   console.log("Setup - Before");
+  const start_time = Date.now();
   let currencyId;
   try{
 
@@ -106,7 +90,8 @@ before(async () =>{
     console.log(error);
   }
 
-  console.log("Setup - Before Completed");
+  const enlapsedTime = Date.now() - start_time;
+  console.log(`Setup - Before Completed in ${enlapsedTime} ms`);
 });
 
 //This is global after hook

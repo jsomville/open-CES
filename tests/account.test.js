@@ -2,11 +2,15 @@ import assert from "node:assert";
 import request from 'supertest';
 import jwt from "jsonwebtoken";
 
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
+
 import app from "../app.js";
 import config from "./config.test.js";
 import { getAccessToken } from "../controller/idpController.js";
 import { getUserByEmail } from '../controller/userController.js';
 import {getCurrencyBySymbol} from '../controller/currencyController.js'
+import { deleteUserAndAccount } from '../controller/helper.js';
 
 describe("Test Account", () => {
     let new_account_id;
@@ -18,7 +22,7 @@ describe("Test Account", () => {
 
     before(async () => {
         //Wait for 1 sec --> bug before
-        await new Promise(resolve => setTimeout(resolve, 1200)); // 1 second
+        await new Promise(resolve => setTimeout(resolve, 100)); // 1 second
 
         //console.log("Account - Before")
         
@@ -28,8 +32,6 @@ describe("Test Account", () => {
             "role" : "user"
         }
         user_access_token = getAccessToken(user_token_parameters)
-        
-        //console.log(global.uat)
 
         // Create Admin Token
         const admin_token_parameters = {
@@ -38,21 +40,33 @@ describe("Test Account", () => {
         }
         admin_access_token = getAccessToken(admin_token_parameters);
 
-        //console.log(global.aat)
-
         const testCurrency = await getCurrencyBySymbol(config.testCurrency);
         testCurrencyId = testCurrency.id;
 
-        // New stuff
-        const user = await getUserByEmail(config.user1Email);
+        //Create User to relate to account creation
+        const userEmail = "test@openced.org";
+        await deleteUserAndAccount(userEmail);
+
+        const user = await prisma.user.create({
+            data:{
+                firstname : "John",
+                lastname : "Doe",
+                email : userEmail,
+                phone : "+32471041010",
+                region : "EU",
+                passwordHash : "FAKE",
+                role : "user"
+            }
+        })
         if (!user)
         {
            throw new Error("Account Test - Before - User not found") 
         }
         user_id = user.id;
-        // Create payload
+
+        // Test payload
         account_payload = {
-            "userId" : user.id,
+            "userId" : user_id,
             "currencyId" : testCurrencyId,
             "accountType" : 1,
         };
@@ -155,6 +169,16 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 422);
         assert.equal(res.body.error, "accountType field mandatory")
+    });
+
+    it('Add user account - Admin account exist for this currency', async () => {
+        const res = await request(app)
+            .post('/api/account')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(account_payload)
+
+        assert.equal(res.statusCode, 409);
+        assert.equal(res.body.error, "Account for this user and this currecny already exists")
     });
 
     it('Get user account - Admin', async () => {
