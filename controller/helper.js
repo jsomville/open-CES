@@ -59,7 +59,7 @@ export const createUserAndAccount = async(email, password, phone, role, currency
 }
 
 export const getAccountIdByEmailAndCurrencySymbol = async(email, currencyId) => {
-    const user = getUserByEmail(email);
+    const user = await getUserByEmail(email);
     if(user){
         const account = await prisma.account.findFirst({
             where : {
@@ -67,9 +67,7 @@ export const getAccountIdByEmailAndCurrencySymbol = async(email, currencyId) => 
                 currencyId : currencyId,
             }
         })
-
         return account;
     }
-
     return null;
 }

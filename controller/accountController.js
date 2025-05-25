@@ -141,6 +141,10 @@ export const transferTo = async (req, res, next) =>{
             return res.status(422).json({error : "Amount must be a positive number"})
         }
 
+        //Add check transfer to itself...
+
+        //add check user on its own account only
+
         // Source account exists
         const sourceAccountNumber = parseInt(req.params.id)
         const sourceAccount = await prisma.account.findUnique({where : { id: sourceAccountNumber}})
@@ -161,7 +165,7 @@ export const transferTo = async (req, res, next) =>{
         }
 
         //Sufficient Funds
-        if (sourceAccount.balance < amount )
+        if (Number(sourceAccount.balance) < amount )
         {
             return res.status(400).json({ error: "Insufficient funds" })
         }
