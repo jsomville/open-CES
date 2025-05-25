@@ -8,15 +8,15 @@ import { getAccessToken } from "../controller/idpController.js"
 describe("Test User", () => {
     let admin_access_token;
     let user_access_token;
+    let new_user_id = 0;
 
     before(async () => {
         // Create User Token
         const user_token_parameters = {
-            "email" : config.userEmail,
+            "email" : config.user1Email,
             "role" : "user"
         }
         user_access_token = getAccessToken(user_token_parameters);
-        //console.log(global.uat);
         
         // Create Admin Token
         const admin_token_parameters = {
@@ -24,7 +24,6 @@ describe("Test User", () => {
             "role" : "admin"
         }
         admin_access_token = getAccessToken(admin_token_parameters);
-        //console.log(global.aat)
     });
 
     it('List all User - Admin', async () => {
@@ -45,7 +44,7 @@ describe("Test User", () => {
         assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
-    let new_user_id = 0;
+    
     const user_payload = {
         "firstname" : "user",
         "lastname" : "test",
@@ -406,7 +405,7 @@ describe("Test User", () => {
         const payload = {
             "firstname" : "user",
             "lastname" : "test",
-            "phone" : "+32471040204", //is the user phone used in test.setup.js
+            "phone" : config.user1Phone,
             "region" : "EU",
         };
 

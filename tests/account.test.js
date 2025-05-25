@@ -6,6 +6,7 @@ import app from "../app.js";
 import config from "./config.test.js";
 import { getAccessToken } from "../controller/idpController.js";
 import { getUserByEmail } from '../controller/userController.js';
+import {getCurrencyBySymbol} from '../controller/currencyController.js'
 
 describe("Test Account", () => {
     let new_account_id;
@@ -13,16 +14,17 @@ describe("Test Account", () => {
     let admin_access_token;
     let user_access_token;
     let user_id;
+    let testCurrencyId;
 
     before(async () => {
         //Wait for 1 sec --> bug before
-        await new Promise(resolve => setTimeout(resolve, 500)); // 1 second
+        await new Promise(resolve => setTimeout(resolve, 1200)); // 1 second
 
         //console.log("Account - Before")
         
         // Create User Token
         const user_token_parameters = {
-            "email" : config.userEmail,
+            "email" : config.user1Email,
             "role" : "user"
         }
         user_access_token = getAccessToken(user_token_parameters)
@@ -38,13 +40,20 @@ describe("Test Account", () => {
 
         //console.log(global.aat)
 
+        const testCurrency = await getCurrencyBySymbol(config.testCurrency);
+        testCurrencyId = testCurrency.id;
+
         // New stuff
-        const user = await getUserByEmail(config.userEmail);
+        const user = await getUserByEmail(config.user1Email);
+        if (!user)
+        {
+           throw new Error("Account Test - Before - User not found") 
+        }
         user_id = user.id;
         // Create payload
         account_payload = {
             "userId" : user.id,
-            "currencyId" : 1,
+            "currencyId" : testCurrencyId,
             "accountType" : 1,
         };
         
@@ -106,7 +115,7 @@ describe("Test Account", () => {
     it('Add user account - No UserID', async () => {
         const payload = {
             //"userId" : user.id,
-            "currencyId" : 1,
+            "currencyId" : testCurrencyId,
             "accountType" : 0
         };
         const res = await request(app)
@@ -121,7 +130,7 @@ describe("Test Account", () => {
     it('Add user account - No Currency', async () => {
         const payload = {
             "userId" : user_id,
-            //"currencyId" : 1
+            //"currencyId" : testCurrencyId,
             "accountType" : 0
         };
         const res = await request(app)
@@ -136,7 +145,7 @@ describe("Test Account", () => {
     it('Add user account - No Account Type', async () => {
         const payload = {
             "userId" : user_id,
-            "currencyId" : 1
+            "currencyId" : testCurrencyId,
             //"accountType" : 0
         };
         const res = await request(app)

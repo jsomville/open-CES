@@ -10,8 +10,8 @@ describe("Login Test", () => {
   // Check a normal user can login
   it('Login - User', async () => {
     const payload = {
-      "username" : config.userEmail,
-      "password" : config.userPassword
+      "username" : config.user1Email,
+      "password" : config.user1Password
     }
 
     const res = await request(app)
@@ -24,7 +24,7 @@ describe("Login Test", () => {
 
     // Access Token 
     const decoded_access_token = jwt.verify(res.body.accessToken, process.env.JWT_ACCESS_SECRET_KEY );
-    assert.equal(decoded_access_token.sub, config.userEmail);
+    assert.equal(decoded_access_token.sub, config.user1Email);
     assert.equal(decoded_access_token.role, "user");
     assert.equal(decoded_access_token.aud, "OpenCES");
     assert.equal(decoded_access_token.iss, "Open-CES");
@@ -72,7 +72,7 @@ describe("Login Test", () => {
 
   it('Login - Invalid User Credentials', async () => {
     const payload = {
-      "username" : config.userEmail,
+      "username" : config.user1Email,
       "password" : "123"
     }
 

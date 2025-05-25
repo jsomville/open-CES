@@ -52,6 +52,17 @@ export const createAccount = async (req, res, next) => {
             return res.status(404).json({ error: "Currency not found" })
         }
 
+        //Account exist for this user and this currency
+        /*const account = await prisma.account.findUnique({
+            where: {
+                userId : parseInt(req.body.userId),
+                currencyId : parseInt(req.body.currencyId)
+            },
+        });
+        if (account){
+             return res.status(404).json({ error: "Accoutn for this user and this currecny already exists" })
+        }*/
+
         //Check Currency User Limit
         const accountCount = await prisma.account.count({
             where :{
@@ -73,6 +84,7 @@ export const createAccount = async (req, res, next) => {
         return res.status(201).json(newAccount)
     }
     catch(error){
+        console.log(error.message)
         return res.status(500).json({ error: error.message })
     }
 };

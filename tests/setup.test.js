@@ -4,81 +4,105 @@ import { PrismaClient } from '@prisma/client'
 
 import app from "../app.js";
 import { getAccessToken } from "../controller/idpController.js"
+import { getUserByEmail } from '../controller/userController.js';
+import {getCurrencyBySymbol} from '../controller/currencyController.js'
 import config from "./config.test.js";
 
 const prisma = new PrismaClient()
 
-let user_id;
-let admin_id;
+const deleteUserAndAccount = async (email) =>{
+  const user = await getUserByEmail(email);
+  if (user) {
+    //Delete User's Account
+    await prisma.account.deleteMany({
+      where : { 
+        userId : user.id
+      }
+    });
+
+    //Delete User
+    await prisma.user.delete({
+      where : { id : user.id}
+    });
+  }
+}
+
+const createUserAndAccount = async(email, password, phone, role, currencyId) =>{
+  const pwdHash = await argon2.hash(password);
+  const user = await prisma.user.create({
+    data:{
+      firstname : "user",
+      lastname : "test",
+      email : email,
+      phone : phone,
+      region : "EU",
+      passwordHash : pwdHash,
+      role : role
+    }
+  });
+
+  if (role == "user")
+  {
+    // Create Account
+    await prisma.account.create({
+      data:{
+        userId : user.id,
+        currencyId : currencyId,
+        accountType : 1, // TO FIX
+      }
+    })
+  }
+}
+
 
 //This is Global Before hook
 before(async () =>{
   console.log("Setup - Before");
+  let currencyId;
   try{
-      //delete user if exists
-      const usr = await prisma.user.findUnique({where: {email : config.userEmail}});
-      if (usr){
-        await prisma.user.delete({
-          where :{
-            "email" : config.userEmail,
-          }
-        });
-      }
 
-      const userPwdHash = await argon2.hash(config.userPassword);
-      const user = await prisma.user.create({
-        data:{
-          firstname : "user",
-          lastname : "test",
-          email : config.userEmail,
-          phone : "+32471040204",
-          region : "EU",
-          passwordHash : userPwdHash,
-          role : "user"
-        }
-      });
-      user_id = user.id;
-
-      //delete admin if exists
-      const adm = await prisma.user.findUnique({where: {email : config.adminPassword}})
-      if (adm){
-        console.log("admin duplicated fond -- delete require")
-        await prisma.user.delete({
-          where :{
-            "email" : config.adminPassword,
-          }
-        });
-      }
-
-      //Create Admin User for testing
-      const passwordHash = await argon2.hash(config.adminPassword);
-      const admin = await prisma.user.create({
-        data:{
-          firstname : "admin",
-          lastname : "test",
-          email : config.adminEmail,
-          phone : "+32471040205",
-          region : "EU",
-          passwordHash : passwordHash,
-          role : "admin"
-        }
-      });
-      admin_id = admin.id;
-
-      //Create Currency if id 1 dosent exists
-      const exists = await prisma.currency.findUnique({where: {id : 1}});
-      if (!exists){
-        const newCurrency = await prisma.currency.create({
+      let currency = await getCurrencyBySymbol(config.testCurrency);
+      if (!currency){
+        //Create Currency
+        currency = await prisma.currency.create({
           data:{
-              id : 1,
-              symbol: "CES",
-              name: "Open CES"
+              symbol: config.testCurrency,
+              name: "CurrTest",
+              country : "EU"
           }
         });
       }
+      currencyId = currency.id;
+  }
+  catch(error){
+    console.log("Setup - Error with Currency")
+    console.log(error);
+  }
+
+  try{
+      await deleteUserAndAccount(config.user1Email);
+
+      await deleteUserAndAccount(config.user2Email);
+
+      await deleteUserAndAccount(config.adminEmail);
     
   }
   catch(error){
+    console.log("Setup - Error with Delete User and Account")
+    console.log(error);
+  }
+
+  try{
+
+      await createUserAndAccount(config.user1Email, config.user1Password, config.user1Phone, "user", currencyId);
+
+      await createUserAndAccount(config.user2Email, config.user2Password, config.user2Phone, "user", currencyId);
+
+      await createUserAndAccount(config.adminEmail, config.adminPassword, config.adminPhone, "admin", currencyId);
+    
+  }
+  catch(error){
+    console.log("Setup - Error create User and Account")
     console.log(error);
   }
 
@@ -89,29 +113,12 @@ before(async () =>{
 after(async () => {
   console.log("Setup - After");
  
-  //Delete User's Account
-  await prisma.account.deleteMany({
-    where : { 
-      userId : user_id
-    }
-  });
+  await deleteUserAndAccount(config.user1Email);
 
-  //Delete User's Account
-  await prisma.account.deleteMany({
-    where : { 
-      userId : admin_id
-    }
-  });
+  await deleteUserAndAccount(config.user2Email);
 
-  // Delete User for testing
-  await prisma.user.delete({
-    where : { id : user_id}
-  });
-
-  // Delete admin for testing
-  await prisma.user.delete({
-    where : { id : admin_id}
-  });
+  await deleteUserAndAccount(config.adminEmail);
 
   console.log("Setup - After Completed");
 });
+

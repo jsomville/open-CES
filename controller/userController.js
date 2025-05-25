@@ -107,11 +107,15 @@ export const createUser = async (req, res, next) => {
 
 export const getUserByEmail = async (email) =>{
     const user = await prisma.user.findUnique({where: {email : email}});
+    if (user)
+    {
+        // Remove password hash
+        const { passwordHash, ...safeUser } = user;
+    
+        return safeUser;
+    }
 
-    // Remove password hash
-    const { passwordHash, ...safeUser } = user;
-
-    return safeUser;
+    return null;
 };
 
 // @desc Modify User

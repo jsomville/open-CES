@@ -353,3 +353,8 @@ export const refundAccount = async (req, res, next) => {
     }
 }
 
+export const getCurrencyBySymbol = async (symbol) => {
+    const currency = await prisma.currency.findUnique({where: {symbol : symbol}})
+    return currency;
+}
+
