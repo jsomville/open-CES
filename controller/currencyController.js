@@ -101,7 +101,7 @@ export const updateCurrency = async (req, res, next) => {
 
         const accountMax = req.body.accountMax;
         if (!accountMax){
-            return res.status(422).json({error : "AccountMax field is requied 2 or 3 characters"})
+            return res.status(422).json({error : "AccountMax field mandatory"})
         }
 
         //Currency exists

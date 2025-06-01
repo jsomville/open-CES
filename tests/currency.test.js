@@ -287,7 +287,8 @@ describe("Test Currency", () => {
     it ('Modify Currency - No Name', async () => {
         const payload = {
             "symbol" : "TC2",
-            "country" : "BE"
+            "country" : "BE",
+            "accountMax": 88
         };
 
         const res = await request(app)
@@ -302,6 +303,9 @@ describe("Test Currency", () => {
     it ('Modify Currency - No Symbol', async () => {
         const payload = {
             "name" : "Test Currency2",
+            //"symbol" : "TC2",
+            "country" : "BE",
+            "accountMax": 88
         };
 
         const res = await request(app)
@@ -311,6 +315,23 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 422);
         assert.equal(res.body.error, "Symbol field mandatory or too long");
+    });
+
+        it ('Modify Currency - No Acount Max', async () => {
+        const payload = {
+            "name" : "Test Currency2",
+            "symbol" : "TC2",
+            "country" : "BE",
+            //"accountMax": 88
+        };
+
+        const res = await request(app)
+            .put(`/api/currency/${new_currency_id}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "AccountMax field mandatory");
     });
 
     it ('Delete Currency - user', async () => {
