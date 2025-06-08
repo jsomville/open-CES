@@ -189,7 +189,7 @@ describe("Test Operations", () => {
         assert.equal(res.body.error, "Destination account not found");
     });
 
-    it('Refund Account - Currency Mismatch', async () => {
+    it('Fund Account - Currency Mismatch', async () => {
 
         const currency = await getCurrencyBySymbol(config.testCurrency);
 

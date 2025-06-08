@@ -207,64 +207,46 @@ export const fundAccount = async (req, res, next) => {
 
         //Fund the account
         try {
-            //Create user Transaction
-            const transaction1 = await prisma.transaction.create({
-                data: {
-                    accountId: destinationAccount.id,
-                    amount: amount,
-                    currencyId: currency.id,
-                    transactionType: "Fund Account",
-                    description: `From account # ${accountNumber}`,
-                    status: "Started"
-                }
-            });
+            const destinationBalance = Number(destinationAccount.balance) + Number(amount);
+            const currencyBalance = Number(currency.balance) - Number(amount);
 
-            //Create user Transaction
-            const transaction2 = await prisma.transaction.create({
-                data: {
-                    accountId: accountNumber,
-                    amount: amount,
-                    currencyId: currency.id,
-                    transactionType: "Fund Account",
-                    description: `To account # ${destinationAccount.id}`,
-                    status: "Started"
-                }
-            });
+            await prisma.$transaction([
+                //Deduct the Currency Balance
+                prisma.currency.update({
+                    where: { id: currency.id },
+                    data: { balance: currencyBalance }
+                }),
 
-            //Deduct the Currency Balance
-            let newBalance;
-            newBalance = Number(currency.balance) - Number(amount);
-            await prisma.currency.update({
-                where: { id: currency.id },
-                data: { balance: newBalance }
-            })
+                //Add to Destination Account
+                prisma.account.update({
+                    where: { id: destinationAccount.id },
+                    data: { balance: destinationBalance },
+                }),
 
-            //Add to Destination Account
-            newBalance = Number(destinationAccount.balance) + Number(amount);
-            await prisma.account.update({
-                where: { id: destinationAccount.id },
-                data: { balance: newBalance },
-            });
+                //Create Currency Transaction
+                prisma.transaction.create({
+                    data: {
+                        accountId: destinationAccount.id,
+                        amount: amount,
+                        currencyId: currency.id,
+                        transactionType: "Fund Account",
+                        description: `From account # ${accountNumber}`,
+                        status: "Completed"
+                    }
+                }),
 
-            //Completed the Transaction
-            await prisma.transaction.update({
-                where: {
-                    id: transaction1.id
-                },
-                data: {
-                    status: "Completed"
-                }
-            });
-
-            //Completed the Transaction
-            await prisma.transaction.update({
-                where: {
-                    id: transaction2.id
-                },
-                data: {
-                    status: "Completed"
-                }
-            });
+                //Create user Transaction
+                prisma.transaction.create({
+                    data: {
+                        accountId: accountNumber,
+                        amount: amount,
+                        currencyId: currency.id,
+                        transactionType: "Fund Account",
+                        description: `To account # ${destinationAccount.id}`,
+                        status: "Completed"
+                    }
+                }),
+            ])
         }
         catch (error) {
             console.log(error)
@@ -324,64 +306,46 @@ export const refundAccount = async (req, res, next) => {
 
         //Refund the account
         try {
-            //Create a Transaction
-            const transaction1 = await prisma.transaction.create({
-                data: {
-                    accountId: accountNumber,
-                    amount: amount,
-                    currencyId: currency.id,
-                    transactionType: "Refund Account",
-                    description: `From account # ${destinationAccount.id}`,
-                    status: "Started"
-                }
-            });
+            const currencyBalance = Number(currency.balance) + Number(amount);
+            const destinationBalance = Number(destinationAccount.balance) - Number(amount);
 
-            //Create a Transaction
-            const transaction2 = await prisma.transaction.create({
-                data: {
-                    accountId: destinationAccount.id,
-                    amount: amount,
-                    currencyId: currency.id,
-                    transactionType: "Refund Account",
-                    description: `To account # ${accountNumber}`,
-                    status: "Started"
-                }
-            });
+            await prisma.$transaction([
+                //Update Currency Balance
+                prisma.currency.update({
+                    where: { id: currency.id },
+                    data: { balance: currencyBalance }
+                }),
 
-            //Refund the Currency Balance
-            let newBalance;
-            newBalance = Number(currency.balance) + Number(amount);
-            await prisma.currency.update({
-                where: { id: currency.id },
-                data: { balance: newBalance }
-            })
+                //Update Account Balance
+                prisma.account.update({
+                    where: { id: destinationAccount.id },
+                    data: { balance: destinationBalance },
+                }),
 
-            //Add to Destination Account
-            newBalance = Number(destinationAccount.balance) - Number(amount);
-            await prisma.account.update({
-                where: { id: destinationAccount.id },
-                data: { balance: newBalance },
-            });
+                //Create a Transaction
+                prisma.transaction.create({
+                    data: {
+                        accountId: accountNumber,
+                        amount: amount,
+                        currencyId: currency.id,
+                        transactionType: "Refund Account",
+                        description: `From account # ${destinationAccount.id}`,
+                        status: "Completed"
+                    }
+                }),
 
-            //Completed the Transaction
-            await prisma.transaction.update({
-                where: {
-                    id: transaction1.id
-                },
-                data: {
-                    status: "Completed"
-                }
-            });
-
-            //Completed the Transaction
-            await prisma.transaction.update({
-                where: {
-                    id: transaction2.id
-                },
-                data: {
-                    status: "Completed"
-                }
-            });
+                //Create a Transaction
+                prisma.transaction.create({
+                    data: {
+                        accountId: destinationAccount.id,
+                        amount: amount,
+                        currencyId: currency.id,
+                        transactionType: "Refund Account",
+                        description: `To account # ${accountNumber}`,
+                        status: "Completed"
+                    }
+                }),
+            ]);
         }
         catch (error) {
             console.log(error)

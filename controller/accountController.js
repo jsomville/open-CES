@@ -169,64 +169,46 @@ export const transferTo = async (req, res, next) => {
         }
 
         try {
-            //Create From Transaction
-            const transaction1 = await prisma.transaction.create({
-                data: {
-                    accountId: sourceAccount.id,
-                    amount: amount,
-                    currencyId: sourceAccount.currencyId,
-                    description: `Transfer to account # ${destinationAccount.id}`,
-                    transactionType: "Transfer",
-                    status: "Started"
-                }
-            });
+            const newDestinationBalance = Number(destinationAccount.balance) + Number(amount);
+            const newSourceBalance = Number(sourceAccount.balance) - Number(amount);
 
-            //Create From Transaction
-            const transaction2 = await prisma.transaction.create({
-                data: {
-                    accountId: destinationAccount.id,
-                    amount: amount,
-                    currencyId: sourceAccount.currencyId,
-                    description: `Recieved from account # ${sourceAccount.id}`,
-                    transactionType: "Transfer",
-                    status: "Started"
-                }
-            });
+            await prisma.$transaction([
+                //Update Source Account Balance
+                prisma.account.update({
+                    where: { id: sourceAccount.id },
+                    data: { balance: newSourceBalance },
+                }),
 
-            //Deduct Main Account funds
-            let newBalance;
-            newBalance = Number(sourceAccount.balance) - Number(amount)
-            await prisma.account.update({
-                where: { id: sourceAccount.id },
-                data: { balance: newBalance },
-            });
+                //Update Destination Account Balance
+                prisma.account.update({
+                    where: { id: destinationAccount.id },
+                    data: { balance: newDestinationBalance },
+                }),
 
-            //Add to Destination Account
-            newBalance = Number(destinationAccount.balance) + Number(amount)
-            await prisma.account.update({
-                where: { id: destinationAccount.id },
-                data: { balance: newBalance },
-            });
+                //Create From Transaction
+                prisma.transaction.create({
+                    data: {
+                        accountId: sourceAccount.id,
+                        amount: amount,
+                        currencyId: sourceAccount.currencyId,
+                        description: `Transfer to account # ${destinationAccount.id}`,
+                        transactionType: "Transfer",
+                        status: "Completed"
+                    }
+                }),
 
-            //Completed the Transaction
-            await prisma.transaction.update({
-                where: {
-                    id: transaction1.id
-                },
-                data: {
-                    status: "Completed"
-                }
-            });
-
-            //Completed the Transaction
-            await prisma.transaction.update({
-                where: {
-                    id: transaction2.id
-                },
-                data: {
-                    status: "Completed"
-                }
-            });
+                //Create From Transaction
+                prisma.transaction.create({
+                    data: {
+                        accountId: destinationAccount.id,
+                        amount: amount,
+                        currencyId: sourceAccount.currencyId,
+                        description: `Recieved from account # ${sourceAccount.id}`,
+                        transactionType: "Transfer",
+                        status: "Completed"
+                    }
+                }),
+            ]);
         }
         catch (error) {
             console.log(error);
