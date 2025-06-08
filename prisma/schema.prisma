@@ -73,25 +73,22 @@ model Account {
   User     User       @relation(fields: [userId], references: [id])
   Currency Currency   @relation(fields: [currencyId], references: [id])
 
-  TransactionsBySender   Transaction[] @relation("TransactionsBySender")
-  TransactionsByRecieved Transaction[] @relation("TransactionsByRecieved")
-  Vouchers               Voucher[]     @relation("ClaimedAccount")
+  Transactions Transaction[] @relation("TransactionsBySender")
+  Vouchers     Voucher[]     @relation("ClaimedAccount")
 }
 
 model Transaction {
-  id                Int      @id @default(autoincrement())
-  senderAccountId   Int      @map("sender_account_id")
-  receiverAccountId Int      @map("receiver_account_id")
-  amount            Decimal  @db.Decimal(10, 2)
-  currencyId        Int      @map("currency_id")
-  transactionType   String   @map("transaction_type") @db.VarChar(20)
-  status            String   @db.VarChar(20)
-  description       String?  @db.VarChar(255)
-  createdAt         DateTime @default(now()) @map("created_at")
+  id              Int      @id @default(autoincrement())
+  accountId       Int      @map("account_id")
+  amount          Decimal  @db.Decimal(10, 2)
+  currencyId      Int      @map("currency_id")
+  transactionType String   @map("transaction_type") @db.VarChar(20)
+  status          String   @db.VarChar(20)
+  description     String?  @db.VarChar(255)
+  createdAt       DateTime @default(now()) @map("created_at")
 
-  SenderAccount   Account  @relation("TransactionsBySender", fields: [senderAccountId], references: [id])
-  ReceiverAccount Account  @relation("TransactionsByRecieved", fields: [receiverAccountId], references: [id])
-  Currency        Currency @relation("Transactions", fields: [currencyId], references: [id])
+  Account  Account  @relation("TransactionsBySender", fields: [accountId], references: [id])
+  Currency Currency @relation("Transactions", fields: [currencyId], references: [id])
 }
 
 model Voucher {

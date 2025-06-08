@@ -21,11 +21,16 @@ async function init() {
             isActive: true,
         }
     });
+}
 
+async function deleteAllTransactions() {
+
+    await prisma.transaction.deleteMany();
 }
 
 // Make it callable directly from command line
 if (import.meta.url === `file://${process.argv[1]}`) {
     console.log("init is running")
     init();
+    //deleteAllTransactions();
 }

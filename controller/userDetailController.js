@@ -30,7 +30,7 @@ export const getUserDetail = async (req, res, next) => {
         const accounts = await prisma.account.findMany({ where: { userId: user.id } });
         for (const account of accounts) {
             const latestTransactions = await prisma.transaction.findMany({
-                where: { senderAccountId: account.id },
+                where: { accountId: account.id },
                 orderBy: { createdAt: 'desc' },
                 take: transactionPerAccount,
             });

@@ -10,7 +10,7 @@ import { getUserToken, getAdminToken } from './0-setup.test.js';
 import { getCurrencyBySymbol } from '../controller/currencyController.js';
 import { createUserAndAccount, deleteUserAndAccount, getAccountIdByEmailAndCurrencySymbol } from "../controller/helper.js";
 
-describe("Test Currency", () => {
+describe("Test Operations", () => {
     let admin_access_token;
     let user_access_token;
 
