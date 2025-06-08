@@ -14,6 +14,7 @@ describe("Test User", () => {
         //Get main Testing Tokens
         user_access_token = getUserToken();
         admin_access_token = getAdminToken();
+
     });
 
     it('List all User - Admin', async () => {
@@ -276,6 +277,56 @@ describe("Test User", () => {
         assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
+    it('Get User By Email - user self', async () => {
+
+        //get Temporary Token
+
+        const email = config.user1Email;
+        const res = await request(app)
+            .get(`/api/user/by-email/${email}`)
+            .set('Authorization', `Bearer ${user_access_token}`)
+
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.body.email, email);
+
+    });
+
+    it('Get User By Email - admin self', async () => {
+
+        //get Temporary Token
+
+        const email = config.adminEmail;
+        const res = await request(app)
+            .get(`/api/user/by-email/${email}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.body.email, email);
+    });
+
+    it('Get User By Email - not self', async () => {
+
+        //get Temporary Token
+
+        const email = config.user1Email;
+        const res = await request(app)
+            .get(`/api/user/by-email/${email}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+
+        assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
+    });
+
+    it('Get User By Email - email not found', async () => {
+        const email = config.user1Email;
+        const res = await request(app)
+            .get(`/api/user/by-email/test123@opences.org`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.error, "User not found");
+    });
+
     // Modify User
     it('Modify User', async () => {
         const payload = {
@@ -408,9 +459,36 @@ describe("Test User", () => {
         assert.equal(res.body.error, "Phone already used");
     });
 
-    it('Delete User - Admin', async () => {
+    it('Modify User - set Admin by User', async () => {
         const res = await request(app)
-            .delete(`/api/user/${new_user_id}`)
+            .post(`/api/user/${new_user_id}/set-admin`)
+            .set('Authorization', `Bearer ${user_access_token}`);
+
+        assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
+    });
+
+    it('Modify User - set Admin by Admin', async () => {
+        const res = await request(app)
+            .post(`/api/user/${new_user_id}/set-admin`)
+            .set('Authorization', `Bearer ${admin_access_token}`);
+
+        assert.equal(res.statusCode, 204);
+
+    });
+
+    it('Modify User - set active by User', async () => {
+        const res = await request(app)
+            .post(`/api/user/${new_user_id}/set-active`)
+            .set('Authorization', `Bearer ${user_access_token}`);
+
+        assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
+    });
+
+    it('Modify User - set active by Admin', async () => {
+        const res = await request(app)
+            .post(`/api/user/${new_user_id}/set-active`)
             .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 204);
@@ -424,4 +502,13 @@ describe("Test User", () => {
         assert.equal(res.statusCode, 403);
         assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
+
+    it('Delete User - Admin', async () => {
+        const res = await request(app)
+            .delete(`/api/user/${new_user_id}`)
+            .set('Authorization', `Bearer ${admin_access_token}`);
+
+        assert.equal(res.statusCode, 204);
+    });
+
 });

@@ -40,6 +40,7 @@ model User {
   role         String
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
+  isActive     Boolean  @default(false)
 
   Account  Account[]
   Merchant Merchant? @relation(fields: [merchantId], references: [id])

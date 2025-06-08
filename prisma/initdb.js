@@ -5,20 +5,20 @@ const prisma = new PrismaClient();
 
 async function init() {
 
-    const password="OpenCES2025!";
+    const password = "OpenCES2025!";
     const email = "admin@opences.org"
-
 
     const userPwdHash = await argon2.hash(password);
     await prisma.user.create({
-        data:{
-            firstname : "default",
-            lastname : "admin",
-            email : email,
-            phone : "+32488040204",
-            region : "EU",
-            passwordHash : userPwdHash,
-            role : "admin"
+        data: {
+            firstname: "default",
+            lastname: "admin",
+            email: email,
+            phone: "+32488040204",
+            region: "EU",
+            passwordHash: userPwdHash,
+            role: "admin",
+            isActive: true,
         }
     });
 

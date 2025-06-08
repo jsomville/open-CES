@@ -6,38 +6,30 @@ const JWT_SECRET = process.env.JWT_ACCESS_SECRET_KEY || 'your-very-secret-key';
 export function authenticateToken(req, res, next) {
 
   const authh = req.headers.authorization
-  if (!authh){
+  if (!authh) {
 
-    return res.status(401).json({error : "Authorization Header is missing"})
+    return res.status(401).json({ error: "Authorization Header is missing" })
   }
 
   //console.log(authh);
   const token = authh?.split(' '); // Expect "Bearer <token>"
 
-  if (!token[0])
-  {
-    //console.log("Missing Bearer");
+  if (!token[0]) {
     return res.status(401).json({ error: 'Invalid token provided' });
   }
-    
-  if (token[0] != "Bearer")
-  {
-    //console.log("Argument is not Bearer");
-    return res.status(401).json({ error: 'Invalid token provided'});
-  }
-    
 
-  if (!token[1])
-  {
-    //console.log("Missing the token value");
+  if (token[0] != "Bearer") {
     return res.status(401).json({ error: 'Invalid token provided' });
   }
-    
-  //console.log(token)
+
+
+  if (!token[1]) {
+    return res.status(401).json({ error: 'Invalid token provided' });
+  }
 
   try {
     const user = jwt.verify(token[1], JWT_SECRET);
-    
+
     req.user = user; // Attach user data to request
 
     next();

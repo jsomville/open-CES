@@ -2,41 +2,54 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+import { getUserByEmail } from './userController.js';
+
 const transactionPerAccount = 5
 
 // @desc Get one user
 // @toute GET /api/user:id
-export const getUserDetail =  async(req, res, next) => {
-    try{
-        const user = await prisma.user.findUnique({where : {email : req.params.email}});
-        if (!user){
-            return res.status(404).json({ error: "User not found"})
+export const getUserDetail = async (req, res, next) => {
+    try {
+        //Check if email is provided
+        if (!req.params.email) {
+            return res.status(422).json({ error: "Email required" });
         }
-        // Remove password hash
-        const { passwordHash, ...safeUser } = user;
 
-        const accounts = await prisma.account.findMany({where : {userId : user.id}});
-        for (const account of accounts){
+        //Check if user exists
+        const user = await getUserByEmail(req.params.email);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" })
+        }
+
+        //Check if self
+        if (req.user.sub !== user.email) {
+            return res.status(403).json({ error: "Forbidden: Insufficient role" })
+        }
+
+
+        const accounts = await prisma.account.findMany({ where: { userId: user.id } });
+        for (const account of accounts) {
             const latestTransactions = await prisma.transaction.findMany({
-                where : {senderAccountId : account.id},
-                orderBy :{ createdAt: 'desc'},
+                where: { senderAccountId: account.id },
+                orderBy: { createdAt: 'desc' },
                 take: transactionPerAccount,
             });
-            if (latestTransactions){
+            if (latestTransactions) {
                 account.latestTransactions = latestTransactions;
             }
         }
-        
+
         const userDetail = {
-            ...safeUser,
-            accounts : accounts.map(account => ({
+            ...user,
+            accounts: accounts.map(account => ({
                 ...account,
             }))
         }
-        
+
         return res.status(200).json(userDetail);
     }
-    catch(error){
+    catch (error) {
+        console.log(error.message)
         return res.status(500).json({ error: error.message })
     }
 };

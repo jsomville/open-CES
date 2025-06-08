@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 
 import app from "../app.js";
 import { getAccessToken } from "../controller/idpController.js";
-import { getUserByEmail } from '../controller/userController.js';
 import { getCurrencyBySymbol } from '../controller/currencyController.js';
 import { deleteUserAndAccount, createUserAndAccount } from '../controller/helper.js';
+import { setUserIsActiveByEmail } from '../controller/userController.js';
 import config from "./config.test.js";
 
 let userToken = "";
@@ -64,6 +64,21 @@ before(async () => {
     await createUserAndAccount(config.user2Email, config.user2Password, config.user2Phone, "user", currencyId);
 
     await createUserAndAccount(config.adminEmail, config.adminPassword, config.adminPhone, "admin", currencyId);
+
+  }
+  catch (error) {
+    console.log("Setup - Error create User and Account")
+    console.log(error);
+  }
+
+  //Activate User
+  try {
+
+    await setUserIsActiveByEmail(config.user1Email);
+
+    //await setUserIsActiveByEmail(config.user2Email);
+
+    await setUserIsActiveByEmail(config.adminEmail);
 
   }
   catch (error) {
