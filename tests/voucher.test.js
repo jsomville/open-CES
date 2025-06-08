@@ -2,8 +2,7 @@ import assert from "node:assert";
 import request from 'supertest';
 
 import app from "../app.js";
-import { getAccessToken } from "../controller/idpController.js"
-import config from "./config.test.js";
+import { getUserToken, getAdminToken } from './0-setup.test.js';
 
 describe.skip("Voucher Test", () => {
     let admin_access_token;
@@ -12,25 +11,15 @@ describe.skip("Voucher Test", () => {
     let new_voucher_id;
 
     before(async () => {
-        // Create User Token
-        const user_token_parameters = {
-            "email" : config.userEmail,
-            "role" : "user"
-        }
-        user_access_token = getAccessToken(user_token_parameters);
-        
-        // Create Admin Token
-        const admin_token_parameters = {
-            "email" : config.adminEmail,
-            "role" : "admin"
-        }
-        admin_access_token = getAccessToken(admin_token_parameters);
+        //Get main Testing Tokens
+        user_access_token = getUserToken();
+        admin_access_token = getAdminToken();
 
         voucher_payload = {
-            "code" : "Code 1234",
-            "currency" : 1,
-            "amount" : 1.5,
-            "expiration" : "",
+            "code": "Code 1234",
+            "currency": 1,
+            "amount": 1.5,
+            "expiration": "",
         }
     });
 
@@ -64,7 +53,7 @@ describe.skip("Voucher Test", () => {
         assert.equal(res.body.status, voucher_payload.status);
         assert.ok(res.body.createdAt);
         assert.ok(res.body.updatedAt);
-        
+
         new_merchant_id = res.body.id;
     });
 });

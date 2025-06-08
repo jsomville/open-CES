@@ -7,10 +7,9 @@ const prisma = new PrismaClient()
 
 import app from "../app.js";
 import config from "./config.test.js";
-import { getAccessToken } from "../controller/idpController.js";
-import { getUserByEmail } from '../controller/userController.js';
-import {getCurrencyBySymbol} from '../controller/currencyController.js'
+import { getCurrencyBySymbol } from '../controller/currencyController.js'
 import { deleteUserAndAccount } from '../controller/helper.js';
+import { getUserToken, getAdminToken } from './0-setup.test.js';
 
 describe("Test Account", () => {
     let new_account_id;
@@ -25,20 +24,10 @@ describe("Test Account", () => {
         await new Promise(resolve => setTimeout(resolve, 100)); // 1 second
 
         //console.log("Account - Before")
-        
-        // Create User Token
-        const user_token_parameters = {
-            "email" : config.user1Email,
-            "role" : "user"
-        }
-        user_access_token = getAccessToken(user_token_parameters)
 
-        // Create Admin Token
-        const admin_token_parameters = {
-            "email" : config.adminEmail,
-            "role" : "admin"
-        }
-        admin_access_token = getAccessToken(admin_token_parameters);
+        //Get main Testing Tokens
+        user_access_token = getUserToken();
+        admin_access_token = getAdminToken();
 
         const testCurrency = await getCurrencyBySymbol(config.testCurrency);
         testCurrencyId = testCurrency.id;
@@ -48,29 +37,28 @@ describe("Test Account", () => {
         await deleteUserAndAccount(userEmail);
 
         const user = await prisma.user.create({
-            data:{
-                firstname : "John",
-                lastname : "Doe",
-                email : userEmail,
-                phone : "+32471041010",
-                region : "EU",
-                passwordHash : "FAKE",
-                role : "user"
+            data: {
+                firstname: "John",
+                lastname: "Doe",
+                email: userEmail,
+                phone: "+32471041010",
+                region: "EU",
+                passwordHash: "FAKE",
+                role: "user"
             }
         })
-        if (!user)
-        {
-           throw new Error("Account Test - Before - User not found") 
+        if (!user) {
+            throw new Error("Account Test - Before - User not found")
         }
         user_id = user.id;
 
         // Test payload
         account_payload = {
-            "userId" : user_id,
-            "currencyId" : testCurrencyId,
-            "accountType" : 1,
+            "userId": user_id,
+            "currencyId": testCurrencyId,
+            "accountType": 1,
         };
-        
+
     });
 
     it('List all Account - Admin', async () => {
@@ -90,7 +78,7 @@ describe("Test Account", () => {
         assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
-     it('Add user account - Admin', async () => {
+    it('Add user account - Admin', async () => {
         const res = await request(app)
             .post('/api/account')
             .set('Authorization', `Bearer ${admin_access_token}`)
@@ -129,8 +117,8 @@ describe("Test Account", () => {
     it('Add user account - No UserID', async () => {
         const payload = {
             //"userId" : user.id,
-            "currencyId" : testCurrencyId,
-            "accountType" : 0
+            "currencyId": testCurrencyId,
+            "accountType": 0
         };
         const res = await request(app)
             .post('/api/account')
@@ -143,9 +131,9 @@ describe("Test Account", () => {
 
     it('Add user account - No Currency', async () => {
         const payload = {
-            "userId" : user_id,
+            "userId": user_id,
             //"currencyId" : testCurrencyId,
-            "accountType" : 0
+            "accountType": 0
         };
         const res = await request(app)
             .post('/api/account')
@@ -158,8 +146,8 @@ describe("Test Account", () => {
 
     it('Add user account - No Account Type', async () => {
         const payload = {
-            "userId" : user_id,
-            "currencyId" : testCurrencyId,
+            "userId": user_id,
+            "currencyId": testCurrencyId,
             //"accountType" : 0
         };
         const res = await request(app)
@@ -207,7 +195,8 @@ describe("Test Account", () => {
         const res = await request(app)
             .delete(`/api/account/${new_account_id}`)
             .set('Authorization', `Bearer ${admin_access_token}`)
-        
+
         assert.equal(res.statusCode, 204);
     });
 });
+

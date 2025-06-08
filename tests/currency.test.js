@@ -5,56 +5,45 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
 import app from "../app.js";
-import config from "./config.test.js";
-import { getAccessToken } from "../controller/idpController.js";
+import { getUserToken, getAdminToken } from './0-setup.test.js';
 
 describe("Test Currency", () => {
     let admin_access_token;
     let user_access_token;
     let new_currency_id;
     const currency_payload = {
-        "name" : "TestCurrency",
-        "symbol" : "TST",
-        "country" : "BE"
+        "name": "TestCurrency",
+        "symbol": "TST",
+        "country": "BE"
     };
-    const new_symbol="TTT";
+    const new_symbol = "TTT";
 
     before(async () => {
-        try{
-            // Create User Token
-            const user_token_parameters = {
-                "email" : config.user1Email,
-                "role" : "user"
-            }
-            user_access_token = getAccessToken(user_token_parameters)
-            
-            // Create Admin Token
-            const admin_token_parameters = {
-                "email" : config.adminEmail,
-                "role" : "admin"
-            }
-            admin_access_token = getAccessToken(admin_token_parameters);
+        try {
+            //Get main Testing Tokens
+            user_access_token = getUserToken();
+            admin_access_token = getAdminToken();
 
             //Delete currency if exist
-            const cur = await prisma.currency.findUnique({where: {symbol : currency_payload.symbol}})
-            if (cur){
+            const cur = await prisma.currency.findUnique({ where: { symbol: currency_payload.symbol } })
+            if (cur) {
                 await prisma.currency.delete({
-                    where :{
-                        symbol : currency_payload.symbol
+                    where: {
+                        symbol: currency_payload.symbol
                     }
                 });
             }
-            
-            const cur2 = await prisma.currency.findUnique({where: {symbol : new_symbol}})
-            if (cur2){
+
+            const cur2 = await prisma.currency.findUnique({ where: { symbol: new_symbol } })
+            if (cur2) {
                 await prisma.currency.deleteMany({
-                    where :{
-                        symbol : new_symbol
+                    where: {
+                        symbol: new_symbol
                     }
                 });
             }
         }
-        catch(error){
+        catch (error) {
             console.log(error.message);
         }
 
@@ -113,8 +102,8 @@ describe("Test Currency", () => {
 
     it('Add currency - No Name', async () => {
         const payload = {
-            "symbol" : "TC",
-            "country" : "EU",
+            "symbol": "TC",
+            "country": "EU",
         };
 
         const res = await request(app)
@@ -128,8 +117,8 @@ describe("Test Currency", () => {
 
     it('Add currency - No Symbol', async () => {
         const payload = {
-            "name" : "Test Currency",
-            "country" : "EU",
+            "name": "Test Currency",
+            "country": "EU",
         };
 
         const res = await request(app)
@@ -143,8 +132,8 @@ describe("Test Currency", () => {
 
     it('Add currency - No Country', async () => {
         const payload = {
-            "symbol" : "TC",
-            "name" : "Test Currency",
+            "symbol": "TC",
+            "name": "Test Currency",
         };
 
         const res = await request(app)
@@ -158,9 +147,9 @@ describe("Test Currency", () => {
 
     it('Add currency - Duplicated Name', async () => {
         const payload = {
-            "name" : currency_payload.name,
-            "symbol" : "TC2",
-            "country" : "BE"
+            "name": currency_payload.name,
+            "symbol": "TC2",
+            "country": "BE"
         };
 
         const res = await request(app)
@@ -174,9 +163,9 @@ describe("Test Currency", () => {
 
     it('Add currency - Duplicated Symbol', async () => {
         const payload = {
-            "name" : "Test Currency2",
-            "symbol" : currency_payload.symbol,
-            "country" : "BE"
+            "name": "Test Currency2",
+            "symbol": currency_payload.symbol,
+            "country": "BE"
         };
 
         const res = await request(app)
@@ -190,9 +179,9 @@ describe("Test Currency", () => {
 
     it('Add currency - Name Too short', async () => {
         const payload = {
-            "name" : "123",
-            "symbol" : "TC",
-            "country" : "BE"
+            "name": "123",
+            "symbol": "TC",
+            "country": "BE"
         };
 
         const res = await request(app)
@@ -207,9 +196,9 @@ describe("Test Currency", () => {
 
     it('Add currency - Symbol too long', async () => {
         const payload = {
-            "name" : "UniqueCurrency",
-            "symbol" : "12345ywr",
-            "country" : "BE"
+            "name": "UniqueCurrency",
+            "symbol": "12345ywr",
+            "country": "BE"
         };
 
         const res = await request(app)
@@ -222,7 +211,7 @@ describe("Test Currency", () => {
     });
 
     // Get Currency
-    it ('Get Currency', async () => {
+    it('Get Currency', async () => {
         const res = await request(app)
             .get(`/api/currency/${new_currency_id}`)
             .set('Authorization', `Bearer ${admin_access_token}`)
@@ -235,7 +224,7 @@ describe("Test Currency", () => {
         assert.ok(res.body.updatedAt)
     });
 
-    it ('Get Currency - Invalid ID', async () => {
+    it('Get Currency - Invalid ID', async () => {
         const res = await request(app)
             .get(`/api/currency/9999`)
             .set('Authorization', `Bearer ${admin_access_token}`)
@@ -244,12 +233,12 @@ describe("Test Currency", () => {
         assert.equal(res.body.error, "Currency not found");
     });
 
-    it ('Modify Currency', async () => {
+    it('Modify Currency', async () => {
         const payload = {
-            "name" : "Test Currency2",
-            "symbol" : new_symbol,
-            "country" : "BE",
-            "accountMax" : 150,
+            "name": "Test Currency2",
+            "symbol": new_symbol,
+            "country": "BE",
+            "accountMax": 150,
         };
 
         const res = await request(app)
@@ -267,7 +256,7 @@ describe("Test Currency", () => {
         assert.ok(res.body.updatedAt)
     });
 
-    it ('Modify Currency - User', async () => {
+    it('Modify Currency - User', async () => {
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
             .set('Authorization', `Bearer ${user_access_token}`);
@@ -276,7 +265,7 @@ describe("Test Currency", () => {
         assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
-    it ('Modify Currency - No Payload', async () => {
+    it('Modify Currency - No Payload', async () => {
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
             .set('Authorization', `Bearer ${admin_access_token}`);
@@ -284,10 +273,10 @@ describe("Test Currency", () => {
         assert.equal(res.statusCode, 422);
     });
 
-    it ('Modify Currency - No Name', async () => {
+    it('Modify Currency - No Name', async () => {
         const payload = {
-            "symbol" : "TC2",
-            "country" : "BE",
+            "symbol": "TC2",
+            "country": "BE",
             "accountMax": 88
         };
 
@@ -300,11 +289,11 @@ describe("Test Currency", () => {
         assert.equal(res.body.error, "Name field mandatory or too short");
     });
 
-    it ('Modify Currency - No Symbol', async () => {
+    it('Modify Currency - No Symbol', async () => {
         const payload = {
-            "name" : "Test Currency2",
+            "name": "Test Currency2",
             //"symbol" : "TC2",
-            "country" : "BE",
+            "country": "BE",
             "accountMax": 88
         };
 
@@ -317,11 +306,11 @@ describe("Test Currency", () => {
         assert.equal(res.body.error, "Symbol field mandatory or too long");
     });
 
-        it ('Modify Currency - No Acount Max', async () => {
+    it('Modify Currency - No Acount Max', async () => {
         const payload = {
-            "name" : "Test Currency2",
-            "symbol" : "TC2",
-            "country" : "BE",
+            "name": "Test Currency2",
+            "symbol": "TC2",
+            "country": "BE",
             //"accountMax": 88
         };
 
@@ -334,7 +323,7 @@ describe("Test Currency", () => {
         assert.equal(res.body.error, "AccountMax field mandatory");
     });
 
-    it ('Delete Currency - user', async () => {
+    it('Delete Currency - user', async () => {
         const res = await request(app)
             .delete(`/api/currency/${new_currency_id}`)
             .set('Authorization', `Bearer ${user_access_token}`);
@@ -343,7 +332,7 @@ describe("Test Currency", () => {
         assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
-    it ('Delete Currency - Invalid ID', async () => {
+    it('Delete Currency - Invalid ID', async () => {
         const res = await request(app)
             .delete(`/api/currency/99999`)
             .set('Authorization', `Bearer ${admin_access_token}`);
@@ -352,12 +341,12 @@ describe("Test Currency", () => {
         assert.equal(res.body.error, "Currency not found");
     });
 
-    it ('Delete Currency - Admin', async () => {
+    it('Delete Currency - Admin', async () => {
         const res = await request(app)
             .delete(`/api/currency/${new_currency_id}`)
             .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 204);
     });
-  });
+});
 

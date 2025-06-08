@@ -2,7 +2,7 @@ import assert from "node:assert";
 import request from 'supertest';
 
 import app from "../app.js";
-import { getAccessToken } from "../controller/idpController.js"
+import { getUserToken, getAdminToken } from './0-setup.test.js';
 import config from "./config.test.js";
 
 describe("Merchant Test", () => {
@@ -12,25 +12,15 @@ describe("Merchant Test", () => {
     let new_merchant_id;
 
     before(async () => {
-        // Create User Token
-        const user_token_parameters = {
-            "email" : config.userEmail,
-            "role" : "user"
-        }
-        user_access_token = getAccessToken(user_token_parameters);
-        
-        // Create Admin Token
-        const admin_token_parameters = {
-            "email" : config.adminEmail,
-            "role" : "admin"
-        }
-        admin_access_token = getAccessToken(admin_token_parameters);
+        //Get main Testing Tokens
+        user_access_token = getUserToken();
+        admin_access_token = getAdminToken();
 
         merchant_payload = {
-            "name" : "Test_Merchant",
-            "email" : "merchant@opences.org",
-            "phone" : "+3212345678",
-            "region" : "EU",
+            "name": "Test_Merchant",
+            "email": "merchant@opences.org",
+            "phone": "+3212345678",
+            "region": "EU",
         }
     });
 
@@ -64,7 +54,7 @@ describe("Merchant Test", () => {
         assert.equal(res.body.region, merchant_payload.region);
         assert.ok(res.body.createdAt);
         assert.ok(res.body.updatedAt);
-        
+
         new_merchant_id = res.body.id;
     });
 
@@ -79,14 +69,14 @@ describe("Merchant Test", () => {
     it('Add Merchant - No Name', async () => {
         const payload = {
             //"name" : "Test_Merchant",
-            "email" : "merchant@opences.org",
-            "phone" : "+3212345678",
-            "region" : "EU",
+            "email": "merchant@opences.org",
+            "phone": "+3212345678",
+            "region": "EU",
         }
         const res = await request(app)
             .post('/api/merchant')
             .set('Authorization', `Bearer ${admin_access_token}`)
-            //.send(payload)
+        //.send(payload)
 
         assert.equal(res.statusCode, 422);
         assert.equal(res.body.error, "Name field mandatory");
@@ -94,10 +84,10 @@ describe("Merchant Test", () => {
 
     it('Add Merchant - No Email', async () => {
         const payload = {
-            "name" : "Test_Merchant",
+            "name": "Test_Merchant",
             //"email" : "merchant@opences.org",
-            "phone" : "+3212345678",
-            "region" : "EU",
+            "phone": "+3212345678",
+            "region": "EU",
         }
         const res = await request(app)
             .post('/api/merchant')
@@ -110,10 +100,10 @@ describe("Merchant Test", () => {
 
     it('Add Merchant - No Phone', async () => {
         const payload = {
-            "name" : "Test_Merchant",
-            "email" : "merchant@opences.org",
+            "name": "Test_Merchant",
+            "email": "merchant@opences.org",
             //"phone" : "+3212345678",
-            "region" : "EU",
+            "region": "EU",
         }
         const res = await request(app)
             .post('/api/merchant')
@@ -126,9 +116,9 @@ describe("Merchant Test", () => {
 
     it('Add Merchant - No Region', async () => {
         const payload = {
-            "name" : "Test_Merchant",
-            "email" : "merchant@opences.org",
-            "phone" : "+3212345678",
+            "name": "Test_Merchant",
+            "email": "merchant@opences.org",
+            "phone": "+3212345678",
             //"region" : "EU",
         }
         const res = await request(app)
@@ -172,10 +162,10 @@ describe("Merchant Test", () => {
 
     it('Modify Merchant - Admin', async () => {
         const payload = {
-            "name" : "new name",
-            "email" : "email@opences.org",
-            "phone" : "+328529637",
-            "region" : "BXL",
+            "name": "new name",
+            "email": "email@opences.org",
+            "phone": "+328529637",
+            "region": "BXL",
         }
         const res = await request(app)
             .put(`/api/merchant/${new_merchant_id}`)
@@ -194,9 +184,9 @@ describe("Merchant Test", () => {
     it('Modify Merchant - No Name', async () => {
         const payload = {
             //"name" : "new name",
-            "email" : "email@opences.org",
-            "phone" : "+328529637",
-            "region" : "BXL",
+            "email": "email@opences.org",
+            "phone": "+328529637",
+            "region": "BXL",
         }
         const res = await request(app)
             .put(`/api/merchant/${new_merchant_id}`)
@@ -209,9 +199,9 @@ describe("Merchant Test", () => {
     it('Modify Merchant - No Name', async () => {
         const payload = {
             //"name" : "new name",
-            "email" : "email@opences.org",
-            "phone" : "+328529637",
-            "region" : "BXL",
+            "email": "email@opences.org",
+            "phone": "+328529637",
+            "region": "BXL",
         }
         const res = await request(app)
             .put(`/api/merchant/${new_merchant_id}`)
@@ -225,10 +215,10 @@ describe("Merchant Test", () => {
 
     it('Modify Merchant - No Email', async () => {
         const payload = {
-            "name" : "new name",
+            "name": "new name",
             //"email" : "email@opences.org",
-            "phone" : "+328529637",
-            "region" : "BXL",
+            "phone": "+328529637",
+            "region": "BXL",
         }
         const res = await request(app)
             .put(`/api/merchant/${new_merchant_id}`)
@@ -242,10 +232,10 @@ describe("Merchant Test", () => {
 
     it('Modify Merchant - No Phone', async () => {
         const payload = {
-            "name" : "new name",
-            "email" : "email@opences.org",
+            "name": "new name",
+            "email": "email@opences.org",
             //"phone" : "+328529637",
-            "region" : "BXL",
+            "region": "BXL",
         }
         const res = await request(app)
             .put(`/api/merchant/${new_merchant_id}`)
@@ -258,9 +248,9 @@ describe("Merchant Test", () => {
 
     it('Modify Merchant - No Region', async () => {
         const payload = {
-            "name" : "new name",
-            "email" : "email@opences.org",
-            "phone" : "+328529637",
+            "name": "new name",
+            "email": "email@opences.org",
+            "phone": "+328529637",
             //"region" : "BXL",
         }
         const res = await request(app)
@@ -275,7 +265,7 @@ describe("Merchant Test", () => {
 
 
 
-    it ('Delete Merchant - Admin', async () => {
+    it('Delete Merchant - Admin', async () => {
         const res = await request(app)
             .delete(`/api/merchant/${new_merchant_id}`)
             .set('Authorization', `Bearer ${admin_access_token}`);
@@ -283,7 +273,7 @@ describe("Merchant Test", () => {
         assert.equal(res.statusCode, 204);
     });
 
-    it ('Delete Merchant - User', async () => {
+    it('Delete Merchant - User', async () => {
         const res = await request(app)
             .delete(`/api/merchant/${new_merchant_id}`)
             .set('Authorization', `Bearer ${user_access_token}`);
