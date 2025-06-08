@@ -6,6 +6,8 @@ const prisma = new PrismaClient();
 
 import app from "../app.js";
 import { getUserToken, getAdminToken } from './0-setup.test.js';
+import { getCurrencyBySymbol } from "../controller/currencyController.js";
+
 
 describe("Test Currency", () => {
     let admin_access_token;
@@ -25,7 +27,7 @@ describe("Test Currency", () => {
             admin_access_token = getAdminToken();
 
             //Delete currency if exist
-            const cur = await prisma.currency.findUnique({ where: { symbol: currency_payload.symbol } })
+            const cur = await getCurrencyBySymbol(currency_payload.symbol);
             if (cur) {
                 await prisma.currency.delete({
                     where: {
@@ -34,7 +36,7 @@ describe("Test Currency", () => {
                 });
             }
 
-            const cur2 = await prisma.currency.findUnique({ where: { symbol: new_symbol } })
+            const cur2 = await getCurrencyBySymbol(new_symbol);
             if (cur2) {
                 await prisma.currency.deleteMany({
                     where: {

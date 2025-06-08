@@ -2,25 +2,40 @@ import assert from "node:assert";
 import request from 'supertest';
 
 import app from "../app.js";
+import config from "./config.test.js";
 import { getUserToken, getAdminToken } from './0-setup.test.js';
+import { getCurrencyBySymbol } from "../controller/currencyController.js";
+import { daysFromNow } from "../controller/voucherController.js";
 
-describe.skip("Voucher Test", () => {
+describe("Voucher Test", () => {
     let admin_access_token;
     let user_access_token;
     let voucher_payload;
-    let new_voucher_id;
+    let voucherId;
+
+    let voucherCode;
 
     before(async () => {
         //Get main Testing Tokens
         user_access_token = getUserToken();
         admin_access_token = getAdminToken();
 
+        const currency = await getCurrencyBySymbol(config.testCurrency);
+
         voucher_payload = {
-            "code": "Code 1234",
-            "currency": 1,
+            "currencyId": currency.id,
             "amount": 1.5,
-            "expiration": "",
+            "duration": 360, //in days
         }
+    });
+
+    it('List All Voucher - User', async () => {
+        const res = await request(app)
+            .get('/api/voucher')
+            .set('Authorization', `Bearer ${user_access_token}`);
+
+        assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
     it('List All Voucher - Admin', async () => {
@@ -31,29 +46,206 @@ describe.skip("Voucher Test", () => {
         assert.equal(res.statusCode, 200);
     });
 
-    it('List All Voucher - User', async () => {
+    it('Add Voucher - User', async () => {
         const res = await request(app)
-            .get('/api/voucher')
-            .set('Authorization', `Bearer ${user_access_token}`);
+            .post('/api/voucher')
+            .set('Authorization', `Bearer ${user_access_token}`)
+            .send(voucher_payload)
 
         assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
 
-    it.skip('Add Voucher - Admin', async () => {
+    it('Add Voucher - Admin', async () => {
+
+        const expiration = daysFromNow(voucher_payload.duration);
+
         const res = await request(app)
             .post('/api/voucher')
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(voucher_payload)
 
         assert.equal(res.statusCode, 201);
-        assert.equal(res.body.code, voucher_payload.code);
+        assert.ok(res.body.id);
+        assert.ok(res.body.code);
         assert.equal(res.body.currency, voucher_payload.currency);
         assert.equal(res.body.amount, voucher_payload.amount);
-        assert.equal(res.body.expiration, voucher_payload.expiration);
-        assert.equal(res.body.status, voucher_payload.status);
+        assert.equal(res.body.expiration, expiration.toISOString());
+        assert.equal(res.body.status, "Issued");
         assert.ok(res.body.createdAt);
-        assert.ok(res.body.updatedAt);
 
-        new_merchant_id = res.body.id;
+        voucherCode = res.body.code;
+        voucherId = res.body.id;
     });
+
+    it('Add Voucher - Missing Currency ID', async () => {
+        const payload = {
+            //"currencyId": voucher_payload.currencyId,
+            "amount": 1.5,
+            "duration": 360, //in days
+        }
+
+        const res = await request(app)
+            .post('/api/voucher')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "currencyId field is mandatory");
+    });
+
+    it('Add Voucher - Missing Amount', async () => {
+        const payload = {
+            "currencyId": voucher_payload.currencyId,
+            //"amount": 1.5,
+            "duration": 360, //in days
+        }
+
+        const res = await request(app)
+            .post('/api/voucher')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "Amount mandatory and must be a positive number");
+    });
+
+    it('Add Voucher - Missing Duration', async () => {
+        const payload = {
+            "currencyId": voucher_payload.currencyId,
+            "amount": 1.5,
+            //"duration": 360, //in days
+        }
+
+        const res = await request(app)
+            .post('/api/voucher')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "Amount mandatory and must be a positive integer");
+    });
+
+    it('Add Voucher - Invalid Currency', async () => {
+        const payload = {
+            "currencyId": 99998,
+            "amount": 1.5,
+            "duration": 360, //in days
+        }
+
+        const res = await request(app)
+            .post('/api/voucher')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.error, "Currency not found");
+    });
+
+    it('Get Voucher - Admin', async () => {
+        const expiration = daysFromNow(voucher_payload.duration);
+
+        const res = await request(app)
+            .get(`/api/voucher/${voucherId}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(voucher_payload)
+
+        assert.equal(res.statusCode, 200);
+        assert.ok(res.body.code);
+        assert.equal(res.body.currency, voucher_payload.currency);
+        assert.equal(res.body.amount, voucher_payload.amount);
+        assert.equal(res.body.expiration, expiration.toISOString());
+        assert.equal(res.body.status, "Issued");
+        assert.ok(res.body.createdAt);
+    });
+
+    it('Get Voucher - User', async () => {
+        const res = await request(app)
+            .get(`/api/voucher/${voucherId}`)
+            .set('Authorization', `Bearer ${user_access_token}`)
+            .send(voucher_payload)
+
+        assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
+    });
+
+    it('Modify Voucher - User', async () => {
+        const payload = {
+            "duration": 10, //in days
+        }
+
+        const res = await request(app)
+            .put(`/api/voucher/${voucherId}`)
+            .set('Authorization', `Bearer ${user_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 403);
+        assert.equal(res.body.error, "Forbidden: Insufficient role");
+    });
+
+    it('Modify Voucher - Voucher ID not found', async () => {
+        const payload = {
+            "duration": 10, //in days
+        }
+
+        const res = await request(app)
+            .put(`/api/voucher/1234568789`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.error, "Voucher not found");
+    });
+
+
+    it('Modify Voucher - Admin', async () => {
+        const payload = {
+            "duration": 10, //in days
+        }
+
+        const duration = voucher_payload.duration + payload.duration
+        const expiration = daysFromNow(duration);
+
+        const res = await request(app)
+            .put(`/api/voucher/${voucherId}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 201);
+        assert.ok(res.body.code);
+        assert.equal(res.body.currency, voucher_payload.currency);
+        assert.equal(res.body.amount, voucher_payload.amount);
+        assert.equal(res.body.expiration, expiration.toISOString());
+        assert.equal(res.body.status, "Issued");
+        assert.ok(res.body.createdAt);
+    });
+
+    it('Delete Voucher', async () => {
+        const payload = {
+            "duration": 10, //in days
+        }
+
+        const res = await request(app)
+            .delete(`/api/voucher/${voucherId}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 404);
+    });
+
+    it.skip('Claim Voucher - User', async () => {
+        const payload = {
+            "code": code,
+            "accountId": 1, // TO FIX
+        }
+
+        const res = await request(app)
+            .post(`/api/voucher/claim`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 201);
+    });
+
+
 });

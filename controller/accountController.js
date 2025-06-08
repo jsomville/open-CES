@@ -19,7 +19,6 @@ export const getAllAccount = async (req, res, next) => {
 export const getAccount = async (req, res, next) => {
     try {
         const account = await prisma.account.findUnique({ where: { id: parseInt(req.params.id) } })
-
         if (!account) {
             return res.status(404).json({ error: "Account not found" })
         }
