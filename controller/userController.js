@@ -205,8 +205,6 @@ export const setUserActive = async (req, res, next) => {
     }
 }
 
-
-
 // @desc Delete a User
 // @route DELETE /api/user
 export const deleteUser = async (req, res, next) => {

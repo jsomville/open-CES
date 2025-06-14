@@ -6,6 +6,8 @@ import config from "./config.test.js";
 import { getUserToken, getAdminToken } from './0-setup.test.js';
 import { getCurrencyBySymbol } from "../controller/currencyController.js";
 import { daysFromNow } from "../controller/voucherController.js";
+import { getAccountByEmailAndCurrency } from "../services/user_service.js";
+import { getVoucherByCode } from "../services/voucher_service.js";
 
 describe("Voucher Test", () => {
     let admin_access_token;
@@ -27,7 +29,15 @@ describe("Voucher Test", () => {
             "amount": 1.5,
             "duration": 360, //in days
         }
+
+        //Create User to claim voucher
+
     });
+
+    after(async () => {
+
+
+    })
 
     it('List All Voucher - User', async () => {
         const res = await request(app)
@@ -220,23 +230,21 @@ describe("Voucher Test", () => {
         assert.ok(res.body.createdAt);
     });
 
-    it('Delete Voucher', async () => {
+    it('Delete Voucher - Invalid code', async () => {
         const payload = {
             "duration": 10, //in days
         }
 
         const res = await request(app)
-            .delete(`/api/voucher/${voucherId}`)
+            .delete(`/api/voucher/123456`)
             .set('Authorization', `Bearer ${admin_access_token}`)
-            .send(payload)
 
         assert.equal(res.statusCode, 404);
     });
 
-    it.skip('Claim Voucher - User', async () => {
+    it('Claim Voucher - Invalid code', async () => {
         const payload = {
-            "code": code,
-            "accountId": 1, // TO FIX
+            "code": "123456",
         }
 
         const res = await request(app)
@@ -244,8 +252,50 @@ describe("Voucher Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 201);
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.error, "Voucher not found");
     });
 
+    it('Claim Voucher', async () => {
+        const email = config.user1Email;
+
+        const accountBefore = await getAccountByEmailAndCurrency(email, voucher_payload.currencyId);
+        const balanceBefore = Number(accountBefore.balance);
+
+        const payload = {
+            "code": voucherCode,
+        }
+
+        const res = await request(app)
+            .post(`/api/voucher/claim`)
+            .set('Authorization', `Bearer ${user_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 201);
+
+        //Check account balance
+        const accountAfter = await getAccountByEmailAndCurrency(email, voucher_payload.currencyId);
+        const diff = Number(accountAfter.balance) - balanceBefore
+        assert.equal(voucher_payload.amount, diff);
+
+        //Check Voucher status
+        const voucher = await getVoucherByCode(voucherCode);
+        assert.equal(voucher.status, "Claimed");
+
+    });
+
+    it('Claim Voucher - Voucher claimed', async () => {
+        const payload = {
+            "code": voucherCode,
+        }
+
+        const res = await request(app)
+            .post(`/api/voucher/claim`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "Voucher not available");
+    });
 
 });

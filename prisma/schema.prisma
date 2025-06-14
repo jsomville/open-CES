@@ -93,7 +93,7 @@ model Transaction {
 
 model Voucher {
   id               Int       @id @default(autoincrement())
-  code             String    @db.VarChar(36)
+  code             String    @unique @db.VarChar(36)
   currencyId       Int       @map("currency_id")
   amount           Decimal   @db.Decimal(10, 2)
   expiration       DateTime

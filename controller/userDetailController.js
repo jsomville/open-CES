@@ -4,7 +4,9 @@ const prisma = new PrismaClient()
 
 import { getUserByEmail } from './userController.js';
 
-const transactionPerAccount = 5
+import { getUserAccountsAndTransactions } from '../services/user_service.js';
+
+const transactionsCount = 5
 
 // @desc Get one user
 // @toute GET /api/user:id
@@ -26,18 +28,18 @@ export const getUserDetail = async (req, res, next) => {
             return res.status(403).json({ error: "Forbidden: Insufficient role" })
         }
 
-
         const accounts = await prisma.account.findMany({ where: { userId: user.id } });
         for (const account of accounts) {
             const latestTransactions = await prisma.transaction.findMany({
                 where: { accountId: account.id },
                 orderBy: { createdAt: 'desc' },
-                take: transactionPerAccount,
+                take: transactionsCount,
             });
             if (latestTransactions) {
                 account.latestTransactions = latestTransactions;
             }
         }
+
 
         const userDetail = {
             ...user,
@@ -49,7 +51,7 @@ export const getUserDetail = async (req, res, next) => {
         return res.status(200).json(userDetail);
     }
     catch (error) {
-        console.log(error.message)
+        console.log(error)
         return res.status(500).json({ error: error.message })
     }
 };
