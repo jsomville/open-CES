@@ -1,5 +1,6 @@
 .env
 node_modules/
-docs/.$model3.drawio.bkp
+docs/.$model.drawio.bkp
 prisma/migrations/*
 .vscode/
+docs/bruno/environments/*

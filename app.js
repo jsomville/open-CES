@@ -24,10 +24,12 @@ const __dirname = path.dirname(__filename);
 // Create Express object
 const app = express();
 
+//Hardening
+app.disable('x-powered-by')
 
 //Body parser middleware
 app.use(express.json());
-app.use(express.urlencoded({extended:false}));
+app.use(express.urlencoded({ extended: false }));
 
 
 //Add Middleware
