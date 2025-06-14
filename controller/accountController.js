@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { getUserByEmail } from '../services/user_service.js';
 
 const prisma = new PrismaClient()
 
@@ -89,11 +90,16 @@ export const createAccount = async (req, res, next) => {
 };
 
 // @desc Delete a Account
-// @route DELETE /api/account
+// @route DELETE /api/account/id
 export const deleteAccount = async (req, res, next) => {
     try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(422).json({ error: "account Id mandatory" })
+        }
+
         // Account exists
-        const account = await prisma.account.findUnique({ where: { id: parseInt(req.params.id) } })
+        const account = await prisma.account.findUnique({ where: { id: parseInt(id) } })
         if (!account) {
             return res.status(404).json({ error: "Account not found" })
         }
@@ -122,15 +128,16 @@ export const deleteAccount = async (req, res, next) => {
 // @route POST /api/account/id/transfer
 export const transferTo = async (req, res, next) => {
     try {
-        //Account is mandatory
-        const accountNumber = req.body.account;
-        if (!accountNumber) {
-            return res.status(422).json({ error: "Account field mandatory" })
+        //Check Account id
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(422).json({ error: "account Id mandatory" })
         }
 
-        //Amount is mandatory
-        if (!req.body.amount) {
-            return res.status(422).json({ error: "Amount field mandatory" })
+        //Account is mandatory
+        const accountNumber = parseInt(req.body.account);
+        if (isNaN(accountNumber)) {
+            return res.status(422).json({ error: "Account field mandatory" })
         }
 
         // Amount is a positive float
@@ -139,22 +146,27 @@ export const transferTo = async (req, res, next) => {
             return res.status(422).json({ error: "Amount must be a positive number" })
         }
 
-        //Add check transfer to itself...
-
-        //add check user on its own account only
-
         // Source account exists
-        const sourceAccountNumber = parseInt(req.params.id)
-        const sourceAccount = await prisma.account.findUnique({ where: { id: sourceAccountNumber } })
+        const sourceAccount = await prisma.account.findUnique({ where: { id: id } })
         if (!sourceAccount) {
             return res.status(404).json({ error: "Source account not found" })
         }
 
         // Destination account exists
-        const destinationAccountNumber = parseInt(req.body.account)
-        const destinationAccount = await prisma.account.findUnique({ where: { id: destinationAccountNumber } })
+        const destinationAccount = await prisma.account.findUnique({ where: { id: accountNumber } })
         if (!destinationAccount) {
             return res.status(404).json({ error: "Destination account not found" })
+        }
+
+        //Check transfer to itself...
+        if (id === accountNumber) {
+            return res.status(422).json({ error: "Cannot transfert to same account" })
+        }
+
+        //Check user transfer from its own account
+        const user = await getUserByEmail(req.user.sub);
+        if (sourceAccount.userId != user.id) {
+            return res.status(422).json({ error: "Account must be owned by current user" })
         }
 
         //Source and Destination using the same currency
@@ -168,8 +180,11 @@ export const transferTo = async (req, res, next) => {
         }
 
         try {
-            const newDestinationBalance = Number(destinationAccount.balance) + Number(amount);
-            const newSourceBalance = Number(sourceAccount.balance) - Number(amount);
+            const newSourceBalance = (Number(sourceAccount.balance) - Number(amount)).toFixed(2);
+            //console.log(`New Source balance : ${newSourceBalance}`);
+
+            const newDestinationBalance = (Number(destinationAccount.balance) + Number(amount)).toFixed(2);
+            //console.log(`New Destination balance : ${newDestinationBalance}`);
 
             await prisma.$transaction([
                 //Update Source Account Balance

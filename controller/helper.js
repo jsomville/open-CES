@@ -2,8 +2,7 @@ import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
-import { getUserByEmail } from '../controller/userController.js';
-import { getCurrency } from './currencyController.js';
+import { getUserByEmail } from '../services/user_service.js';
 
 
 export const deleteUserAndAccount = async (email) => {
@@ -61,18 +60,4 @@ export const createUserAndAccount = async (email, password, phone, role, currenc
       }
     })
   }
-}
-
-export const getAccountIdByEmailAndCurrencySymbol = async (email, currencyId) => {
-  const user = await getUserByEmail(email);
-  if (user) {
-    const account = await prisma.account.findFirst({
-      where: {
-        userId: user.id,
-        currencyId: currencyId,
-      }
-    })
-    return account;
-  }
-  return null;
 }

@@ -3,7 +3,8 @@ import request from 'supertest';
 
 import app from "../app.js"
 import config from "./config.test.js";
-import { getUserToken, getAdminToken } from './0-setup.test.js';
+import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
+
 
 describe("Test User", () => {
     let admin_access_token;
@@ -12,8 +13,8 @@ describe("Test User", () => {
 
     before(async () => {
         //Get main Testing Tokens
-        user_access_token = getUserToken();
-        admin_access_token = getAdminToken();
+        user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
+        admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
 
     });
 

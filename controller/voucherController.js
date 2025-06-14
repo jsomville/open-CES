@@ -1,10 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getUserByEmail } from './userController.js';
-import { getAccountByEmailAndCurrency, getUserAccounts } from '../services/user_service.js';
-
-import { getVoucherByCode, getVoucherById } from '../services/voucher_service.js';
+import { getAccountByEmailAndCurrencyId } from '../services/user_service.js';
+import { getVoucherById } from '../services/voucher_service.js';
 
 const prisma = new PrismaClient();
 
@@ -160,7 +158,7 @@ export const claimVoucher = async (req, res, next) => {
 
         // Get current user account
         const email = req.user.sub;
-        const account = await getAccountByEmailAndCurrency(email, voucher.currencyId);
+        const account = await getAccountByEmailAndCurrencyId(email, voucher.currencyId);
         if (!account) {
             return res.status(404).json({ error: "Account not found" })
         }

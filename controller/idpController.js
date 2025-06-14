@@ -1,15 +1,15 @@
 import jwt from "jsonwebtoken";
 import { PrismaClient } from '@prisma/client'
-import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
+
+import { getAccessToken, getRefreshToken } from "../services/auth_service.js";
 
 // @desc Login
 // @toute POST /api/idp/login
 export const login = async (req, res, next) => {
     try {
-
         const username = req.body.username;
         const password = req.body.password;
 
@@ -41,19 +41,10 @@ export const login = async (req, res, next) => {
         }
 
         // Get Access Token
-        const accessToken = getAccessToken(user)
+        const accessToken = getAccessToken(user);
 
         //Get Refresh Token
-        const refreshToken = jwt.sign({
-            sub: user.email,
-            jti: uuidv4(),
-            aud: "OpenCES"
-        }, process.env.JWT_REFRESH_SECRET_KEY, {
-            algorithm: "HS256",
-            expiresIn: process.env.REFRESH_TOKEN_DURATION,
-            issuer: process.env.TRUSTED_ISSUER
-        }
-        );
+        const refreshToken = getRefreshToken(user);
 
         //Add refresh to cookie ?!?
 
@@ -65,25 +56,6 @@ export const login = async (req, res, next) => {
         console.log(error.message)
         return res.status(500).json({ error: error.message })
     }
-
-}
-
-//Generate Access Token
-export function getAccessToken(user) {
-    // JWT Access Token
-    const accessToken = jwt.sign({
-        sub: user.email,
-        jti: uuidv4(),
-        role: user.role,
-        aud: "OpenCES"
-    }, process.env.JWT_ACCESS_SECRET_KEY, {
-        algorithm: "HS256",
-        expiresIn: process.env.ACCESS_TOKEN_DURATION,
-        issuer: process.env.TRUSTED_ISSUER
-    }
-    );
-
-    return accessToken;
 }
 
 function verifyTokenAsync(token, secret) {

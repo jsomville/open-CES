@@ -1,17 +1,10 @@
-//import { before, after } from "node:test";
-import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
-import app from "../app.js";
-import { getAccessToken } from "../controller/idpController.js";
-import { getCurrencyBySymbol } from '../controller/currencyController.js';
+import config from "./config.test.js";
+import { getCurrencyBySymbol } from '../services/currency_service.js';
 import { deleteUserAndAccount, createUserAndAccount } from '../controller/helper.js';
 import { setUserIsActiveByEmail } from '../controller/userController.js';
-import config from "./config.test.js";
-
-let userToken = "";
-let adminToken = "";
 
 //This is Global Before hook
 before(async () => {
@@ -21,9 +14,7 @@ before(async () => {
   const before_start_time = Date.now();
   let currencyId;
 
-
   try {
-
     let currency = await getCurrencyBySymbol(config.testCurrency);
     if (!currency) {
       //Create Currency
@@ -86,20 +77,6 @@ before(async () => {
     console.log(error);
   }
 
-  // Create User Token
-  const user_token_parameters = {
-    "email": config.user1Email,
-    "role": "user"
-  }
-  userToken = getAccessToken(user_token_parameters)
-
-  // Create Admin Token
-  const admin_token_parameters = {
-    "email": config.adminEmail,
-    "role": "admin"
-  }
-  adminToken = getAccessToken(admin_token_parameters);
-
   // Duration of before Hook
   const enlapsedTime = Date.now() - before_start_time;
   console.log(`Setup - Before Completed in ${enlapsedTime} ms`);
@@ -119,13 +96,3 @@ after(async () => {
   const enlapsedTime = Date.now() - after_start_time;
   console.log(`Setup - After Completed in ${enlapsedTime} ms`);
 });
-
-// Export get User Token
-export function getUserToken() {
-  return userToken;
-}
-
-// Export get Admin Token
-export function getAdminToken() {
-  return adminToken;
-}

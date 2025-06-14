@@ -3,11 +3,11 @@ import request from 'supertest';
 
 import app from "../app.js";
 import config from "./config.test.js";
-import { getUserToken, getAdminToken } from './0-setup.test.js';
-import { getCurrencyBySymbol } from "../controller/currencyController.js";
+import { getCurrencyBySymbol } from "../services/currency_service.js";
 import { daysFromNow } from "../controller/voucherController.js";
-import { getAccountByEmailAndCurrency } from "../services/user_service.js";
+import { getAccountByEmailAndCurrencyId } from "../services/user_service.js";
 import { getVoucherByCode } from "../services/voucher_service.js";
+import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
 
 describe("Voucher Test", () => {
     let admin_access_token;
@@ -19,8 +19,8 @@ describe("Voucher Test", () => {
 
     before(async () => {
         //Get main Testing Tokens
-        user_access_token = getUserToken();
-        admin_access_token = getAdminToken();
+        user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
+        admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
 
         const currency = await getCurrencyBySymbol(config.testCurrency);
 
@@ -259,7 +259,7 @@ describe("Voucher Test", () => {
     it('Claim Voucher', async () => {
         const email = config.user1Email;
 
-        const accountBefore = await getAccountByEmailAndCurrency(email, voucher_payload.currencyId);
+        const accountBefore = await getAccountByEmailAndCurrencyId(email, voucher_payload.currencyId);
         const balanceBefore = Number(accountBefore.balance);
 
         const payload = {
@@ -274,7 +274,7 @@ describe("Voucher Test", () => {
         assert.equal(res.statusCode, 201);
 
         //Check account balance
-        const accountAfter = await getAccountByEmailAndCurrency(email, voucher_payload.currencyId);
+        const accountAfter = await getAccountByEmailAndCurrencyId(email, voucher_payload.currencyId);
         const diff = Number(accountAfter.balance) - balanceBefore
         assert.equal(voucher_payload.amount, diff);
 
