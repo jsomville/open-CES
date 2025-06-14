@@ -1,0 +1,15 @@
+meta {
+  name: getUsers
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{URL}}/api/user
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}

@@ -1,0 +1,23 @@
+meta {
+  name: createCurrency
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{URL}}/api/currency/
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}
+
+body:json {
+  {
+      "name" : "Zn4rr",
+      "symbol" : "Zn6",
+      "country" : "BE"
+  }
+}

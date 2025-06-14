@@ -1,0 +1,22 @@
+meta {
+  name: refundAccount
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{URL}}/api/currency/1/refundAccount
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}
+
+body:json {
+  {
+      "account": 1,
+      "amount": 20.5
+  }
+}

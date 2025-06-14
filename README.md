@@ -9,7 +9,7 @@ Open **C**urrency **E**xchange **S**ystem is a back-end solution for local curre
 - Voucher Management
 - Claim Voucher
 
----
+For more detail look at our web site : http://open-ces.org/
 
 # To run the server
 

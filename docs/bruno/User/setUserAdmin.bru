@@ -1,0 +1,15 @@
+meta {
+  name: setUserAdmin
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{URL}}/api/user/1022/set-admin
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}

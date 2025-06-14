@@ -1,0 +1,22 @@
+meta {
+  name: fundAccount
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{URL}}/api/currency/1/fundAccount
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}
+
+body:json {
+  {
+      "account": 1,
+      "amount": 20.5
+  }
+}

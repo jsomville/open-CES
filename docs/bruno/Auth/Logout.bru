@@ -1,0 +1,15 @@
+meta {
+  name: Logout
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{URL}}/api/idp/logout
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorisation: {{my_tocken}}
+}

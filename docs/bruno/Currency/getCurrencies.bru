@@ -1,0 +1,15 @@
+meta {
+  name: getCurrencies
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{URL}}/api/currency
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}
