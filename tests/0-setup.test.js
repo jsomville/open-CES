@@ -3,8 +3,8 @@ const prisma = new PrismaClient();
 
 import config from "./config.test.js";
 import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { deleteUserAndAccount, createUserAndAccount } from '../controller/helper.js';
-import { setUserIsActiveByEmail } from '../controller/userController.js';
+import { setUserIsActiveByEmail, deleteUserAndAccount, createUserAndAccount } from '../services/user_service.js';
+
 
 //This is Global Before hook
 before(async () => {

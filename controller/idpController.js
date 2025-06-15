@@ -31,7 +31,12 @@ export const login = async (req, res, next) => {
 
         // Check user is active
         if (!user.isActive) {
-            return res.status(403).json({ error: "User is inactive" });
+            return res.status(403).json({ error: "Forbidden" });
+        }
+
+        // Check user is validated
+        if (!user.isEmailValidated || !user.isPhoneValidated) {
+            return res.status(403).json({ error: "Forbidden" });
         }
 
         //Verify User Password

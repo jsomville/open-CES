@@ -2,9 +2,7 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-import { getUserByEmail } from './userController.js';
-
-import { getUserAccountsAndTransactions } from '../services/user_service.js';
+import { getUserByEmail, getUserAccountsAndTransactions } from '../services/user_service.js';
 
 const transactionsCount = 5
 

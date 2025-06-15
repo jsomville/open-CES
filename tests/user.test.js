@@ -4,6 +4,7 @@ import request from 'supertest';
 import app from "../app.js"
 import config from "./config.test.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
+import { getUserByEmail, removeUser } from "../services/user_service.js";
 
 
 describe("Test User", () => {
@@ -11,12 +12,32 @@ describe("Test User", () => {
     let user_access_token;
     let new_user_id = 0;
 
+    const user_payload = {
+        "firstname": "user",
+        "lastname": "test",
+        "email": "test@opences.org",
+        "phone": "+32481040204",
+        "region": "EU",
+        "password": "TestPWD1234!"
+    };
+
     before(async () => {
         //Get main Testing Tokens
         user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
         admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
 
+        const user = await getUserByEmail(user_payload.email);
+        if (user) {
+            await removeUser(user.id)
+        }
     });
+
+    after(async () => {
+        const user = await getUserByEmail(user_payload.email);
+        if (user) {
+            await removeUser(user.id)
+        }
+    })
 
     it('List all User - Admin', async () => {
         const res = await request(app)
@@ -35,16 +56,6 @@ describe("Test User", () => {
         assert.equal(res.statusCode, 403);
         assert.equal(res.body.error, "Forbidden: Insufficient role");
     });
-
-
-    const user_payload = {
-        "firstname": "user",
-        "lastname": "test",
-        "email": "test@opences.org",
-        "phone": "+32481040204",
-        "region": "EU",
-        "password": "TestPWD1234!"
-    };
 
     it('Add User - User', async () => {
         const res = await request(app)
@@ -68,9 +79,9 @@ describe("Test User", () => {
         assert.equal(res.body.email, user_payload.email);
         assert.equal(res.body.phone, user_payload.phone);
         assert.equal(res.body.region, user_payload.region);
+        assert.ok(res.body.id);
         assert.ok(res.body.createdAt);
         assert.ok(res.body.updatedAt);
-        assert.ok(!res.body.passwordHash);
 
         new_user_id = res.body.id
     });

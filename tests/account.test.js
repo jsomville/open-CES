@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 import app from "../app.js";
 import config from "./config.test.js";
 import { getCurrencyBySymbol } from '../services/currency_service.js'
-import { deleteUserAndAccount } from '../controller/helper.js';
+import { deleteUserAndAccount } from '../services/user_service.js';
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
 
 

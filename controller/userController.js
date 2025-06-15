@@ -1,5 +1,6 @@
 import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
+import { addUser } from '../services/user_service.js';
 
 const prisma = new PrismaClient()
 
@@ -43,19 +44,24 @@ export const getUser = async (req, res, next) => {
 // @route POST /api/user
 export const createUser = async (req, res, next) => {
     try {
-        if (!req.body.firstname) {
+        const firstname = req.body.firstname;
+        if (!firstname) {
             return res.status(422).json({ error: "Firstname field mandatory" })
         }
-        if (!req.body.lastname) {
+        const lastname = req.body.lastname;
+        if (!lastname) {
             return res.status(422).json({ error: "Lastname field mandatory" })
         }
-        if (!req.body.email) {
+        const email = req.body.email;
+        if (!email) {
             return res.status(422).json({ error: "Email field mandatory" })
         }
-        if (!req.body.phone) {
+        const phone = req.body.phone;
+        if (!phone) {
             return res.status(422).json({ error: "Phone field mandatory" })
         }
-        if (!req.body.region) {
+        const region = req.body.region;
+        if (!region) {
             return res.status(422).json({ error: "Region field mandatory" })
         }
         const password = req.body.password
@@ -78,29 +84,13 @@ export const createUser = async (req, res, next) => {
             return res.status(409).json({ error: "Phone already used" })
         }
 
-        //Hash the password
-        const passwordHashed = await argon2.hash(password);
+        const role = "user";
+        const user = await addUser(email, phone, password, role, firstname, lastname, region);
 
-        //Create User
-        const newUser = await prisma.user.create({
-            data: {
-                firstname: req.body.firstname,
-                lastname: req.body.lastname,
-                email: req.body.email,
-                phone: req.body.phone,
-                region: req.body.region,
-                passwordHash: passwordHashed,
-                role: "user"
-            }
-        })
-
-        // Remove password hash
-        const { passwordHash, ...safeUser } = newUser;
-
-        return res.status(201).json(safeUser)
+        return res.status(201).json(user)
     }
     catch (error) {
-        console.log(error.message);
+        console.error(error);
         return res.status(500).json({ error: error.message })
     }
 };
@@ -153,6 +143,7 @@ export const updateUser = async (req, res, next) => {
         return res.status(201).json(safeUser)
     }
     catch (error) {
+        console.error(error);
         return res.status(500).json({ error: error.message })
     }
 };
@@ -201,6 +192,7 @@ export const setUserActive = async (req, res, next) => {
         return res.status(204).send()
     }
     catch (error) {
+        console.error(error);
         return res.status(500).json({ error: error.message })
     }
 }
@@ -235,39 +227,7 @@ export const deleteUser = async (req, res, next) => {
         return res.status(204).send()
     }
     catch (error) {
+        console.error(error);
         return res.status(500).json({ error: error.message })
     }
 };
-// *****
-//  Other Functions
-// ******
-
-export const getUserByEmail = async (email) => {
-    const user = await prisma.user.findUnique({ where: { email: email } });
-    if (user) {
-        // Remove password hash
-        const { passwordHash, ...safeUser } = user;
-
-        return safeUser;
-    }
-
-    return null;
-};
-
-export const setUserIsActiveByEmail = async (email) => {
-    const user = await prisma.user.findUnique({ where: { email: email } });
-    if (user) {
-
-        const updatedUser = await prisma.user.update({
-            data: {
-                isActive: true
-            },
-            where: { email: email }
-        });
-        // Remove password hash
-        const { passwordHash, ...safeUser } = updatedUser;
-
-        return safeUser
-    }
-    return null;
-}

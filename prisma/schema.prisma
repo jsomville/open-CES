@@ -29,18 +29,20 @@ model Currency {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  merchantId   Int?     @map("merchant_id")
-  firstname    String   @db.VarChar(255)
-  lastname     String   @db.VarChar(255)
-  email        String   @unique @db.VarChar(255)
-  phone        String   @unique @db.VarChar(15)
-  region       String
-  passwordHash String   @map("password_hash") @db.VarChar(255)
-  role         String
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  isActive     Boolean  @default(false)
+  id               Int      @id @default(autoincrement())
+  merchantId       Int?     @map("merchant_id")
+  firstname        String   @db.VarChar(255)
+  lastname         String   @db.VarChar(255)
+  email            String   @unique @db.VarChar(255)
+  phone            String   @unique @db.VarChar(15)
+  region           String
+  passwordHash     String   @map("password_hash") @db.VarChar(255)
+  role             String
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  isActive         Boolean  @default(false) @map("is_active")
+  isPhoneValidated Boolean  @default(false) @map("is_phone_validated")
+  isEmailValidated Boolean  @default(false) @map("is_email_validated")
 
   Account  Account[]
   Merchant Merchant? @relation(fields: [merchantId], references: [id])

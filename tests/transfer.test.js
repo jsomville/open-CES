@@ -6,8 +6,7 @@ const prisma = new PrismaClient();
 
 import app from "../app.js";
 import config from "./config.test.js";
-import { createUserAndAccount, deleteUserAndAccount } from "../controller/helper.js";
-import { getAccountByEmailAndCurrencyId } from "../services/user_service.js";
+import { getAccountByEmailAndCurrencyId, createUserAndAccount, deleteUserAndAccount } from "../services/user_service.js";
 import { getAccessTokenByEmailAndRole, getAccessToken } from "../services/auth_service.js";
 
 
