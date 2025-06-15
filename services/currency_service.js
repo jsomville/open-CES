@@ -11,7 +11,7 @@ export const getCurrencyByName = async (name) => {
     return currency;
 }
 
-export const getCurrencyById = async (name) => {
+export const getCurrencyById = async (id) => {
     const currency = await prisma.currency.findUnique({ where: { id: id } })
     return currency;
 }

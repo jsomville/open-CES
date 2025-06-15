@@ -5,8 +5,9 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
 import app from "../app.js";
-import { getUserToken, getAdminToken } from './0-setup.test.js';
-import { getCurrencyBySymbol } from "../controller/currencyController.js";
+import config from "./config.test.js";
+import { getCurrencyBySymbol } from "../services/currency_service.js";
+import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
 
 
 describe("Test Currency", () => {
@@ -23,8 +24,8 @@ describe("Test Currency", () => {
     before(async () => {
         try {
             //Get main Testing Tokens
-            user_access_token = getUserToken();
-            admin_access_token = getAdminToken();
+            user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
+            admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
 
             //Delete currency if exist
             const cur = await getCurrencyBySymbol(currency_payload.symbol);
@@ -237,8 +238,6 @@ describe("Test Currency", () => {
 
     it('Modify Currency', async () => {
         const payload = {
-            "name": "Test Currency2",
-            "symbol": new_symbol,
             "country": "BE",
             "accountMax": 150,
         };
@@ -249,8 +248,9 @@ describe("Test Currency", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 201);
-        assert.equal(res.body.name, payload.name);
-        assert.equal(res.body.symbol, payload.symbol);
+        assert.equal(res.body.id, new_currency_id);
+        assert.equal(res.body.name, currency_payload.name);
+        assert.equal(res.body.symbol, currency_payload.symbol);
         assert.equal(res.body.country, payload.country);
         assert.equal(res.body.accountMax, payload.accountMax);
         assert.equal(res.body.balance, 0);
@@ -275,10 +275,9 @@ describe("Test Currency", () => {
         assert.equal(res.statusCode, 422);
     });
 
-    it('Modify Currency - No Name', async () => {
+    it('Modify Currency - No Country', async () => {
         const payload = {
-            "symbol": "TC2",
-            "country": "BE",
+            //"country": "BE",
             "accountMax": 88
         };
 
@@ -288,14 +287,12 @@ describe("Test Currency", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Name field mandatory or too short");
+        assert.equal(res.body.error, "Country field is required and must be 2 or 3 characters long");
     });
 
-    it('Modify Currency - No Symbol', async () => {
+    it('Modify Currency - Country too short', async () => {
         const payload = {
-            "name": "Test Currency2",
-            //"symbol" : "TC2",
-            "country": "BE",
+            "country": "B",
             "accountMax": 88
         };
 
@@ -305,13 +302,26 @@ describe("Test Currency", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Symbol field mandatory or too long");
+        assert.equal(res.body.error, "Country field is required and must be 2 or 3 characters long");
+    });
+
+    it('Modify Currency - Country too long', async () => {
+        const payload = {
+            "country": "Belgium",
+            "accountMax": 88
+        };
+
+        const res = await request(app)
+            .put(`/api/currency/${new_currency_id}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 422);
+        assert.equal(res.body.error, "Country field is required and must be 2 or 3 characters long");
     });
 
     it('Modify Currency - No Acount Max', async () => {
         const payload = {
-            "name": "Test Currency2",
-            "symbol": "TC2",
             "country": "BE",
             //"accountMax": 88
         };

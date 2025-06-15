@@ -122,7 +122,7 @@ describe("Test Fund / Refund", () => {
 
     });
 
-    it('Fund Account - No Account', async () => {
+    it('Fund Account - No Amount', async () => {
         const payload = {
             "account": user1AccountId,
             //"amount" : fundAmount,
@@ -134,7 +134,7 @@ describe("Test Fund / Refund", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Amount field mandatory")
+        assert.equal(res.body.error, "Amount must be a positive number")
     });
 
     it('Fund Account - Amount not positive', async () => {

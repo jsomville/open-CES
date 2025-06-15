@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient();
 
-const prisma = new PrismaClient()
+import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName } from '../services/currency_service.js';
 
 // @desc Get Currencies
 // @route GET /api/currency
@@ -18,23 +19,7 @@ export const getAllCurrencies = async (req, res, next) => {
     }
 }
 
-// @desc Get Currency
-// @route GET /api/currency
-export const getCurrency = async (req, res, next) => {
-    try {
-        const currency = await prisma.currency.findUnique({ where: { id: parseInt(req.params.id) } })
 
-        //Currency exists
-        if (!currency) {
-            return res.status(404).json({ error: "Currency not found" })
-        }
-
-        return res.status(200).json(currency)
-    }
-    catch (error) {
-        return res.status(500).json({ error: error.message })
-    }
-}
 
 
 // @desc Create Currency
@@ -55,15 +40,19 @@ export const createCurrency = async (req, res, next) => {
         }
 
         //Check if Name is unique
-        if (await prisma.currency.findUnique({ where: { name: name } })) {
+        let currency;
+        currency = await getCurrencyByName(name);
+        if (currency) {
             return res.status(409).json({ error: "Name must be unique" })
         }
 
         //Check if Symbol is unique
-        if (await prisma.currency.findUnique({ where: { symbol: symbol } })) {
+        currency = await getCurrencyBySymbol(symbol);
+        if (currency) {
             return res.status(409).json({ error: "Symbol must be unique" })
         }
 
+        //Create Currency
         const newCurrency = await prisma.currency.create({
             data: {
                 symbol: symbol,
@@ -75,28 +64,46 @@ export const createCurrency = async (req, res, next) => {
         return res.status(201).json(newCurrency)
     }
     catch (error) {
-        console.log(error.message)
+        console.error(error.message)
+        return res.status(500).json({ error: error.message })
+    }
+}
+
+// @desc Get Currency
+// @route GET /api/currency
+export const getCurrency = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(422).json({ error: "Currency Id must be a positive integer" })
+        }
+
+        //Currency exists
+        const currency = await getCurrencyById(id);
+        if (!currency) {
+            return res.status(404).json({ error: "Currency not found" })
+        }
+
+        return res.status(200).json(currency)
+    }
+    catch (error) {
+        console.error(error);
         return res.status(500).json({ error: error.message })
     }
 }
 
 // @desc Modify Currencies
-// @route PUT /api/currency
+// @route PUT /api/currency/id
 export const updateCurrency = async (req, res, next) => {
     try {
-
-        const symbol = req.body.symbol;
-        if (!symbol || symbol.length > 6) {
-            return res.status(422).json({ error: "Symbol field mandatory or too long" })
-        }
-        const name = req.body.name;
-        if (!name || name.length < 4) {
-            return res.status(422).json({ error: "Name field mandatory or too short" })
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(422).json({ error: "Currency Id must be a positive integer" })
         }
 
         const country = req.body.country;
         if (!country || country.length < 2 || country.length > 3) {
-            return res.status(422).json({ error: "Name field is requied 2 or 3 characters" })
+            return res.status(422).json({ error: "Country field is required and must be 2 or 3 characters long" })
         }
 
         const accountMax = req.body.accountMax;
@@ -105,35 +112,41 @@ export const updateCurrency = async (req, res, next) => {
         }
 
         //Currency exists
-        if (!await prisma.currency.findUnique({ where: { id: parseInt(req.params.id) } })) {
+        const currency = await getCurrencyById(id);
+        if (!currency) {
             return res.status(404).json({ error: "Currency not found" })
         }
 
+        //Update Currency
         const updatedCurrency = await prisma.currency.update({
             data: {
-                symbol: req.body.symbol,
-                name: req.body.name,
                 country: country,
-                accountMax: accountMax
+                accountMax: accountMax,
             },
             where: {
-                id: parseInt(req.params.id)
+                id: id,
             }
         })
 
         return res.status(201).json(updatedCurrency)
     }
     catch (error) {
+        console.error(error.message);
         return res.status(500).json({ error: error.message })
     }
 }
 
 // @desc Delete Currencies
-// @route DELETE /api/currency
+// @route DELETE /api/currency/id
 export const deleteCurrency = async (req, res, next) => {
     try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(422).json({ error: "Currency Id must be a positive integer" })
+        }
+
         //Currency exists
-        const currency = await prisma.currency.findUnique({ where: { id: parseInt(req.params.id) } })
+        const currency = await prisma.currency.findUnique({ where: { id: id } })
         if (!currency) {
             return res.status(404).json({ error: "Currency not found" })
         }
@@ -154,6 +167,7 @@ export const deleteCurrency = async (req, res, next) => {
             return res.status(409).json({ error: `Currency id is being used in ${accountCount} account(s)` })
         }
 
+        // Delete Currency
         await prisma.currency.delete({
             where: {
                 id: parseInt(req.params.id)
@@ -163,6 +177,7 @@ export const deleteCurrency = async (req, res, next) => {
         return res.status(204).send()
     }
     catch (error) {
+        console.error(error.message);
         return res.status(500).json({ error: error.message })
     }
 }
@@ -174,11 +189,6 @@ export const fundAccount = async (req, res, next) => {
         const accountNumber = req.body.account;
         if (!accountNumber) {
             return res.status(422).json({ error: "Account field mandatory" })
-        }
-
-        //Amount is mandatory
-        if (!req.body.amount) {
-            return res.status(422).json({ error: "Amount field mandatory" })
         }
 
         // Amount is a positive float
@@ -249,13 +259,14 @@ export const fundAccount = async (req, res, next) => {
             ])
         }
         catch (error) {
-            console.log(error)
+            console.error(error.message);
             return res.status(500).json({ error: "Fund Account Failed" })
         }
 
         return res.status(201).send()
     }
     catch (error) {
+        console.error(error.message);
         return res.status(500).json({ error: error.message })
     }
 }
@@ -348,19 +359,17 @@ export const refundAccount = async (req, res, next) => {
             ]);
         }
         catch (error) {
-            console.log(error)
+            console.error(error.message);
             return res.status(500).json({ error: "Fund Account Failed" })
         }
 
         return res.status(201).send()
     }
     catch (error) {
+        console.error(error.message);
         return res.status(500).json({ error: error.message })
     }
 }
 
-export const getCurrencyBySymbol = async (symbol) => {
-    const currency = await prisma.currency.findUnique({ where: { symbol: symbol } })
-    return currency;
-}
+
 
