@@ -260,6 +260,24 @@ describe("Test Currency", () => {
     assert.equal(res.body.error, "Validation failed");
   });
 
+
+  it('Add currency - Other field', async () => {
+    const payload = {
+      "name": "New Name",
+      "symbol": "TC",
+      "country": "BE",
+      "balance": "150",
+    };
+
+    const res = await request(app)
+      .post('/api/currency')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error, "Validation failed");
+  });
+
   it('Add currency - Duplicated Name', async () => {
     const payload = {
       "name": currency_payload.name,
@@ -338,8 +356,8 @@ describe("Test Currency", () => {
     assert.equal(res.body.country, payload.country);
     assert.equal(res.body.accountMax, payload.accountMax);
     assert.equal(res.body.balance, 0);
-    assert.ok(res.body.createdAt)
-    assert.ok(res.body.updatedAt)
+    assert.ok(res.body.createdAt);
+    assert.ok(res.body.updatedAt);
   });
 
   it('Modify Currency - User', async () => {
@@ -356,7 +374,7 @@ describe("Test Currency", () => {
       .put(`/api/currency/${new_currency_id}`)
       .set('Authorization', `Bearer ${admin_access_token}`);
 
-    assert.equal(res.statusCode, 422);
+    assert.equal(res.statusCode, 400);
   });
 
   it('Modify Currency - No Country', async () => {
@@ -370,8 +388,8 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
-    assert.equal(res.statusCode, 422);
-    assert.equal(res.body.error, "Country field is required and must be 2 or 3 characters long");
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error, "Validation failed");
   });
 
   it('Modify Currency - Country too short', async () => {
@@ -385,8 +403,8 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
-    assert.equal(res.statusCode, 422);
-    assert.equal(res.body.error, "Country field is required and must be 2 or 3 characters long");
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error, "Validation failed");
   });
 
   it('Modify Currency - Country too long', async () => {
@@ -400,14 +418,14 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
-    assert.equal(res.statusCode, 422);
-    assert.equal(res.body.error, "Country field is required and must be 2 or 3 characters long");
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error, "Validation failed");
   });
 
-  it('Modify Currency - No Acount Max', async () => {
+  it('Modify Currency - Other field', async () => {
     const payload = {
       "country": "BE",
-      //"accountMax": 88
+      "balance": 88,
     };
 
     const res = await request(app)
@@ -415,8 +433,10 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
-    assert.equal(res.statusCode, 422);
-    assert.equal(res.body.error, "AccountMax field mandatory");
+    console.log(res.body.error);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error, "Validation failed");
   });
 
   it('Delete Currency - user', async () => {

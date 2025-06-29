@@ -29,7 +29,7 @@ const CurrencyCreateSchema = z.object({
   regionList: z.string().min(0).max(1024).optional(),
   logoURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
   webSiteURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-})
+}).strict()
 
 const extractZodErrors = (error) => {
   return error.errors.map((err) => ({
@@ -42,18 +42,7 @@ const extractZodErrors = (error) => {
 // @route POST /api/currency
 export const createCurrency = async (req, res, next) => {
   try {
-    /*const symbol = req.body.symbol;
-    if (!symbol || symbol.length > 6) {
-        return res.status(422).json({ error: "Symbol field is requied or too long" })
-    }
-    const name = req.body.name;
-    if (!name || name.length < 4) {
-        return res.status(422).json({ error: "Name field is requied or too short" })
-    }
-    const country = req.body.country;
-    if (!country || country.length < 2 || country.length > 3) {
-        return res.status(422).json({ error: "Country field is requied 2 or 3 characters" })
-    }*/
+    //Zod Validation
     const result = CurrencyCreateSchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({
@@ -110,11 +99,19 @@ export const getCurrency = async (req, res, next) => {
   }
 }
 
+const CurrencyModifySchema = z.object({
+  country: z.string().min(2),
+  accountMax: z.number().int().min(100).optional(),
+  regionList: z.string().min(0).max(1024).optional(),
+  logoURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+  webSiteURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+}).strict()
+
 // @desc Modify Currencies
 // @route PUT /api/currency/id
 export const updateCurrency = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
+    /*const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(422).json({ error: "Currency Id must be a positive integer" })
     }
@@ -127,20 +124,28 @@ export const updateCurrency = async (req, res, next) => {
     const accountMax = req.body.accountMax;
     if (!accountMax) {
       return res.status(422).json({ error: "AccountMax field mandatory" })
+    }*/
+
+    //Zod Validation
+    const result = CurrencyModifySchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        errors: extractZodErrors(result.error),
+      })
     }
 
-    //Currency exists
+    //Check if Currency exists
+    const id = parseInt(req.params.id);
     const currency = await getCurrencyById(id);
     if (!currency) {
       return res.status(404).json({ error: "Currency not found" })
     }
 
     //Update Currency
+    const data = result.data;
     const updatedCurrency = await prisma.currency.update({
-      data: {
-        country: country,
-        accountMax: accountMax,
-      },
+      data,
       where: {
         id: id,
       }
