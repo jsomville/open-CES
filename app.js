@@ -25,8 +25,12 @@ const __dirname = path.dirname(__filename);
 // Create Express object
 const app = express();
 
-//Use cors 
-//app.use(cors)
+//Use cors
+const corsOptions = {
+    origin: '*',
+    methods: ['GET', 'PUT', 'POST', 'DELETE'],
+}
+app.use(cors(corsOptions))
 
 //Hardening
 app.disable('x-powered-by')
