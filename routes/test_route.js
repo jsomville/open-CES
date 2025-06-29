@@ -4,7 +4,7 @@ import redisHelper from '../redis/redisHelper.js'
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    const key = "";
+    const key = "myKey";
     let data = await redisHelper.get(key);
     let msg = "hit cache : 1";
     if (!data) {
