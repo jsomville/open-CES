@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cors from 'cors'
 
 //Import Middleware
 import logger from './middleware/logger.js';
@@ -23,6 +24,9 @@ const __dirname = path.dirname(__filename);
 
 // Create Express object
 const app = express();
+
+//Use cors 
+//app.use(cors)
 
 //Hardening
 app.disable('x-powered-by')

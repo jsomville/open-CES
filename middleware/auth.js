@@ -7,7 +7,6 @@ export function authenticateToken(req, res, next) {
 
   const authh = req.headers.authorization
   if (!authh) {
-
     return res.status(401).json({ error: "Authorization Header is missing" })
   }
 
@@ -34,7 +33,8 @@ export function authenticateToken(req, res, next) {
 
     next();
   }
-  catch (err) {
+  catch (error) {
+    console.error(error)
     return res.status(403).json({ error: 'Invalid token' });
   }
 }
