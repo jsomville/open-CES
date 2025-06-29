@@ -1,7 +1,7 @@
 import assert from 'assert';
 import request from 'supertest';
 
-import app from "../app.js"
+import { app } from "../app.js"
 
 describe("Test Main server", () => {
 
@@ -9,7 +9,7 @@ describe("Test Main server", () => {
   it('Call root page', async () => {
     const res = await request(app)
       .get('/');
-    
-      assert.equal(res.statusCode, 200);
+
+    assert.equal(res.statusCode, 200);
   });
 });

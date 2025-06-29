@@ -4,7 +4,7 @@ import request from 'supertest';
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
-import app from "../app.js";
+import { app } from "../app.js";
 import config from "./config.test.js";
 import { getCurrencyBySymbol } from '../services/currency_service.js';
 import { getAccountByEmailAndCurrencyId, createUserAndAccount, deleteUserAndAccount } from "../services/user_service.js";

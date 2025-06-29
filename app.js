@@ -8,7 +8,7 @@ import logger from './middleware/logger.js';
 import errorHanlder from './middleware/error.js';
 import notFoundHandler from './middleware/notFound.js';
 
-import { connectRedis } from './redis/redisClient.js';
+import { connectRedis, redisClient } from './redis/redisClient.js';
 
 //Routes
 import home_route from './routes/home_route.js';
@@ -31,8 +31,8 @@ const app = express();
 
 //Use cors
 const corsOptions = {
-    origin: '*',
-    methods: ['GET', 'PUT', 'POST', 'DELETE'],
+  origin: '*',
+  methods: ['GET', 'PUT', 'POST', 'DELETE'],
 }
 app.use(cors(corsOptions))
 
@@ -74,4 +74,27 @@ app.use('/test', test_route);
 app.use(notFoundHandler);
 app.use(errorHanlder);
 
-export default app;
+
+//Shutdown gracefully
+async function shutdown(arg) {
+  //Close Redis
+  if (redisClient.isOpen) {
+    try {
+      await redisClient.quit();
+      console.log('✅ Redis disconnected');
+    }
+    catch (err) {
+      console.error('❌ Error disconnecting Redis:', err);
+    }
+  }
+  process.exit(0);
+}
+
+
+if (process.env.NODE_ENV !== 'test') {
+  process.on('SIGINT', () => shutdown('sigint'));
+  process.on('SIGTERM', () => shutdown('sigterm'));
+  process.on('exit', () => shutdown('exit'));
+}
+
+export { app, shutdown };

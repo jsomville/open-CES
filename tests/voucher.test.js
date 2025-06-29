@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import request from 'supertest';
 
-import app from "../app.js";
+import { app } from "../app.js";
 import config from "./config.test.js";
 import { getCurrencyBySymbol } from "../services/currency_service.js";
 import { daysFromNow } from "../controller/voucherController.js";

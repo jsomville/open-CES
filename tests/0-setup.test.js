@@ -1,16 +1,21 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
+//import { redisClient } from './redis/redisClient.js';
+import { shutdown } from '../app.js'
 
 import config from "./config.test.js";
 import { getCurrencyBySymbol } from '../services/currency_service.js';
 import { setUserIsActiveByEmail, deleteUserAndAccount, createUserAndAccount } from '../services/user_service.js';
 
+//To calculate global test duration
+let test_start_time;
 
 //This is Global Before hook
 before(async () => {
 
   // Check and Create Test Currency Symbol
   console.log("Setup - Before");
+  test_start_time = Date.now();
   const before_start_time = Date.now();
   let currencyId;
 
@@ -95,4 +100,9 @@ after(async () => {
 
   const enlapsedTime = Date.now() - after_start_time;
   console.log(`Setup - After Completed in ${enlapsedTime} ms`);
+
+  const totalEnlapsedDuration = Date.now() - test_start_time;
+  console.log(`Test Suite executed in  ${totalEnlapsedDuration} ms`);
+
+  shutdown("Test cleanup");
 });

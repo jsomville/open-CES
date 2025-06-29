@@ -2,7 +2,7 @@ import assert from "node:assert";
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
-import app from "../app.js";
+import { app } from "../app.js";
 import config from "./config.test.js";
 import { setActiveUser, setPhoneValidated, setEmailValidated, getUserByEmail, addUser, removeUser } from "../services/user_service.js"
 
