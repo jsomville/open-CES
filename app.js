@@ -8,6 +8,8 @@ import logger from './middleware/logger.js';
 import errorHanlder from './middleware/error.js';
 import notFoundHandler from './middleware/notFound.js';
 
+import { connectRedis } from './redis/redisClient.js';
+
 //Routes
 import home_route from './routes/home_route.js';
 import idp_route from './routes/idp_route.js';
@@ -16,14 +18,16 @@ import currency_route from './routes/currency_route.js'
 import account_route from './routes/account_route.js'
 import merchant_route from './routes/merchant_route.js'
 import voucher_route from './routes/voucher_route.js'
+import test_route from './routes/test_route.js'
 
-
-//get DIR name
+//get Dfunctions to deal with static files
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
 // Create Express object
 const app = express();
+
 
 //Use cors
 const corsOptions = {
@@ -32,8 +36,10 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 
+
 //Hardening
 app.disable('x-powered-by')
+
 
 //Body parser middleware
 app.use(express.json());
@@ -48,6 +54,9 @@ app.use(logger);
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+//Connect Redis
+await connectRedis();
+
 //Add the routes
 app.use('/', home_route);
 app.use('/api/idp', idp_route);
@@ -56,6 +65,9 @@ app.use('/api/user', user_route);
 app.use('/api/account', account_route);
 app.use('/api/merchant', merchant_route);
 app.use('/api/voucher', voucher_route);
+
+//Test Route
+app.use('/test', test_route);
 
 
 //Add error Handler
