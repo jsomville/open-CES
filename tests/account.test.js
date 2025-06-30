@@ -104,6 +104,7 @@ describe("Test Account", () => {
             .send(account_payload)
 
         assert.equal(res.statusCode, 403);
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Add user account - No payload', async () => {
@@ -111,7 +112,8 @@ describe("Test Account", () => {
             .post('/api/account')
             .set('Authorization', `Bearer ${admin_access_token}`)
 
-        assert.equal(res.statusCode, 422);
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add user account - No UserID', async () => {
@@ -125,8 +127,8 @@ describe("Test Account", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "userId field mandatory")
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add user account - No Currency', async () => {
@@ -140,8 +142,8 @@ describe("Test Account", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "currencyId field mandatory")
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add user account - No Account Type', async () => {
@@ -155,8 +157,8 @@ describe("Test Account", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "accountType field mandatory")
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add user account - Admin account exist for this currency', async () => {
@@ -166,7 +168,7 @@ describe("Test Account", () => {
             .send(account_payload)
 
         assert.equal(res.statusCode, 409);
-        assert.equal(res.body.error, "Account for this user and this currecny already exists")
+        assert.equal(res.body.message, "Account for this user and this currecny already exists")
     });
 
     it('Get user account - Admin', async () => {
@@ -189,6 +191,7 @@ describe("Test Account", () => {
             .set('Authorization', `Bearer ${user_access_token}`)
 
         assert.equal(res.statusCode, 403);
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Delete Account - admin', async () => {

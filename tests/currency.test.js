@@ -101,8 +101,6 @@ describe("Test Currency", () => {
     assert.ok(res.body.createdAt);
     assert.ok(res.body.updatedAt);
 
-    console.log(res.body.message);
-
     new_currency_id = res.body.id
   });
 
@@ -291,8 +289,6 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
-    console.log(res.body.errors);
-
     assert.equal(res.statusCode, 409);
     assert.equal(res.body.message, "Name must be unique");
 
@@ -309,8 +305,6 @@ describe("Test Currency", () => {
       .post('/api/currency')
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
-
-    console.log(res.body.errors);
 
     assert.equal(res.statusCode, 409);
     assert.equal(res.body.message, "Symbol must be unique");
@@ -354,8 +348,6 @@ describe("Test Currency", () => {
       .put(`/api/currency/${new_currency_id}`)
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
-
-    console.log(res.body.errors);
 
     assert.equal(res.statusCode, 201);
     assert.equal(res.body.id, new_currency_id);
@@ -441,8 +433,6 @@ describe("Test Currency", () => {
       .put(`/api/currency/${new_currency_id}`)
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
-
-    console.log(res.body.message);
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
