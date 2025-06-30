@@ -38,7 +38,7 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Add Merchant - Admin', async () => {

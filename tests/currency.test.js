@@ -69,6 +69,7 @@ describe("Test Currency", () => {
     const res = await request(app)
       .get('/api/currency')
       .set('Authorization', `Bearer ${admin_access_token}`);
+
     assert.equal(res.statusCode, 200);
   });
 
@@ -79,7 +80,7 @@ describe("Test Currency", () => {
       .send(currency_payload);
 
     assert.equal(res.statusCode, 403);
-    assert.equal(res.body.error, "Forbidden: Insufficient role");
+    assert.equal(res.body.message, "Forbidden: Insufficient role");
   });
 
   it('Add currency - Admin', async () => {
@@ -100,7 +101,7 @@ describe("Test Currency", () => {
     assert.ok(res.body.createdAt);
     assert.ok(res.body.updatedAt);
 
-    console.log(res.body.error);
+    console.log(res.body.message);
 
     new_currency_id = res.body.id
   });
@@ -126,7 +127,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Add currency - No Symbol', async () => {
@@ -142,7 +143,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Add currency - No Country', async () => {
@@ -158,7 +159,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Add currency - Name Too short', async () => {
@@ -174,7 +175,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Add currency - Name Too Long', async () => {
@@ -190,7 +191,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Add currency - Symbol too long', async () => {
@@ -206,7 +207,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Add currency - LogoURL Too Long', async () => {
@@ -223,7 +224,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Add currency - webSiteURL Too Long', async () => {
@@ -240,7 +241,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Add currency - regionList Too Long', async () => {
@@ -257,7 +258,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
 
@@ -275,14 +276,14 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Add currency - Duplicated Name', async () => {
     const payload = {
       "name": currency_payload.name,
       "symbol": "TC2",
-      "country": "BE"
+      "country": "BE",
     };
 
     const res = await request(app)
@@ -290,8 +291,11 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
+    console.log(res.body.errors);
+
     assert.equal(res.statusCode, 409);
-    assert.equal(res.body.error, "Name must be unique");
+    assert.equal(res.body.message, "Name must be unique");
+
   });
 
   it('Add currency - Duplicated Symbol', async () => {
@@ -306,8 +310,10 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
+    console.log(res.body.errors);
+
     assert.equal(res.statusCode, 409);
-    assert.equal(res.body.error, "Symbol must be unique");
+    assert.equal(res.body.message, "Symbol must be unique");
   });
 
   // Get Currency
@@ -335,7 +341,7 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
 
     assert.equal(res.statusCode, 404);
-    assert.equal(res.body.error, "Currency not found");
+    assert.equal(res.body.message, "Currency not found");
   });
 
   it('Modify Currency', async () => {
@@ -349,6 +355,8 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
+    console.log(res.body.errors);
+
     assert.equal(res.statusCode, 201);
     assert.equal(res.body.id, new_currency_id);
     assert.equal(res.body.name, currency_payload.name);
@@ -358,6 +366,7 @@ describe("Test Currency", () => {
     assert.equal(res.body.balance, 0);
     assert.ok(res.body.createdAt);
     assert.ok(res.body.updatedAt);
+
   });
 
   it('Modify Currency - User', async () => {
@@ -366,7 +375,7 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${user_access_token}`);
 
     assert.equal(res.statusCode, 403);
-    assert.equal(res.body.error, "Forbidden: Insufficient role");
+    assert.equal(res.body.message, "Forbidden: Insufficient role");
   });
 
   it('Modify Currency - No Payload', async () => {
@@ -389,7 +398,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Modify Currency - Country too short', async () => {
@@ -404,7 +413,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Modify Currency - Country too long', async () => {
@@ -419,7 +428,7 @@ describe("Test Currency", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Modify Currency - Other field', async () => {
@@ -433,10 +442,10 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
-    console.log(res.body.error);
+    console.log(res.body.message);
 
     assert.equal(res.statusCode, 400);
-    assert.equal(res.body.error, "Validation failed");
+    assert.equal(res.body.message, "Validation failed");
   });
 
   it('Delete Currency - user', async () => {
@@ -445,7 +454,7 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${user_access_token}`);
 
     assert.equal(res.statusCode, 403);
-    assert.equal(res.body.error, "Forbidden: Insufficient role");
+    assert.equal(res.body.message, "Forbidden: Insufficient role");
   });
 
   it('Delete Currency - Invalid ID', async () => {
@@ -454,7 +463,7 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`);
 
     assert.equal(res.statusCode, 404);
-    assert.equal(res.body.error, "Currency not found");
+    assert.equal(res.body.message, "Currency not found");
   });
 
   it('Delete Currency - Admin', async () => {

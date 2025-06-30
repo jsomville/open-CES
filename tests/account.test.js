@@ -75,7 +75,7 @@ describe("Test Account", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Add user account - Admin', async () => {

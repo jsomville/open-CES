@@ -7,23 +7,23 @@ export function authenticateToken(req, res, next) {
 
   const authh = req.headers.authorization
   if (!authh) {
-    return res.status(401).json({ error: "Authorization Header is missing" })
+    return res.status(401).json({ message: "Authorization Header is missing" })
   }
 
   //console.log(authh);
   const token = authh?.split(' '); // Expect "Bearer <token>"
 
   if (!token[0]) {
-    return res.status(401).json({ error: 'Invalid token provided' });
+    return res.status(401).json({ message: 'Invalid token' });
   }
 
   if (token[0] != "Bearer") {
-    return res.status(401).json({ error: 'Invalid token provided' });
+    return res.status(401).json({ message: 'Invalid token' });
   }
 
 
   if (!token[1]) {
-    return res.status(401).json({ error: 'Invalid token provided' });
+    return res.status(401).json({ message: 'Invalid token' });
   }
 
   try {
@@ -35,6 +35,6 @@ export function authenticateToken(req, res, next) {
   }
   catch (error) {
     console.error(error)
-    return res.status(403).json({ error: 'Invalid token' });
+    return res.status(403).json({ message: 'Invalid token' });
   }
 }

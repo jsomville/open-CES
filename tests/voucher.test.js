@@ -45,7 +45,7 @@ describe("Voucher Test", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('List All Voucher - Admin', async () => {
@@ -63,7 +63,7 @@ describe("Voucher Test", () => {
             .send(voucher_payload)
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Add Voucher - Admin', async () => {
@@ -176,7 +176,7 @@ describe("Voucher Test", () => {
             .send(voucher_payload)
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Modify Voucher - User', async () => {
@@ -190,7 +190,7 @@ describe("Voucher Test", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Modify Voucher - Voucher ID not found', async () => {

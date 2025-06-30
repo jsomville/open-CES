@@ -102,7 +102,7 @@ describe("Test Fund / Refund", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Fund Account - No Account', async () => {
@@ -247,7 +247,7 @@ describe("Test Fund / Refund", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Refund Account - No account', async () => {

@@ -54,7 +54,7 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Add User - User', async () => {
@@ -64,7 +64,7 @@ describe("Test User", () => {
             .send(user_payload)
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Add User - Admin', async () => {
@@ -286,7 +286,7 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${user_access_token}`)
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Get User By Email - user self', async () => {
@@ -477,7 +477,7 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Modify User - set Admin by Admin', async () => {
@@ -495,7 +495,7 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Modify User - set active by Admin', async () => {
@@ -512,7 +512,7 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
-        assert.equal(res.body.error, "Forbidden: Insufficient role");
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Delete User - Admin', async () => {

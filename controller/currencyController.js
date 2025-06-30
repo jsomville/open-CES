@@ -1,9 +1,17 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
-import { z, ZodError } from 'zod';
+//import { z, ZodError } from 'zod';
 
 import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName } from '../services/currency_service.js';
+//import { createCurrencySchema, modifyCurrencySchema } from './currency.schema.js'
 
+
+/*const extractZodErrors = (error) => {
+  return error.errors.map((err) => ({
+    path: err.path.join('.'),
+    message: err.message,
+  }));
+};*/
 
 // @desc Get Currencies
 // @route GET /api/currency
@@ -21,51 +29,37 @@ export const getAllCurrencies = async (req, res, next) => {
   }
 }
 
-const CurrencyCreateSchema = z.object({
-  symbol: z.string().min(3).max(6),
-  name: z.string().min(4).max(255),
-  country: z.string().min(2),
-  accountMax: z.number().int().min(100).optional(),
-  regionList: z.string().min(0).max(1024).optional(),
-  logoURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-  webSiteURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-}).strict()
-
-const extractZodErrors = (error) => {
-  return error.errors.map((err) => ({
-    path: err.path.join('.'),
-    message: err.message,
-  }));
-};
-
 // @desc Create Currency
 // @route POST /api/currency
 export const createCurrency = async (req, res, next) => {
   try {
     //Zod Validation
-    const result = CurrencyCreateSchema.safeParse(req.body);
+    /*const result = createCurrencySchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({
         error: 'Validation failed',
         errors: extractZodErrors(result.error),
       })
-    }
+    }*/
+    const data = req.validatedData;
 
     //Check if Name is unique
     let currency;
-    currency = await getCurrencyByName(result.data.name);
+    //currency = await getCurrencyByName(result.data.name);
+    currency = await getCurrencyByName(data.name);
     if (currency) {
-      return res.status(409).json({ error: "Name must be unique" })
+      return res.status(409).json({ message: "Name must be unique" })
     }
 
     //Check if Symbol is unique
-    currency = await getCurrencyBySymbol(result.data.symbol);
+    //currency = await getCurrencyBySymbol(result.data.symbol);
+    currency = await getCurrencyBySymbol(data.symbol);
     if (currency) {
-      return res.status(409).json({ error: "Symbol must be unique" })
+      return res.status(409).json({ message: "Symbol must be unique" })
     }
 
     //Create Currency
-    const data = result.data;
+    //const data = req.validatedData;
     const newCurrency = await prisma.currency.create({ data })
 
     return res.status(201).json(newCurrency)
@@ -82,13 +76,13 @@ export const getCurrency = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(422).json({ error: "Currency Id must be a positive integer" })
+      return res.status(422).json({ message: "Currency Id must be a positive integer" })
     }
 
     //Currency exists
     const currency = await getCurrencyById(id);
     if (!currency) {
-      return res.status(404).json({ error: "Currency not found" })
+      return res.status(404).json({ message: "Currency not found" })
     }
 
     return res.status(200).json(currency)
@@ -99,51 +93,29 @@ export const getCurrency = async (req, res, next) => {
   }
 }
 
-const CurrencyModifySchema = z.object({
-  country: z.string().min(2),
-  accountMax: z.number().int().min(100).optional(),
-  regionList: z.string().min(0).max(1024).optional(),
-  logoURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-  webSiteURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-}).strict()
-
 // @desc Modify Currencies
 // @route PUT /api/currency/id
 export const updateCurrency = async (req, res, next) => {
   try {
-    /*const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(422).json({ error: "Currency Id must be a positive integer" })
-    }
-
-    const country = req.body.country;
-    if (!country || country.length < 2 || country.length > 3) {
-      return res.status(422).json({ error: "Country field is required and must be 2 or 3 characters long" })
-    }
-
-    const accountMax = req.body.accountMax;
-    if (!accountMax) {
-      return res.status(422).json({ error: "AccountMax field mandatory" })
-    }*/
-
     //Zod Validation
-    const result = CurrencyModifySchema.safeParse(req.body);
+    /*const result = modifyCurrencySchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({
         error: 'Validation failed',
         errors: extractZodErrors(result.error),
       })
-    }
+    }*/
+    const data = req.validatedData;
 
     //Check if Currency exists
     const id = parseInt(req.params.id);
     const currency = await getCurrencyById(id);
     if (!currency) {
-      return res.status(404).json({ error: "Currency not found" })
+      return res.status(404).json({ message: "Currency not found" })
     }
 
     //Update Currency
-    const data = result.data;
+    //const data = result.data;
     const updatedCurrency = await prisma.currency.update({
       data,
       where: {
@@ -165,18 +137,18 @@ export const deleteCurrency = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(422).json({ error: "Currency Id must be a positive integer" })
+      return res.status(422).json({ message: "Currency Id must be a positive integer" })
     }
 
     //Currency exists
     const currency = await prisma.currency.findUnique({ where: { id: id } })
     if (!currency) {
-      return res.status(404).json({ error: "Currency not found" })
+      return res.status(404).json({ message: "Currency not found" })
     }
 
     //Balance must be zero
     if (!currency.balance === 0) {
-      return res.status(422).json({ error: "Balance must be zero" })
+      return res.status(422).json({ message: "Balance must be zero" })
     }
 
     //Get Number of Account 
@@ -187,7 +159,7 @@ export const deleteCurrency = async (req, res, next) => {
     })
     // Number of accounts must be zero
     if (accountCount) {
-      return res.status(409).json({ error: `Currency id is being used in ${accountCount} account(s)` })
+      return res.status(409).json({ message: `Currency id is being used in ${accountCount} account(s)` })
     }
 
     // Delete Currency

@@ -3,7 +3,10 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getCurrency, createCurrency, getAllCurrencies, updateCurrency, deleteCurrency, fundAccount, refundAccount} from '../controller/currencyController.js'
+import { getCurrency, createCurrency, getAllCurrencies, updateCurrency, deleteCurrency, fundAccount, refundAccount } from '../controller/currencyController.js'
+
+import { validate } from '../middleware/validate.js';
+import { createCurrencySchema, modifyCurrencySchema } from '../controller/currency.schema.js'
 
 const router = express.Router();
 
@@ -11,16 +14,16 @@ const router = express.Router();
 router.use(authenticateToken)
 
 //get all currency
-router.get('/', authorizeRole("admin", "user"), getAllCurrencies, )
+router.get('/', authorizeRole("admin", "user"), getAllCurrencies,)
 
 //get currency by ID
 router.get('/:id', authorizeRole("admin"), getCurrency)
 
 //create currency
-router.post('/', authorizeRole("admin"), createCurrency)
+router.post('/', authorizeRole("admin"), validate(createCurrencySchema), createCurrency)
 
 //modify currency
-router.put('/:id', authorizeRole("admin"), updateCurrency)
+router.put('/:id', authorizeRole("admin"), validate(modifyCurrencySchema), updateCurrency)
 
 //delete currency
 router.delete('/:id', authorizeRole("admin"), deleteCurrency)
