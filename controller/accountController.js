@@ -76,7 +76,6 @@ export const createAccount = async (req, res, next) => {
   }
   catch (error) {
     console.error(error.message);
-    console.log(error.message);
     return res.status(500).json({ message: "Error creating account" });
   }
 };

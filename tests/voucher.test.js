@@ -29,9 +29,6 @@ describe("Voucher Test", () => {
             "amount": 1.5,
             "duration": 360, //in days
         }
-
-        //Create User to claim voucher
-
     });
 
     after(async () => {
@@ -100,8 +97,8 @@ describe("Voucher Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "currencyId field is mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add Voucher - Missing Amount', async () => {
@@ -116,8 +113,8 @@ describe("Voucher Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Amount mandatory and must be a positive number");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add Voucher - Missing Duration', async () => {
@@ -132,8 +129,8 @@ describe("Voucher Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Amount mandatory and must be a positive integer");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add Voucher - Invalid Currency', async () => {
@@ -149,7 +146,7 @@ describe("Voucher Test", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 404);
-        assert.equal(res.body.error, "Currency not found");
+        assert.equal(res.body.message, "Currency not found");
     });
 
     it('Get Voucher - Admin', async () => {
@@ -204,7 +201,7 @@ describe("Voucher Test", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 404);
-        assert.equal(res.body.error, "Voucher not found");
+        assert.equal(res.body.message, "Voucher not found");
     });
 
 
@@ -253,7 +250,7 @@ describe("Voucher Test", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 404);
-        assert.equal(res.body.error, "Voucher not found");
+        assert.equal(res.body.message, "Voucher not found");
     });
 
     it('Claim Voucher', async () => {
@@ -295,7 +292,7 @@ describe("Voucher Test", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Voucher not available");
+        assert.equal(res.body.message, "Voucher not available");
     });
 
 });

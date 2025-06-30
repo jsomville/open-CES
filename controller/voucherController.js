@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountByEmailAndCurrencyId } from '../services/user_service.js';
 import { getVoucherById } from '../services/voucher_service.js';
+import { getCurrencyById } from '../services/currency_service.js';
 
 const prisma = new PrismaClient();
 
@@ -15,7 +16,8 @@ export const getAllVouchers = async (req, res, next) => {
         return res.status(200).json(vouchers);
     }
     catch (error) {
-        return res.status(500).json({ error: error.message })
+        console.error(error.message);
+        return res.status(500).json({ message: "Error obtaining vouchers" })
     }
 }
 
@@ -25,28 +27,27 @@ export const getVoucher = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
-            res.status(422).json({ error: "Id required" });
+            res.status(422).json({ message: "Id required" });
         }
 
         const voucher = await getVoucherById(id);
         if (!voucher) {
-            return res.status(404).json({ error: "Voucher Not found" })
+            return res.status(404).json({ message: "Voucher Not found" })
         }
 
         return res.status(200).json(voucher);
     }
     catch (error) {
-        console.log(error)
-        return res.status(500).json({ error: error.message })
+        console.error(error.message);
+        return res.status(500).json({ message: "Error obtaining voucher" })
     }
-
 };
 
 // @desc Create a voucher
 // @route POST /api/voucher
 export const createVoucher = async (req, res, next) => {
     try {
-        const currencyId = parseInt(req.body.currencyId);
+        /*const currencyId = parseInt(req.body.currencyId);
         if (isNaN(currencyId)) {
             return res.status(422).json({ error: "currencyId field is mandatory" })
         }
@@ -57,26 +58,29 @@ export const createVoucher = async (req, res, next) => {
         const duration = parseInt(req.body.duration);
         if (isNaN(duration) || duration < 0) {
             return res.status(422).json({ error: "Amount mandatory and must be a positive integer" })
-        }
+        }*/
+
+        const data = req.validatedData;
 
         //Currency exists
-        const currency = await prisma.currency.findUnique({ where: { id: parseInt(currencyId) } })
+        //const currency = await prisma.currency.findUnique({ where: { id: data.currencId } })
+        const currency = await getCurrencyById(data.currencyId);
         if (!currency) {
-            return res.status(404).json({ error: "Currency not found" })
+            return res.status(404).json({ message: "Currency not found" })
         }
 
         //Generate Unique Code
         const new_code = uuidv4()
 
         //Calculate the Expiration Date
-        const expiration = daysFromNow(duration);
+        const expiration = daysFromNow(data.duration);
 
         //Create Voucher
         const newVoucher = await prisma.voucher.create({
             data: {
                 code: new_code,
-                currencyId: currency.id,
-                amount: amount,
+                currencyId: data.currencyId,
+                amount: data.amount,
                 expiration: expiration,
                 status: "Issued",
             }
@@ -85,8 +89,8 @@ export const createVoucher = async (req, res, next) => {
         return res.status(201).json(newVoucher)
     }
     catch (error) {
-        console.log(error)
-        return res.status(500).json({ error: error.message })
+        console.error(error.message);
+        return res.status(500).json({ message: "Error creating voucher" })
     }
 };
 
@@ -99,19 +103,21 @@ export const updateVoucher = async (req, res, next) => {
             res.status(422).json({ error: "Id required" });
         }
 
-        const duration = parseInt(req.body.duration);
+        /*const duration = parseInt(req.body.duration);
         if (isNaN(duration) || duration < 0) {
             return res.status(422).json({ error: "Amount mandatory and must be a positive integer" })
-        }
+        }*/
 
         // Voucher exists
         const voucher = await getVoucherById(id);
         if (!voucher) {
-            return res.status(404).json({ error: "Voucher not found" })
+            return res.status(404).json({ message: "Voucher not found" })
         }
 
+        const data = req.validatedData
+
         //Calculate the Expiration
-        const expiration = daysFrom(voucher.expiration, duration);
+        const expiration = daysFrom(voucher.expiration, data.duration);
 
         // Update Expiration date
         const updatedVoucher = await prisma.voucher.update({
@@ -126,7 +132,8 @@ export const updateVoucher = async (req, res, next) => {
         return res.status(201).json(updatedVoucher)
     }
     catch (error) {
-        return res.status(500).json({ error: error.message })
+        console.error(error.message);
+        return res.status(500).json({ message: "Error updating voucher" })
     }
 };
 // @desc Claim Voucher
@@ -136,31 +143,31 @@ export const claimVoucher = async (req, res, next) => {
         // Get Code
         const code = req.body.code;
         if (!code) {
-            return res.status(422).json({ error: "Code is mandatory" })
+            return res.status(422).json({ message: "Code is mandatory" })
         }
 
         // Voucher exists
         const voucher = await prisma.voucher.findUnique({ where: { code: code } });
         if (!voucher) {
-            return res.status(404).json({ error: "Voucher not found" })
+            return res.status(404).json({ message: "Voucher not found" })
         }
 
         // Check Voucher status
         if (voucher.status !== "Issued") {
-            return res.status(422).json({ error: "Voucher not available" })
+            return res.status(422).json({ message: "Voucher not available" })
         }
 
         // Check Voucher Expiration
         const now = new Date();
         if (now > voucher.expiration) {
-            return res.status(410).json({ error: "Voucher expired" })
+            return res.status(410).json({ message: "Voucher expired" })
         }
 
         // Get current user account
         const email = req.user.sub;
         const account = await getAccountByEmailAndCurrencyId(email, voucher.currencyId);
         if (!account) {
-            return res.status(404).json({ error: "Account not found" })
+            return res.status(404).json({ message: "Account not found" })
         }
 
         try {
@@ -199,14 +206,14 @@ export const claimVoucher = async (req, res, next) => {
             return res.status(201).send();
         }
         catch (error) {
-            console.log(error);
-            return res.status(500).json({ error: error.message })
+            console.error(error.message);
+            return res.status(500).json({ message: "Error voucher claim" })
         }
 
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({ error: error.message })
+        console.error(error.message);
+        return res.status(500).json({ message: "Error claiming voucher" })
     }
 };
 
