@@ -6,6 +6,9 @@ import { authorizeRole } from '../middleware/authorizeRole.js'
 import { getAllUsers, getUser, createUser, updateUser, deleteUser, setUserAdmin, setUserActive } from '../controller/userController.js'
 import { getUserDetail } from '../controller/userDetailController.js'
 
+import { validate } from '../middleware/validate.js';
+import { createUserSchema, modifyUserSchema } from '../controller/user.schema.js'
+
 const router = express.Router();
 
 // Use the Auth Middleware for all routes
@@ -18,10 +21,10 @@ router.get('/', authorizeRole("admin"), getAllUsers);
 router.get('/:id', authorizeRole("admin"), getUser);
 
 // create user
-router.post('/', authorizeRole("admin"), createUser);
+router.post('/', authorizeRole("admin"), validate(createUserSchema), createUser);
 
 // modify user
-router.put('/:id', authorizeRole("admin"), updateUser);
+router.put('/:id', authorizeRole("admin"), validate(modifyUserSchema), updateUser);
 
 // delete user
 router.delete('/:id', authorizeRole("admin"), deleteUser);

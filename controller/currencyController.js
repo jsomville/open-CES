@@ -1,17 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
-//import { z, ZodError } from 'zod';
 
 import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName } from '../services/currency_service.js';
-//import { createCurrencySchema, modifyCurrencySchema } from './currency.schema.js'
-
-
-/*const extractZodErrors = (error) => {
-  return error.errors.map((err) => ({
-    path: err.path.join('.'),
-    message: err.message,
-  }));
-};*/
 
 // @desc Get Currencies
 // @route GET /api/currency
@@ -25,7 +15,8 @@ export const getAllCurrencies = async (req, res, next) => {
     return res.status(200).json(safeCurrency)
   }
   catch (error) {
-    return res.status(500).json({ error: error.message })
+    console.error(error.message);
+    return res.status(500).json({ message: "Error obtaining currencies" })
   }
 }
 
@@ -33,40 +24,29 @@ export const getAllCurrencies = async (req, res, next) => {
 // @route POST /api/currency
 export const createCurrency = async (req, res, next) => {
   try {
-    //Zod Validation
-    /*const result = createCurrencySchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({
-        error: 'Validation failed',
-        errors: extractZodErrors(result.error),
-      })
-    }*/
     const data = req.validatedData;
 
     //Check if Name is unique
     let currency;
-    //currency = await getCurrencyByName(result.data.name);
     currency = await getCurrencyByName(data.name);
     if (currency) {
       return res.status(409).json({ message: "Name must be unique" })
     }
 
     //Check if Symbol is unique
-    //currency = await getCurrencyBySymbol(result.data.symbol);
     currency = await getCurrencyBySymbol(data.symbol);
     if (currency) {
       return res.status(409).json({ message: "Symbol must be unique" })
     }
 
     //Create Currency
-    //const data = req.validatedData;
     const newCurrency = await prisma.currency.create({ data })
 
     return res.status(201).json(newCurrency)
   }
   catch (error) {
-    console.error(error.message)
-    return res.status(500).json({ error: error.message })
+    console.error(error.message);
+    return res.status(500).json({ message: "Error creating currency" })
   }
 }
 
@@ -89,7 +69,7 @@ export const getCurrency = async (req, res, next) => {
   }
   catch (error) {
     console.error(error);
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ message: "Error obtaining currency" })
   }
 }
 
@@ -97,14 +77,6 @@ export const getCurrency = async (req, res, next) => {
 // @route PUT /api/currency/id
 export const updateCurrency = async (req, res, next) => {
   try {
-    //Zod Validation
-    /*const result = modifyCurrencySchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({
-        error: 'Validation failed',
-        errors: extractZodErrors(result.error),
-      })
-    }*/
     const data = req.validatedData;
 
     //Check if Currency exists
@@ -115,7 +87,6 @@ export const updateCurrency = async (req, res, next) => {
     }
 
     //Update Currency
-    //const data = result.data;
     const updatedCurrency = await prisma.currency.update({
       data,
       where: {
@@ -127,7 +98,7 @@ export const updateCurrency = async (req, res, next) => {
   }
   catch (error) {
     console.error(error.message);
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ message: "Error updating currency" })
   }
 }
 
@@ -173,7 +144,7 @@ export const deleteCurrency = async (req, res, next) => {
   }
   catch (error) {
     console.error(error.message);
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ message: "Error deleting currency" })
   }
 }
 //@desc Fund account
@@ -255,14 +226,14 @@ export const fundAccount = async (req, res, next) => {
     }
     catch (error) {
       console.error(error.message);
-      return res.status(500).json({ error: "Fund Account Failed" })
+      return res.status(500).json({ message: "Fund Account Failed" })
     }
 
     return res.status(201).send()
   }
   catch (error) {
     console.error(error.message);
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ message: "Error Funding the account" })
   }
 }
 
@@ -355,14 +326,14 @@ export const refundAccount = async (req, res, next) => {
     }
     catch (error) {
       console.error(error.message);
-      return res.status(500).json({ error: "Fund Account Failed" })
+      return res.status(500).json({ message: "Fund Account Failed" })
     }
 
     return res.status(201).send()
   }
   catch (error) {
     console.error(error.message);
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ message: "Error refunding the account" })
   }
 }
 

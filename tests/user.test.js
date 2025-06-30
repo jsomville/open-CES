@@ -79,6 +79,7 @@ describe("Test User", () => {
         assert.equal(res.body.email, user_payload.email);
         assert.equal(res.body.phone, user_payload.phone);
         assert.equal(res.body.region, user_payload.region);
+        assert.equal(res.body.role, "user");
         assert.ok(res.body.id);
         assert.ok(res.body.createdAt);
         assert.ok(res.body.updatedAt);
@@ -91,7 +92,8 @@ describe("Test User", () => {
             .post('/api/user')
             .set('Authorization', `Bearer ${admin_access_token}`)
 
-        assert.equal(res.statusCode, 422);
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add User - No Firstname', async () => {
@@ -108,8 +110,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Firstname field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add User - No Lastname', async () => {
@@ -126,8 +128,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Lastname field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add User - No email', async () => {
@@ -144,8 +146,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Email field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add User - No phone', async () => {
@@ -162,8 +164,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Phone field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add User - No region', async () => {
@@ -180,8 +182,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Region field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add User - No Password', async () => {
@@ -198,8 +200,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Password field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add User - Password Too short', async () => {
@@ -216,8 +218,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Invalid Password policy");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add User - Duplicated Email', async () => {
@@ -235,7 +237,7 @@ describe("Test User", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 409);
-        assert.equal(res.body.error, "Email already used");
+        assert.equal(res.body.message, "Email already used");
     });
 
     it('Add User - Duplicated Phone', async () => {
@@ -253,7 +255,7 @@ describe("Test User", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 409);
-        assert.equal(res.body.error, "Phone already used");
+        assert.equal(res.body.message, "Phone already used");
     });
 
     it('Get User - Admin', async () => {
@@ -277,7 +279,7 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
 
         assert.equal(res.statusCode, 404);
-        assert.equal(res.body.error, "User not found");
+        assert.equal(res.body.message, "User not found");
     });
 
     it('Get User - User', async () => {
@@ -377,8 +379,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Firstname field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     // Modify User
@@ -395,8 +397,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Lastname field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     // Modify User
@@ -413,8 +415,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Phone field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     // Modify User
@@ -431,8 +433,8 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Region field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     // Modify User
@@ -450,7 +452,7 @@ describe("Test User", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 404);
-        assert.equal(res.body.error, "User not found");
+        assert.equal(res.body.message, "User not found");
     });
 
     // Modify User
@@ -468,7 +470,7 @@ describe("Test User", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 409);
-        assert.equal(res.body.error, "Phone already used");
+        assert.equal(res.body.message, "Phone already used");
     });
 
     it('Modify User - set Admin by User', async () => {
@@ -486,7 +488,6 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 204);
-
     });
 
     it('Modify User - set active by User', async () => {
@@ -506,6 +507,15 @@ describe("Test User", () => {
         assert.equal(res.statusCode, 204);
     });
 
+    it('Modify User - set active user not found', async () => {
+        const res = await request(app)
+            .post(`/api/user/123456789/set-active`)
+            .set('Authorization', `Bearer ${admin_access_token}`);
+
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.message, "User not found");
+    });
+
     it('Delete User - User', async () => {
         const res = await request(app)
             .delete(`/api/user/${new_user_id}`)
@@ -521,6 +531,15 @@ describe("Test User", () => {
             .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 204);
+    });
+
+    it('Delete User - Admin', async () => {
+        const res = await request(app)
+            .delete(`/api/user/123456789`)
+            .set('Authorization', `Bearer ${admin_access_token}`);
+
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.message, "User not found");
     });
 
 });
