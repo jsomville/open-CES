@@ -39,30 +39,10 @@ export const getMerchant = async (req, res, next) => {
 // @route POST /api/merchant
 export const createMerchant = async (req, res, next) => {
   try {
-    /*if (!req.body.name) {
-      return res.status(422).json({ error: "Name field mandatory" })
-    }
-    if (!req.body.email) {
-      return res.status(422).json({ error: "Email field mandatory" })
-    }
-    if (!req.body.phone) {
-      return res.status(422).json({ error: "Phone field mandatory" })
-    }
-    if (!req.body.region) {
-      return res.status(422).json({ error: "Region field mandatory" })
-    }*/
 
     const data = req.validatedData;
 
-    const newMerchant = await prisma.merchant.create({
-      /*data: {
-        name: req.body.name,
-        email: req.body.email,
-        phone: req.body.phone,
-        region: req.body.region
-      }*/
-      data
-    })
+    const newMerchant = await prisma.merchant.create({ data });
 
     return res.status(201).json(newMerchant)
   }
@@ -76,18 +56,6 @@ export const createMerchant = async (req, res, next) => {
 // @route PUT /api/merchant
 export const updateMerchant = async (req, res, next) => {
   try {
-    /*if (!req.body.name) {
-      return res.status(422).json({ error: "Name field mandatory" })
-    }
-    if (!req.body.email) {
-      return res.status(422).json({ error: "Email field mandatory" })
-    }
-    if (!req.body.phone) {
-      return res.status(422).json({ error: "Phone field mandatory" })
-    }
-    if (!req.body.region) {
-      return res.status(422).json({ error: "Region field mandatory" })
-    }*/
 
     const data = req.validatedData;
 
@@ -97,12 +65,6 @@ export const updateMerchant = async (req, res, next) => {
     }
 
     const updatedMerchant = await prisma.merchant.update({
-      /*data: {
-        name: req.body.name,
-        email: req.body.email,
-        phone: req.body.phone,
-        region: req.body.region
-      },*/
       data,
       where: {
         id: parseInt(req.params.id)
@@ -121,7 +83,6 @@ export const updateMerchant = async (req, res, next) => {
 // @route DELETE /api/merchant
 export const deleteMerchant = async (req, res, next) => {
   try {
-    const data = req.validatedData;
     const merchantId = parseInt(req.params.id);
 
     // User exists
@@ -140,7 +101,7 @@ export const deleteMerchant = async (req, res, next) => {
     //Demete user
     await prisma.merchant.delete({
       where: {
-        id: parseInt(req.params.id)
+        id: merchantId
       }
     })
 
