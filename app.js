@@ -7,6 +7,7 @@ import cors from 'cors'
 import logger from './middleware/logger.js';
 import errorHanlder from './middleware/error.js';
 import notFoundHandler from './middleware/notFound.js';
+import requestDuration from './middleware/requestDuration.js'
 
 import { connectRedis, redisClient } from './redis/redisClient.js';
 
@@ -41,18 +42,15 @@ app.use(cors(corsOptions))
 app.disable('x-powered-by')
 
 
-//Body parser middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-
 //Add Middleware
-app.use(logger);
+app.use(express.json()); //Json parsing
+app.use(express.urlencoded({ extended: false })); //url encoder
+app.use(logger); //Logger Middleware
+app.use(requestDuration); // add X-response-Time
 
 
 //Add static folder for templates & assets
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 //Connect Redis
 await connectRedis();
