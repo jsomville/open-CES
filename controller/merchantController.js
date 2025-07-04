@@ -5,139 +5,150 @@ const prisma = new PrismaClient()
 // @desc Get Merchants
 // @route GET /api/merchant
 export const getAllMerchant = async (req, res, next) => {
-    try {
-        const merchants = await prisma.merchant.findMany()
+  try {
+    const merchants = await prisma.merchant.findMany()
 
-        return res.status(200).json(merchants);
-    }
-    catch (error) {
-        return res.status(500).json({ error: error.message })
-    }
+    return res.status(200).json(merchants);
+  }
+  catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error obtaining merchants" })
+  }
 }
 
 // @desc Get one merchant
 // @toute GET /api/merchant:id
 export const getMerchant = async (req, res, next) => {
-    try {
-        const merchant = await prisma.merchant.findUnique({ where: { id: parseInt(req.params.id) } })
+  try {
+    const merchant = await prisma.merchant.findUnique({ where: { id: parseInt(req.params.id) } })
 
-        if (!merchant) {
-            return res.status(404).json({ error: "merchant not found" })
-        }
+    if (!merchant) {
+      return res.status(404).json({ message: "Merchant not found" })
+    }
 
-        return res.status(200).json(merchant);
-    }
-    catch (error) {
-        return res.status(500).json({ error: error.message })
-    }
+    return res.status(200).json(merchant);
+  }
+  catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error obtaining merchant" })
+  }
 
 };
 
 // @desc Create a Merchant
 // @route POST /api/merchant
 export const createMerchant = async (req, res, next) => {
-    try {
-        if (!req.body.name) {
-            return res.status(422).json({ error: "Name field mandatory" })
-        }
-        if (!req.body.email) {
-            return res.status(422).json({ error: "Email field mandatory" })
-        }
-        if (!req.body.phone) {
-            return res.status(422).json({ error: "Phone field mandatory" })
-        }
-        if (!req.body.region) {
-            return res.status(422).json({ error: "Region field mandatory" })
-        }
-
-        const newMerchant = await prisma.merchant.create({
-            data: {
-                name: req.body.name,
-                email: req.body.email,
-                phone: req.body.phone,
-                region: req.body.region
-            }
-        })
-
-        return res.status(201).json(newMerchant)
+  try {
+    /*if (!req.body.name) {
+      return res.status(422).json({ error: "Name field mandatory" })
     }
-    catch (error) {
-        return res.status(500).json({ error: error.message })
+    if (!req.body.email) {
+      return res.status(422).json({ error: "Email field mandatory" })
     }
+    if (!req.body.phone) {
+      return res.status(422).json({ error: "Phone field mandatory" })
+    }
+    if (!req.body.region) {
+      return res.status(422).json({ error: "Region field mandatory" })
+    }*/
+
+    const data = req.validatedData;
+
+    const newMerchant = await prisma.merchant.create({
+      /*data: {
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        region: req.body.region
+      }*/
+      data
+    })
+
+    return res.status(201).json(newMerchant)
+  }
+  catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error adding merchant" })
+  }
 };
 
 // @desc Modify Merchant
 // @route PUT /api/merchant
 export const updateMerchant = async (req, res, next) => {
-    try {
-        if (!req.body.name) {
-            return res.status(422).json({ error: "Name field mandatory" })
-        }
-        if (!req.body.email) {
-            return res.status(422).json({ error: "Email field mandatory" })
-        }
-        if (!req.body.phone) {
-            return res.status(422).json({ error: "Phone field mandatory" })
-        }
-        if (!req.body.region) {
-            return res.status(422).json({ error: "Region field mandatory" })
-        }
-
-        // User exists
-        if (!await prisma.merchant.findUnique({ where: { id: parseInt(req.params.id) } })) {
-            return res.status(404).json({ error: "Merchant not found" })
-        }
-
-        const updatedMerchant = await prisma.merchant.update({
-            data: {
-                name: req.body.name,
-                email: req.body.email,
-                phone: req.body.phone,
-                region: req.body.region
-            },
-            where: {
-                id: parseInt(req.params.id)
-            }
-        })
-
-        return res.status(201).json(updatedMerchant)
+  try {
+    /*if (!req.body.name) {
+      return res.status(422).json({ error: "Name field mandatory" })
     }
-    catch (error) {
-        return res.status(500).json({ error: error.message })
+    if (!req.body.email) {
+      return res.status(422).json({ error: "Email field mandatory" })
     }
+    if (!req.body.phone) {
+      return res.status(422).json({ error: "Phone field mandatory" })
+    }
+    if (!req.body.region) {
+      return res.status(422).json({ error: "Region field mandatory" })
+    }*/
+
+    const data = req.validatedData;
+
+    // User exists
+    if (!await prisma.merchant.findUnique({ where: { id: parseInt(req.params.id) } })) {
+      return res.status(404).json({ message: "Merchant not found" })
+    }
+
+    const updatedMerchant = await prisma.merchant.update({
+      /*data: {
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        region: req.body.region
+      },*/
+      data,
+      where: {
+        id: parseInt(req.params.id)
+      }
+    })
+
+    return res.status(201).json(updatedMerchant)
+  }
+  catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error modifying merchant" })
+  }
 };
 
 // @desc Delete a Merchant
 // @route DELETE /api/merchant
 export const deleteMerchant = async (req, res, next) => {
-    try {
-        // User exists
-        if (!await prisma.merchant.findUnique({ where: { id: parseInt(req.params.id) } })) {
-            return res.status(404).json({ error: "Merchant not found" })
-        }
+  try {
+    const data = req.validatedData;
+    const merchantId = parseInt(req.params.id);
 
-        //Get Number of Account 
-        const accountCount = await prisma.account.count({
-            where: {
-                merchantId: parseInt(req.params.id)
-            }
-        })
-        // Number of accounts must be zero
-        if (accountCount) {
-            return res.status(409).json({ error: `Merchant is still assigned to an account` })
-        }
-
-        //Demete user
-        await prisma.merchant.delete({
-            where: {
-                id: parseInt(req.params.id)
-            }
-        })
-
-        return res.status(204).send()
+    // User exists
+    if (!await prisma.merchant.findUnique({ where: { id: merchantId } })) {
+      return res.status(404).json({ message: "Merchant not found" })
     }
-    catch (error) {
-        return res.status(500).json({ error: error.message })
+
+    //Validate number of accoutn must be 0
+    const accountCount = await prisma.account.count({
+      where: { merchantId: merchantId }
+    })
+    if (accountCount) {
+      return res.status(409).json({ message: `Merchant is still assigned to an account` })
     }
+
+    //Demete user
+    await prisma.merchant.delete({
+      where: {
+        id: parseInt(req.params.id)
+      }
+    })
+
+    return res.status(204).send()
+  }
+  catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error deleting merchant" })
+  }
 
 };

@@ -63,7 +63,8 @@ describe("Merchant Test", () => {
             .post('/api/merchant')
             .set('Authorization', `Bearer ${admin_access_token}`)
 
-        assert.equal(res.statusCode, 422);
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add Merchant - No Name', async () => {
@@ -78,8 +79,8 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
         //.send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Name field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add Merchant - No Email', async () => {
@@ -94,8 +95,8 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Email field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add Merchant - No Phone', async () => {
@@ -110,8 +111,8 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Phone field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Add Merchant - No Region', async () => {
@@ -126,8 +127,8 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Region field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Get Merchant - Admin', async () => {
@@ -150,6 +151,7 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
 
         assert.equal(res.statusCode, 404);
+        assert.equal(res.body.message, "Merchant not found");
     });
 
     it('Get Merchant - User', async () => {
@@ -158,6 +160,7 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${user_access_token}`)
 
         assert.equal(res.statusCode, 403);
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
     it('Modify Merchant - Admin', async () => {
@@ -193,7 +196,8 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Modify Merchant - No Name', async () => {
@@ -208,8 +212,8 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Name field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
 
@@ -225,8 +229,8 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Email field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
 
@@ -242,8 +246,8 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Phone field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
 
     it('Modify Merchant - No Region', async () => {
@@ -258,12 +262,9 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Region field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
     });
-
-
-
 
     it('Delete Merchant - Admin', async () => {
         const res = await request(app)
@@ -279,5 +280,6 @@ describe("Merchant Test", () => {
             .set('Authorization', `Bearer ${user_access_token}`);
 
         assert.equal(res.statusCode, 403);
+        assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 });
