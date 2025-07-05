@@ -1,5 +1,5 @@
 import express from 'express';
-import redisHelper from '../redis/redisHelper.js'
+import redisHelper from '../utils/redisHelper.js'
 
 const router = express.Router();
 

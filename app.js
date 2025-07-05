@@ -9,7 +9,7 @@ import errorHanlder from './middleware/error.js';
 import notFoundHandler from './middleware/notFound.js';
 import requestDuration from './middleware/requestDuration.js'
 
-import { connectRedis, redisClient } from './redis/redisClient.js';
+import { connectRedis, redisClient } from './utils/redisClient.js';
 
 //Routes
 import home_route from './routes/home_route.js';
@@ -39,7 +39,8 @@ app.use(cors(corsOptions))
 
 
 //Hardening
-app.disable('x-powered-by')
+app.disable('x-powered-by');
+app.set('trust proxy', true);
 
 
 //Add Middleware
