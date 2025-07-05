@@ -84,11 +84,6 @@ describe("Login Test", () => {
         //await setEmailValidated(user.id);
         await setPhoneValidated(user.id);
       }
-
-      //Reset Rate Limit keys
-      await reset_rate_limiter_by_ip('::ffff:127.0.0.1');
-      await reset_rate_limiter_by_sub(okUser.email);
-      await reset_rate_limiter_by_sub(okAdmin.email);
     }
     catch (error) {
       console.error(error);

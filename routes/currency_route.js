@@ -8,10 +8,13 @@ import { getCurrency, createCurrency, getAllCurrencies, updateCurrency, deleteCu
 import { validate } from '../middleware/validate.js';
 import { createCurrencySchema, modifyCurrencySchema } from '../controller/currency.schema.js'
 
+import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
+
 const router = express.Router();
 
 // Use the Auth Middleware for all routes
 router.use(authenticateToken)
+router.use(rate_limiter_by_sub);
 
 //get all currency
 router.get('/', authorizeRole("admin", "user"), getAllCurrencies,)

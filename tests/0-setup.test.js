@@ -13,6 +13,9 @@ let test_start_time;
 //This is Global Before hook
 before(async () => {
 
+  //Set testing flag
+  process.env.isTesting = true;
+
   // Check and Create Test Currency Symbol
   console.log("Setup - Before");
   test_start_time = Date.now();

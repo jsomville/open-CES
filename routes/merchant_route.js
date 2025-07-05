@@ -7,10 +7,12 @@ import { getAllMerchant, getMerchant, createMerchant, updateMerchant, deleteMerc
 
 import { validate } from '../middleware/validate.js';
 import { createMerchantSchema, modifyMerchantSchema } from '../controller/merchant.schema.js'
+import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 
 const router = express.Router();
 
 router.use(authenticateToken);
+router.use(rate_limiter_by_sub);
 
 // get all
 router.get('/', authorizeRole("admin"), getAllMerchant);
