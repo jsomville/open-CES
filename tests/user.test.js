@@ -317,6 +317,27 @@ describe("Test User", () => {
         assert.strictEqual(res.body.errors.length, 1);
     });
 
+    it('Add User - Other field', async () => {
+        const payload = {
+            "firstname": "user",
+            "lastname": "test",
+            "email": "test2@opences.org",
+            "phone": "123456789",
+            "region": "EU",
+            "password": "ABCDEfgh1!",
+            "other": "field",
+        }
+        const res = await request(app)
+            .post('/api/user')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
+    });
+
     it('Add User - Duplicated Email', async () => {
         const payload = {
             "firstname": "user",
@@ -527,6 +548,26 @@ describe("Test User", () => {
             "lastname": "test",
             "phone": user_payload.phone,
             //"region" : "EU",
+        };
+
+        const res = await request(app)
+            .put(`/api/user/${new_user_id}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
+    });
+
+    it('Modify User - Other field', async () => {
+        const payload = {
+            "firstname": "user",
+            "lastname": "test",
+            "phone": user_payload.phone,
+            "region": "EU",
+            "other": "field",
         };
 
         const res = await request(app)
