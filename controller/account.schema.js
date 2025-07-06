@@ -18,3 +18,12 @@ export const accountIdSchema = z.strictObject({
     params: accountParamSchema,
     body: z.strictObject({}).optional(),
 });
+
+export const accountTransferSchema = z.strictObject({
+    params: accountParamSchema,
+    body: z.strictObject({
+        account: z.number().int().min(1),
+        amount: z.number().positive(),
+        description: z.string().max(255).optional()
+    })
+});

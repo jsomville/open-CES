@@ -13,7 +13,7 @@ export const createCurrencySchema = z.strictObject({
   }),
 });
 
-export const currencyParamSchema = z.strictObject({
+const currencyParamSchema = z.strictObject({
   id: z.coerce.number().int().positive(),
 });
 
@@ -31,5 +31,13 @@ export const modifyCurrencySchema = z.strictObject({
 export const currencyIdSchema = z.strictObject({
   params: currencyParamSchema,
   body: z.strictObject({}).optional(),
+});
+
+export const currencyFundRefundSchema = z.strictObject({
+  params: currencyParamSchema,
+  body: z.strictObject({
+    account: z.number().int().min(1),
+    amount: z.number().positive(),
+  }),
 });
 

@@ -120,23 +120,10 @@ export const deleteAccount = async (req, res, next) => {
 // @route POST /api/account/id/transfer
 export const transferTo = async (req, res, next) => {
   try {
-    //Check Account id
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(422).json({ error: "account Id mandatory" })
-    }
 
-    //Account is mandatory
-    const accountNumber = parseInt(req.body.account);
-    if (isNaN(accountNumber)) {
-      return res.status(422).json({ error: "Account field mandatory" })
-    }
-
-    // Amount is a positive float
-    const amount = Number(req.body.amount)
-    if (isNaN(amount) || amount < 0) {
-      return res.status(422).json({ error: "Amount must be a positive number" })
-    }
+    const id = req.validatedParams.id;
+    const accountNumber = req.validatedBody.account;
+    const amount = req.validatedBody.amount;
 
     // Source account exists
     const sourceAccount = await prisma.account.findUnique({ where: { id: id } })

@@ -139,8 +139,10 @@ describe("Test Transfer", () => {
             .set('Authorization', `Bearer ${user1Token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Account field mandatory");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Transfer - Amount Missing', async () => {
@@ -155,8 +157,10 @@ describe("Test Transfer", () => {
             .set('Authorization', `Bearer ${user1Token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Amount must be a positive number");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Transfer - Amount Must be a positive number', async () => {
@@ -171,8 +175,10 @@ describe("Test Transfer", () => {
             .set('Authorization', `Bearer ${user1Token}`)
             .send(payload)
 
-        assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Amount must be a positive number");
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Transfer - Destination account not found', async () => {

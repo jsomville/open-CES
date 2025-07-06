@@ -306,7 +306,6 @@ describe("Voucher Test", () => {
     const res = await request(app)
       .get(`/api/voucher/${voucherId}`)
       .set('Authorization', `Bearer ${admin_access_token}`)
-      .send(voucher_payload)
 
     assert.equal(res.statusCode, 200);
     assert.ok(res.body.code);
@@ -317,11 +316,36 @@ describe("Voucher Test", () => {
     assert.ok(res.body.createdAt);
   });
 
+  it('Get Voucher - id as string', async () => {
+    const expiration = daysFromNow(voucher_payload.duration);
+
+    const res = await request(app)
+      .get(`/api/voucher/abc`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Get Voucher - id as float', async () => {
+    const expiration = daysFromNow(voucher_payload.duration);
+
+    const res = await request(app)
+      .get(`/api/voucher/4.5`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
   it('Get Voucher - User', async () => {
     const res = await request(app)
       .get(`/api/voucher/${voucherId}`)
       .set('Authorization', `Bearer ${user_access_token}`)
-      .send(voucher_payload)
 
     assert.equal(res.statusCode, 403);
     assert.equal(res.body.message, "Forbidden: Insufficient role");

@@ -25,10 +25,7 @@ export const getAllVouchers = async (req, res, next) => {
 // @toute GET /api/voucher:id
 export const getVoucher = async (req, res, next) => {
     try {
-        const id = parseInt(req.params.id);
-        if (isNaN(id)) {
-            res.status(422).json({ message: "Id required" });
-        }
+        const id = req.validatedParams.id;
 
         const voucher = await getVoucherById(id);
         if (!voucher) {
@@ -47,7 +44,7 @@ export const getVoucher = async (req, res, next) => {
 // @route POST /api/voucher
 export const createVoucher = async (req, res, next) => {
     try {
-        const data = req.validatedData;
+        const data = req.validatedBody;
 
         //Currency exists
         const currency = await getCurrencyById(data.currencyId);
@@ -84,23 +81,14 @@ export const createVoucher = async (req, res, next) => {
 // @route PUT /api/voucher
 export const updateVoucher = async (req, res, next) => {
     try {
-        const id = parseInt(req.params.id);
-        if (isNaN(id)) {
-            res.status(422).json({ error: "Id required" });
-        }
-
-        /*const duration = parseInt(req.body.duration);
-        if (isNaN(duration) || duration < 0) {
-            return res.status(422).json({ error: "Amount mandatory and must be a positive integer" })
-        }*/
+        const data = req.validatedBody;
+        const id = req.validatedParams.id;
 
         // Voucher exists
         const voucher = await getVoucherById(id);
         if (!voucher) {
             return res.status(404).json({ message: "Voucher not found" })
         }
-
-        const data = req.validatedData
 
         //Calculate the Expiration
         const expiration = daysFrom(voucher.expiration, data.duration);
@@ -111,7 +99,7 @@ export const updateVoucher = async (req, res, next) => {
                 expiration: expiration
             },
             where: {
-                id: parseInt(req.params.id)
+                id: id
             }
         })
 

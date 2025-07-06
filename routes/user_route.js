@@ -7,7 +7,7 @@ import { getAllUsers, getUser, createUser, updateUser, deleteUser, setUserAdmin,
 import { getUserDetail } from '../controller/userDetailController.js'
 
 import { validate } from '../middleware/validate.js';
-import { createUserSchema, modifyUserSchema } from '../controller/user.schema.js'
+import { createUserSchema, modifyUserSchema, userIdSchema } from '../controller/user.schema.js'
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 
 const router = express.Router();
@@ -20,7 +20,7 @@ router.use(rate_limiter_by_sub);
 router.get('/', authorizeRole("admin"), getAllUsers);
 
 // get user by ID
-router.get('/:id', authorizeRole("admin"), getUser);
+router.get('/:id', authorizeRole("admin"), validate(userIdSchema), getUser);
 
 // create user
 router.post('/', authorizeRole("admin"), validate(createUserSchema), createUser);
@@ -29,7 +29,7 @@ router.post('/', authorizeRole("admin"), validate(createUserSchema), createUser)
 router.put('/:id', authorizeRole("admin"), validate(modifyUserSchema), updateUser);
 
 // delete user
-router.delete('/:id', authorizeRole("admin"), deleteUser);
+router.delete('/:id', authorizeRole("admin"), validate(userIdSchema), deleteUser);
 
 //set admin
 router.post('/:id/set-admin', authorizeRole("admin"), setUserAdmin);

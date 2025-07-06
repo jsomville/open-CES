@@ -5,8 +5,8 @@ import { authorizeRole } from '../middleware/authorizeRole.js'
 
 import { getAllAccount, getAccount, createAccount, deleteAccount, transferTo } from '../controller/accountController.js'
 
-import { validate, validate2 } from '../middleware/validate.js';
-import { createAccountSchema, accountIdSchema } from '../controller/account.schema.js'
+import { validate } from '../middleware/validate.js';
+import { createAccountSchema, accountIdSchema, accountTransferSchema } from '../controller/account.schema.js'
 
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 
@@ -20,18 +20,18 @@ router.use(rate_limiter_by_sub);
 router.get('/', authorizeRole("admin"), getAllAccount);
 
 //get account by id
-router.get('/:id', authorizeRole("admin"), validate2(accountIdSchema), getAccount);
+router.get('/:id', authorizeRole("admin"), validate(accountIdSchema), getAccount);
 
 //create account
-router.post('/', authorizeRole("admin"), validate2(createAccountSchema), createAccount);
+router.post('/', authorizeRole("admin"), validate(createAccountSchema), createAccount);
 
 //Modify account
 //Account cannot be modified
 
 //delete account
-router.delete('/:id', authorizeRole("admin"), validate2(accountIdSchema), deleteAccount);
+router.delete('/:id', authorizeRole("admin"), validate(accountIdSchema), deleteAccount);
 
 //Transfer To
-router.post("/:id/transferTo", authorizeRole("admin", "user"), transferTo);
+router.post("/:id/transferTo", authorizeRole("admin", "user"), validate(accountTransferSchema), transferTo);
 
 export default router;

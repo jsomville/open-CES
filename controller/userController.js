@@ -47,7 +47,7 @@ export const getUser = async (req, res, next) => {
 export const createUser = async (req, res, next) => {
   try {
 
-    const data = req.validatedData;
+    const data = req.validatedBody;
     //Check email is unique
     const user_email = await prisma.user.findUnique({ where: { email: data.email } })
     if (user_email) {
@@ -81,23 +81,24 @@ export const createUser = async (req, res, next) => {
 // @route PUT /api/user
 export const updateUser = async (req, res, next) => {
   try {
-    const data = req.validatedData;
+    const data = req.validatedBody;
+    const id = req.validatedParams.id
 
     // User exists
-    if (!await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } })) {
+    if (!await prisma.user.findUnique({ where: { id: id } })) {
       return res.status(404).json({ message: "User not found" })
     }
 
     //Check phone is unique and not self
-    const user_phone = await prisma.user.findUnique({ where: { phone: data.phone } })
-    if (user_phone && user_phone.id != req.params.id) {
+    const user = await prisma.user.findUnique({ where: { phone: data.phone } })
+    if (user && user.id != req.params.id) {
       return res.status(409).json({ message: "Phone already used" })
     }
 
     const updatedUser = await prisma.user.update({
       data,
       where: {
-        id: parseInt(req.params.id)
+        id: id,
       }
     })
 
