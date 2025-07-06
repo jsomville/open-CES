@@ -73,6 +73,22 @@ describe("Test Currency", () => {
     assert.equal(res.statusCode, 200);
   });
 
+  it('List currencies details- User', async () => {
+    const res = await request(app)
+      .get('/api/currency/details')
+      .set('Authorization', `Bearer ${user_access_token}`);
+
+    assert.equal(res.statusCode, 200);
+  });
+
+  it('List currencies details- Admin', async () => {
+    const res = await request(app)
+      .get('/api/currency/details')
+      .set('Authorization', `Bearer ${admin_access_token}`);
+
+    assert.equal(res.statusCode, 200);
+  });
+
   it('Add currency - User', async () => {
     const res = await request(app)
       .post('/api/currency')

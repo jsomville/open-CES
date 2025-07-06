@@ -3,7 +3,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getCurrency, createCurrency, getAllCurrencies, updateCurrency, deleteCurrency, fundAccount, refundAccount } from '../controller/currencyController.js'
+import { getCurrency, getCurrenciesDetails, createCurrency, getAllCurrencies, updateCurrency, deleteCurrency, fundAccount, refundAccount } from '../controller/currencyController.js'
 
 import { validate } from '../middleware/validate.js';
 import { createCurrencySchema, modifyCurrencySchema, currencyIdSchema, currencyFundRefundSchema } from '../controller/currency.schema.js'
@@ -17,24 +17,26 @@ router.use(authenticateToken)
 router.use(rate_limiter_by_sub);
 
 //get all currency
-router.get('/', authorizeRole("admin", "user"), getAllCurrencies,)
+router.get('/', authorizeRole("admin", "user"), getAllCurrencies);
+
+router.get('/details', authorizeRole("admin", "user"), getCurrenciesDetails);
 
 //get currency by ID
-router.get('/:id', authorizeRole("admin"), validate(currencyIdSchema), getCurrency)
+router.get('/:id', authorizeRole("admin"), validate(currencyIdSchema), getCurrency);
 
 //create currency
-router.post('/', authorizeRole("admin"), validate(createCurrencySchema), createCurrency)
+router.post('/', authorizeRole("admin"), validate(createCurrencySchema), createCurrency);
 
 //modify currency
-router.put('/:id', authorizeRole("admin"), validate(modifyCurrencySchema), updateCurrency)
+router.put('/:id', authorizeRole("admin"), validate(modifyCurrencySchema), updateCurrency);
 
 //delete currency
-router.delete('/:id', authorizeRole("admin"), validate(currencyIdSchema), deleteCurrency)
+router.delete('/:id', authorizeRole("admin"), validate(currencyIdSchema), deleteCurrency);
 
 //Fund account
-router.post('/:id/fundAccount', authorizeRole("admin"), validate(currencyFundRefundSchema), fundAccount)
+router.post('/:id/fundAccount', authorizeRole("admin"), validate(currencyFundRefundSchema), fundAccount);
 
 //Refund account
-router.post('/:id/refundAccount', authorizeRole("admin"), validate(currencyFundRefundSchema), refundAccount)
+router.post('/:id/refundAccount', authorizeRole("admin"), validate(currencyFundRefundSchema), refundAccount);
 
 export default router;

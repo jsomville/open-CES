@@ -20,6 +20,23 @@ export const getAllCurrencies = async (req, res, next) => {
   }
 }
 
+// @desc Get Currencies
+// @route GET /api/currency
+export const getCurrenciesDetails = async (req, res, next) => {
+  try {
+    const currencies = await prisma.currency.findMany()
+
+    // Remove Balance in list of Currencies
+    const safeCurrency = currencies.map(({ balance, accountMax, regionList, createdAt, updatedAt, ...currencies }) => currencies);
+
+    return res.status(200).json(safeCurrency)
+  }
+  catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Error obtaining currencies" })
+  }
+}
+
 // @desc Create Currency
 // @route POST /api/currency
 export const createCurrency = async (req, res, next) => {
