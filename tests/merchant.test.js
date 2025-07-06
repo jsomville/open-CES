@@ -173,6 +173,28 @@ describe("Merchant Test", () => {
     assert.ok(res.body.updatedAt);
   });
 
+  it('Get Merchant - Id as string', async () => {
+    const res = await request(app)
+      .get(`/api/merchant/abc`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Get Merchant - Id as float', async () => {
+    const res = await request(app)
+      .get(`/api/merchant/4.5`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
   it('Get Merchant - Invalid Id', async () => {
     const res = await request(app)
       .get(`/api/merchant/125458`)

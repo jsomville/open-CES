@@ -40,7 +40,7 @@ export const getMerchant = async (req, res, next) => {
 export const createMerchant = async (req, res, next) => {
   try {
 
-    const data = req.validatedData;
+    const data = req.validatedBody;
 
     const newMerchant = await prisma.merchant.create({ data });
 
@@ -57,17 +57,18 @@ export const createMerchant = async (req, res, next) => {
 export const updateMerchant = async (req, res, next) => {
   try {
 
-    const data = req.validatedData;
+    const data = req.validatedBody;
+    const id = req.validatedParams.id
 
     // User exists
-    if (!await prisma.merchant.findUnique({ where: { id: parseInt(req.params.id) } })) {
+    if (!await prisma.merchant.findUnique({ where: { id: id } })) {
       return res.status(404).json({ message: "Merchant not found" })
     }
 
     const updatedMerchant = await prisma.merchant.update({
       data,
       where: {
-        id: parseInt(req.params.id)
+        id: id
       }
     })
 
