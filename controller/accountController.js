@@ -40,7 +40,7 @@ export const getAccount = async (req, res, next) => {
 // @route POST /api/account
 export const createAccount = async (req, res, next) => {
   try {
-    const data = req.validatedData;
+    const data = req.validatedBody;
 
     //Currency exists
     const currency = await getCurrencyById(data.currencyId);

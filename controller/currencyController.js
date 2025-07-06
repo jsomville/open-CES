@@ -25,7 +25,6 @@ export const getAllCurrencies = async (req, res, next) => {
 export const createCurrency = async (req, res, next) => {
   try {
     const data = req.validatedBody;
-    console.log(data)
 
     //Check if Name is unique
     let currency;

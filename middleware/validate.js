@@ -34,8 +34,6 @@ export const validate2 = (schema) => {
     req.validatedParams = validated.params ?? {};
     req.validatedBody = validated.body ?? {};
 
-    console.log(result.data.body)
-
     next();
   };
 };

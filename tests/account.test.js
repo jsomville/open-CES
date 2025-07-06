@@ -220,6 +220,59 @@ describe("Test Account", () => {
     assert.equal(res.body.message, "Forbidden: Insufficient role");
   });
 
+  it('Get account - Account is string', async () => {
+    const res = await request(app)
+      .get(`/api/account/abc`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Get account - Account is float', async () => {
+    const res = await request(app)
+      .get(`/api/account/4.5`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Delete Account - user', async () => {
+    const res = await request(app)
+      .delete(`/api/account/${new_account_id}`)
+      .set('Authorization', `Bearer ${user_access_token}`)
+
+    assert.equal(res.statusCode, 403);
+    assert.equal(res.body.message, "Forbidden: Insufficient role");
+  });
+
+  it('Delete Account - account is string', async () => {
+    const res = await request(app)
+      .delete(`/api/account/abc`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Delete Account - account is float', async () => {
+    const res = await request(app)
+      .delete(`/api/account/4.5`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
   it('Delete Account - admin', async () => {
     const res = await request(app)
       .delete(`/api/account/${new_account_id}`)
