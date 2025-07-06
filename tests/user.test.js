@@ -409,8 +409,6 @@ describe("Test User", () => {
 
   it('Get User By Email - user self', async () => {
 
-    //get Temporary Token
-
     const email = config.user1Email;
     const res = await request(app)
       .get(`/api/user/by-email/${email}`)
@@ -422,9 +420,6 @@ describe("Test User", () => {
   });
 
   it('Get User By Email - admin self', async () => {
-
-    //get Temporary Token
-
     const email = config.adminEmail;
     const res = await request(app)
       .get(`/api/user/by-email/${email}`)
@@ -435,9 +430,6 @@ describe("Test User", () => {
   });
 
   it('Get User By Email - not self', async () => {
-
-    //get Temporary Token
-
     const email = config.user1Email;
     const res = await request(app)
       .get(`/api/user/by-email/${email}`)
@@ -458,7 +450,7 @@ describe("Test User", () => {
   });
 
   // Modify User
-  it('Modify User', async () => {
+  it('Modify User - Admin', async () => {
     const payload = {
       "firstname": "user",
       "lastname": "test",
@@ -477,9 +469,54 @@ describe("Test User", () => {
     assert.equal(res.body.email, user_payload.email); //cannot be modified
     assert.equal(res.body.phone, payload.phone);
     assert.equal(res.body.region, payload.region);
-    assert.ok(res.body.createdAt)
-    assert.ok(res.body.updatedAt)
+    assert.ok(res.body.createdAt);
+    assert.ok(res.body.updatedAt);
   });
+
+  // Modify User
+  it('Modify User - User', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "phone": user_payload.phone,
+      "region": "EU",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${new_user_id}`)
+      .set('Authorization', `Bearer ${user_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 403);
+    assert.equal(res.body.message, "Forbidden: Insufficient role");
+  });
+
+  // Modify User
+  it('Modify User - User self', async () => {
+
+    const user = await getUserByEmail(config.user1Email)
+
+    const payload = {
+      "firstname": user.firstname,
+      "lastname": user.lastname,
+      "phone": user.phone,
+      "region": user.region,
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${user.id}`)
+      .set('Authorization', `Bearer ${user_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 201);
+    assert.equal(res.body.firstname, payload.firstname);
+    assert.equal(res.body.lastname, payload.lastname);
+    assert.equal(res.body.phone, payload.phone);
+    assert.equal(res.body.region, payload.region);
+    assert.ok(res.body.createdAt);
+    assert.ok(res.body.updatedAt);
+  });
+
 
   // Modify User
   it('Modify User - Missing Firstname', async () => {
@@ -565,7 +602,7 @@ describe("Test User", () => {
     const payload = {
       "firstname": "user",
       "lastname": "test",
-      "phone": user_payload.phone,
+      "phone": "+3259684265",
       "region": "EU",
       "other": "field",
     };
@@ -582,11 +619,11 @@ describe("Test User", () => {
   });
 
   // Modify User
-  it('Modify User - Invalid ID', async () => {
+  it('Modify User - ID not found', async () => {
     const payload = {
       "firstname": "user",
       "lastname": "test",
-      "phone": user_payload.phone,
+      "phone": "+3259684265",
       "region": "EU",
     };
 
@@ -597,6 +634,26 @@ describe("Test User", () => {
 
     assert.equal(res.statusCode, 404);
     assert.equal(res.body.message, "User not found");
+  });
+
+  // Modify User
+  it('Modify User - ID as string', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "phone": user_payload.phone,
+      "region": "EU",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/abc`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
   });
 
   // Modify User
@@ -616,6 +673,7 @@ describe("Test User", () => {
     assert.equal(res.statusCode, 409);
     assert.equal(res.body.message, "Phone already used");
   });
+
 
   it('Modify User - set Admin by User', async () => {
     const res = await request(app)

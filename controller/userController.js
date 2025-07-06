@@ -1,6 +1,6 @@
 import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
-import { addUser } from '../services/user_service.js';
+import { addUser, getUserById } from '../services/user_service.js';
 
 const prisma = new PrismaClient()
 
@@ -82,16 +82,24 @@ export const createUser = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const data = req.validatedBody;
-    const id = req.validatedParams.id
+    const id = req.validatedParams.id;
 
     // User exists
-    if (!await prisma.user.findUnique({ where: { id: id } })) {
+    const user = await getUserById(id);
+    if (!user) {
       return res.status(404).json({ message: "User not found" })
     }
 
+    // User - Allow to modify self
+    if (req.user.role == "user") {
+      if (req.user.sub != user.email) {
+        return res.status(403).json({ message: "Forbidden: Insufficient role" })
+      }
+    }
+
     //Check phone is unique and not self
-    const user = await prisma.user.findUnique({ where: { phone: data.phone } })
-    if (user && user.id != req.params.id) {
+    const userByPhone = await prisma.user.findUnique({ where: { phone: data.phone } })
+    if (userByPhone && userByPhone.id != id) {
       return res.status(409).json({ message: "Phone already used" })
     }
 

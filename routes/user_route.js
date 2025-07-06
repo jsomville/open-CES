@@ -26,7 +26,7 @@ router.get('/:id', authorizeRole("admin"), validate(userIdSchema), getUser);
 router.post('/', authorizeRole("admin"), validate(createUserSchema), createUser);
 
 // modify user
-router.put('/:id', authorizeRole("admin"), validate(modifyUserSchema), updateUser);
+router.put('/:id', authorizeRole("user", "admin"), validate(modifyUserSchema), updateUser);
 
 // delete user
 router.delete('/:id', authorizeRole("admin"), validate(userIdSchema), deleteUser);
