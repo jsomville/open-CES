@@ -5,8 +5,8 @@ import { authorizeRole } from '../middleware/authorizeRole.js'
 
 import { getCurrency, createCurrency, getAllCurrencies, updateCurrency, deleteCurrency, fundAccount, refundAccount } from '../controller/currencyController.js'
 
-import { validate } from '../middleware/validate.js';
-import { createCurrencySchema, modifyCurrencySchema } from '../controller/currency.schema.js'
+import { validate, validate2 } from '../middleware/validate.js';
+import { createCurrencySchema, modifyCurrencySchema, currencyIdSchema } from '../controller/currency.schema.js'
 
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 
@@ -20,16 +20,16 @@ router.use(rate_limiter_by_sub);
 router.get('/', authorizeRole("admin", "user"), getAllCurrencies,)
 
 //get currency by ID
-router.get('/:id', authorizeRole("admin"), getCurrency)
+router.get('/:id', authorizeRole("admin"), validate2(currencyIdSchema), getCurrency)
 
 //create currency
-router.post('/', authorizeRole("admin"), validate(createCurrencySchema), createCurrency)
+router.post('/', authorizeRole("admin"), validate2(createCurrencySchema), createCurrency)
 
 //modify currency
-router.put('/:id', authorizeRole("admin"), validate(modifyCurrencySchema), updateCurrency)
+router.put('/:id', authorizeRole("admin"), validate2(modifyCurrencySchema), updateCurrency)
 
 //delete currency
-router.delete('/:id', authorizeRole("admin"), deleteCurrency)
+router.delete('/:id', authorizeRole("admin"), validate2(currencyIdSchema), deleteCurrency)
 
 //Fund account
 router.post('/:id/fundAccount', authorizeRole("admin"), fundAccount)

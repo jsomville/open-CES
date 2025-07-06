@@ -24,7 +24,8 @@ export const getAllCurrencies = async (req, res, next) => {
 // @route POST /api/currency
 export const createCurrency = async (req, res, next) => {
   try {
-    const data = req.validatedData;
+    const data = req.validatedBody;
+    console.log(data)
 
     //Check if Name is unique
     let currency;
@@ -54,7 +55,7 @@ export const createCurrency = async (req, res, next) => {
 // @route GET /api/currency
 export const getCurrency = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = req.validatedParams.id;
     if (isNaN(id)) {
       return res.status(422).json({ message: "Currency Id must be a positive integer" })
     }
@@ -77,10 +78,10 @@ export const getCurrency = async (req, res, next) => {
 // @route PUT /api/currency/id
 export const updateCurrency = async (req, res, next) => {
   try {
-    const data = req.validatedData;
+    const data = req.validatedBody;
+    const id = req.validatedParams.id;
 
     //Check if Currency exists
-    const id = parseInt(req.params.id);
     const currency = await getCurrencyById(id);
     if (!currency) {
       return res.status(404).json({ message: "Currency not found" })

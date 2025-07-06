@@ -247,6 +247,24 @@ describe("Voucher Test", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
+  it('Add Voucher - Duration as float', async () => {
+    const payload = {
+      "currencyId": voucher_payload.currencyId,
+      "amount": 1.5,
+      "duration": 5.5, //in days
+    }
+
+    const res = await request(app)
+      .post('/api/voucher')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
   it('Add Voucher - Other field', async () => {
     const payload = {
       "currencyId": voucher_payload.currencyId,
@@ -369,8 +387,6 @@ describe("Voucher Test", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
-    console.log(res.body.errors)
-
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
     assert.ok(res.body.errors);
@@ -385,8 +401,6 @@ describe("Voucher Test", () => {
       .put(`/api/voucher/${voucherId}`)
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
-
-    console.log(res.body.errors)
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
@@ -403,7 +417,20 @@ describe("Voucher Test", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
-    console.log(res.body.errors)
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+  });
+
+  it('Modify Voucher - Duration as float', async () => {
+    const payload = {
+      "duration": 5.9, //in days
+    }
+
+    const res = await request(app)
+      .put(`/api/voucher/${voucherId}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");

@@ -47,23 +47,9 @@ export const getVoucher = async (req, res, next) => {
 // @route POST /api/voucher
 export const createVoucher = async (req, res, next) => {
     try {
-        /*const currencyId = parseInt(req.body.currencyId);
-        if (isNaN(currencyId)) {
-            return res.status(422).json({ error: "currencyId field is mandatory" })
-        }
-        const amount = Number(req.body.amount);
-        if (isNaN(amount) || amount < 0) {
-            return res.status(422).json({ error: "Amount mandatory and must be a positive number" })
-        }
-        const duration = parseInt(req.body.duration);
-        if (isNaN(duration) || duration < 0) {
-            return res.status(422).json({ error: "Amount mandatory and must be a positive integer" })
-        }*/
-
         const data = req.validatedData;
 
         //Currency exists
-        //const currency = await prisma.currency.findUnique({ where: { id: data.currencId } })
         const currency = await getCurrencyById(data.currencyId);
         if (!currency) {
             return res.status(404).json({ message: "Currency not found" })

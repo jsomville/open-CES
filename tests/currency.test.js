@@ -331,7 +331,7 @@ describe("Test Currency", () => {
   });
 
   // Get Currency
-  it('Get Currency', async () => {
+  it('Get Currency - Admin', async () => {
     const res = await request(app)
       .get(`/api/currency/${new_currency_id}`)
       .set('Authorization', `Bearer ${admin_access_token}`)
@@ -351,6 +351,17 @@ describe("Test Currency", () => {
 
   it('Get Currency - Invalid ID', async () => {
     const res = await request(app)
+      .get(`/api/currency/abc`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Get Currency - Not found', async () => {
+    const res = await request(app)
       .get(`/api/currency/9999`)
       .set('Authorization', `Bearer ${admin_access_token}`)
 
@@ -358,7 +369,7 @@ describe("Test Currency", () => {
     assert.equal(res.body.message, "Currency not found");
   });
 
-  it('Modify Currency', async () => {
+  it('Modify Currency - Admin', async () => {
     const payload = {
       "country": "BE",
       "accountMax": 150,
