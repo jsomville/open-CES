@@ -7,7 +7,7 @@ const asyncHandler = fn => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
 export const rate_limiter_by_sub = asyncHandler(async (req, res, next) => {
-  if (!process.env.isTesting) {
+  if (!process.env.IS_TESTING) {
     const key = "RL" + req.user.sub;
 
     const remaining = await rate_limiter_by_key(key, res);
@@ -27,14 +27,8 @@ export const rate_limiter_by_sub = asyncHandler(async (req, res, next) => {
   }
 });
 
-export async function reset_rate_limiter_by_sub(sub) {
-  const key = "RL" + sub;
-
-  //await redisHelper.del(key);
-}
-
 export const rate_limiter_by_ip = asyncHandler(async (req, res, next) => {
-  if (!process.env.isTesting) {
+  if (!process.env.IS_TESTING) {
     const key = "RL" + req.ip;
 
     const remaining = await rate_limiter_by_key(key, res);
@@ -53,12 +47,6 @@ export const rate_limiter_by_ip = asyncHandler(async (req, res, next) => {
     next();
   }
 });
-
-export async function reset_rate_limiter_by_ip(ip) {
-  const key = "RL" + ip;
-
-  //await redisHelper.del(key);
-}
 
 async function rate_limiter_by_key(key, res) {
   const now = Date.now();

@@ -14,7 +14,7 @@ let test_start_time;
 before(async () => {
 
   //Set testing flag
-  process.env.isTesting = true;
+  process.env.IS_TESTING = true;
 
   // Check and Create Test Currency Symbol
   console.log("Setup - Before");

@@ -3,9 +3,8 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
 import { app } from "../app.js";
-import config from "./config.test.js";
-import { setActiveUser, setPhoneValidated, setEmailValidated, getUserByEmail, addUser, removeUser } from "../services/user_service.js"
-import { reset_rate_limiter_by_ip, reset_rate_limiter_by_sub } from "../middleware/rate-limiter.js";
+//import config from "./config.test.js";
+import { setActiveUser, setPhoneValidated, setEmailValidated, getUserByEmail, addUser, removeUser } from "../services/user_service.js";
 
 describe("Login Test", () => {
   const okUser = {

@@ -46,12 +46,9 @@ app.set('trust proxy', true);
 //Add Middleware
 app.use(express.json()); //Json parsing
 app.use(express.urlencoded({ extended: false })); //url encoder
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(logger); //Logger Middleware
 app.use(requestDuration); // add X-response-Time
-
-
-//Add static folder for templates & assets
-app.use(express.static(path.join(__dirname, 'public')));
 
 //Connect Redis
 await connectRedis();
@@ -69,7 +66,7 @@ app.use('/api/voucher', voucher_route);
 app.use('/test', test_route);
 
 
-//Add error Handler
+//Add after routes middleware
 app.use(notFoundHandler);
 app.use(errorHanlder);
 
