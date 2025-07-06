@@ -94,6 +94,7 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
     });
 
     it('Add User - No Firstname', async () => {
@@ -112,6 +113,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - No Lastname', async () => {
@@ -130,6 +133,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - No email', async () => {
@@ -148,6 +153,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - No phone', async () => {
@@ -166,6 +173,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - No region', async () => {
@@ -184,6 +193,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - No Password', async () => {
@@ -202,6 +213,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Password Too short', async () => {
@@ -211,7 +224,7 @@ describe("Test User", () => {
             "email": "test2@opences.org",
             "phone": "123456789",
             "region": "EU",
-            "password": "T",
+            "password": "123Abc!",
         }
         const res = await request(app)
             .post('/api/user')
@@ -220,6 +233,88 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
+    });
+
+    it('Add User - Password no numbers', async () => {
+        const payload = {
+            "firstname": "user",
+            "lastname": "test",
+            "email": "test2@opences.org",
+            "phone": "123456789",
+            "region": "EU",
+            "password": "Abcdefghig!",
+        }
+        const res = await request(app)
+            .post('/api/user')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
+    });
+
+    it('Add User - Password no Uppercase', async () => {
+        const payload = {
+            "firstname": "user",
+            "lastname": "test",
+            "email": "test2@opences.org",
+            "phone": "123456789",
+            "region": "EU",
+            "password": "abcdefghi9!",
+        }
+        const res = await request(app)
+            .post('/api/user')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
+    });
+
+    it('Add User - Password no Lowercase', async () => {
+        const payload = {
+            "firstname": "user",
+            "lastname": "test",
+            "email": "test2@opences.org",
+            "phone": "123456789",
+            "region": "EU",
+            "password": "ABCDE7GH!",
+        }
+        const res = await request(app)
+            .post('/api/user')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
+    });
+
+    it('Add User - Password no special characters', async () => {
+        const payload = {
+            "firstname": "user",
+            "lastname": "test",
+            "email": "test2@opences.org",
+            "phone": "123456789",
+            "region": "EU",
+            "password": "ABCDEfgh1",
+        }
+        const res = await request(app)
+            .post('/api/user')
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send(payload)
+
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Duplicated Email', async () => {
@@ -381,6 +476,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     // Modify User
@@ -399,6 +496,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     // Modify User
@@ -417,6 +516,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     // Modify User
@@ -435,6 +536,8 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
+        assert.ok(res.body.errors);
+        assert.strictEqual(res.body.errors.length, 1);
     });
 
     // Modify User
