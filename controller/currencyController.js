@@ -135,7 +135,7 @@ export const deleteCurrency = async (req, res, next) => {
     }
 
     //Balance must be zero
-    if (!currency.balance === 0) {
+    if (Number(currency.balance) !== 0) {
       return res.status(422).json({ message: "Balance must be zero" })
     }
 

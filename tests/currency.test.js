@@ -63,6 +63,10 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${user_access_token}`);
 
     assert.equal(res.statusCode, 200);
+    // ensure balance field is filtered out
+    if (Array.isArray(res.body) && res.body.length) {
+      assert.ok(!('balance' in res.body[0]));
+    }
   });
 
   it('List all currencies - Admin', async () => {
@@ -79,6 +83,14 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${user_access_token}`);
 
     assert.equal(res.statusCode, 200);
+    if (Array.isArray(res.body) && res.body.length) {
+      const item = res.body[0];
+      assert.ok(!('balance' in item));
+      assert.ok(!('accountMax' in item));
+      assert.ok(!('regionList' in item));
+      assert.ok(!('createdAt' in item));
+      assert.ok(!('updatedAt' in item));
+    }
   });
 
   it('List currencies details- Admin', async () => {
@@ -118,6 +130,65 @@ describe("Test Currency", () => {
     assert.ok(res.body.updatedAt);
 
     new_currency_id = res.body.id
+  });
+
+  it('Add currency - accountMax below minimum', async () => {
+    const payload = {
+      name: 'BelowMin',
+      symbol: 'BLW',
+      country: 'BE',
+      accountMax: 50,
+    };
+
+    const res = await request(app)
+      .post('/api/currency')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, 'Validation failed');
+    assert.ok(res.body.errors);
+  });
+
+  it('Add currency - invalid URL formats', async () => {
+    const payload = {
+      name: 'BadURL',
+      symbol: 'BURL',
+      country: 'BE',
+      logoURL: 'not-a-url',
+      webSiteURL: 'also-not-a-url',
+    };
+
+    const res = await request(app)
+      .post('/api/currency')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, 'Validation failed');
+    assert.ok(res.body.errors);
+  });
+
+  it('Add currency - empty URLs accepted', async () => {
+    const payload = {
+      name: 'EmptyURLs',
+      symbol: new_symbol,
+      country: 'BE',
+      logoURL: '',
+      webSiteURL: '',
+    };
+
+    const res = await request(app)
+      .post('/api/currency')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload);
+
+    assert.equal(res.statusCode, 201);
+    assert.equal(res.body.name, payload.name);
+    assert.equal(res.body.symbol, payload.symbol);
+
+    // cleanup created currency
+    await prisma.currency.delete({ where: { id: res.body.id } });
   });
 
   it('Add currency - No Payload', async () => {
@@ -408,6 +479,27 @@ describe("Test Currency", () => {
 
   });
 
+  it('Modify Currency - Currency not found', async () => {
+    const res = await request(app)
+      .put(`/api/currency/9999999`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send({ country: 'BE' });
+
+    assert.equal(res.statusCode, 404);
+    assert.equal(res.body.message, 'Currency not found');
+  });
+
+  it('Modify Currency - invalid URL formats', async () => {
+    const res = await request(app)
+      .put(`/api/currency/${new_currency_id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send({ country: 'BE', logoURL: 'x', webSiteURL: 'y' });
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, 'Validation failed');
+    assert.ok(res.body.errors);
+  });
+
   it('Modify Currency - User', async () => {
     const res = await request(app)
       .put(`/api/currency/${new_currency_id}`)
@@ -519,6 +611,43 @@ describe("Test Currency", () => {
       .set('Authorization', `Bearer ${admin_access_token}`);
 
     assert.equal(res.statusCode, 204);
+  });
+
+  it('Delete Currency - Balance not zero', async () => {
+    // create isolated currency and set balance
+    const cur = await prisma.currency.create({ data: { symbol: 'DNZ', name: 'DelNotZero', country: 'BE', balance: 10 } });
+    const res = await request(app)
+      .delete(`/api/currency/${cur.id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`);
+
+    assert.equal(res.statusCode, 422);
+    assert.equal(res.body.message, 'Balance must be zero');
+
+    // cleanup
+    await prisma.currency.delete({ where: { id: cur.id } });
+  });
+
+  it('Delete Currency - Referenced by accounts', async () => {
+    // create currency and account referencing it
+    const cur = await prisma.currency.create({ data: { symbol: 'REF2', name: 'RefByAccount', country: 'BE' } });
+    const user = await prisma.user.create({
+      data: {
+        firstname: 'A', lastname: 'B', email: 'refacc@open-ces.org', phone: '+32471111111', region: 'EU', passwordHash: 'FAKE', role: 'user'
+      }
+    });
+    await prisma.account.create({ data: { userId: user.id, currencyId: cur.id, accountType: 1 } });
+
+    const res = await request(app)
+      .delete(`/api/currency/${cur.id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`);
+
+    assert.equal(res.statusCode, 409);
+    assert.ok(res.body.message.includes('Currency id is being used in'));
+
+    // cleanup
+    await prisma.account.deleteMany({ where: { currencyId: cur.id } });
+    await prisma.user.delete({ where: { id: user.id } });
+    await prisma.currency.delete({ where: { id: cur.id } });
   });
 });
 

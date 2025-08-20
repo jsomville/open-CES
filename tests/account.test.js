@@ -97,6 +97,39 @@ describe("Test Account", () => {
     new_account_id = res.body.id;
   });
 
+  it('Add account - Currency not found', async () => {
+    const payload = {
+      "userId": user_id,
+      "currencyId": 9999999,
+      "accountType": 1,
+    };
+
+    const res = await request(app)
+      .post('/api/account')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 404);
+    assert.equal(res.body.message, "Currency not found");
+  });
+
+  it('Add account - User does not exist (FK)', async () => {
+    const payload = {
+      "userId": 9999999,
+      "currencyId": testCurrencyId,
+      "accountType": 1,
+    };
+
+    const res = await request(app)
+      .post('/api/account')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    // Prisma FK violation is handled as 500 by controller
+    assert.equal(res.statusCode, 500);
+    assert.equal(res.body.message, "Error creating account");
+  });
+
   it('Add account - User', async () => {
     const res = await request(app)
       .post('/api/account')
@@ -197,6 +230,46 @@ describe("Test Account", () => {
     assert.equal(res.body.message, "Account for this user and this currecny already exists")
   });
 
+  it('Add account - Account quota reached', async () => {
+    // Create dedicated currency with low accountMax
+    const cur = await prisma.currency.create({
+      data: { symbol: 'AQT', name: 'AcctQuotaTest', country: 'EU', accountMax: 1 }
+    });
+
+    // Create second temp user
+    const userB = await prisma.user.create({
+      data: {
+        firstname: "Jane",
+        lastname: "Smith",
+        email: "quota_user_b@openced.org",
+        phone: "+32471041011",
+        region: "EU",
+        passwordHash: "FAKE",
+        role: "user"
+      }
+    });
+
+    // First account should succeed
+    const res1 = await request(app)
+      .post('/api/account')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send({ userId: user_id, currencyId: cur.id, accountType: 1 });
+    assert.equal(res1.statusCode, 201);
+
+    // Second account for same currency should hit quota
+    const res2 = await request(app)
+      .post('/api/account')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send({ userId: userB.id, currencyId: cur.id, accountType: 1 });
+    assert.equal(res2.statusCode, 403);
+    assert.equal(res2.body.message, "Account quota reached");
+
+    // cleanup
+    await prisma.account.deleteMany({ where: { currencyId: cur.id } });
+    await prisma.user.delete({ where: { id: userB.id } });
+    await prisma.currency.delete({ where: { id: cur.id } });
+  });
+
   it('Get account - Admin', async () => {
     const res = await request(app)
       .get(`/api/account/${new_account_id}`)
@@ -209,6 +282,15 @@ describe("Test Account", () => {
     assert.equal(res.body.balance, 0);
     assert.ok(res.body.createdAt)
     assert.ok(res.body.updatedAt)
+  });
+
+  it('Get account - Not found', async () => {
+    const res = await request(app)
+      .get(`/api/account/9999999`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 404);
+    assert.equal(res.body.message, "Account not found");
   });
 
   it('Get account - User', async () => {
@@ -279,6 +361,42 @@ describe("Test Account", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
 
     assert.equal(res.statusCode, 204);
+  });
+
+  it('Delete Account - Not found', async () => {
+    const res = await request(app)
+      .delete(`/api/account/9999999`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 404);
+    assert.equal(res.body.message, "Account not found");
+  });
+
+  it('Delete Account - Balance must be zero', async () => {
+    // Create a dedicated currency so we can create another account for the same user
+    const cur = await prisma.currency.create({
+      data: { symbol: 'DEL', name: 'DeleteLock', country: 'EU' }
+    });
+
+    // Create a new account for current user
+    const acc = await prisma.account.create({
+      data: { userId: user_id, currencyId: cur.id, accountType: 1 }
+    });
+
+    // Set non-zero balance
+    await prisma.account.update({ where: { id: acc.id }, data: { balance: 10 } });
+
+    const res = await request(app)
+      .delete(`/api/account/${acc.id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 409);
+    assert.equal(res.body.message, "Balance must be zero");
+
+    // cleanup: reset balance to allow delete
+    await prisma.account.update({ where: { id: acc.id }, data: { balance: 0 } });
+    await prisma.account.delete({ where: { id: acc.id } });
+    await prisma.currency.delete({ where: { id: cur.id } });
   });
 });
 

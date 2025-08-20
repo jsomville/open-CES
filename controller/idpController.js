@@ -91,7 +91,7 @@ export const refresh = async (req, res, next) => {
             console.log("iss")
 
             //Check Trusted Issuer
-            if (decoded.iss = process.env.TRUSTED_ISSUER) {
+            if (decoded.iss != process.env.TRUSTED_ISSUER) {
                 return res.status(422).json({ error: "Untrusted Issuer" });
             }
 

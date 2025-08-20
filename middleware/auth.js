@@ -1,7 +1,7 @@
 // middleware/auth.js
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_ACCESS_SECRET_KEY || 'your-very-secret-key';
+
 
 export function authenticateToken(req, res, next) {
 
@@ -27,6 +27,9 @@ export function authenticateToken(req, res, next) {
   }
 
   try {
+
+    const JWT_SECRET = process.env.JWT_ACCESS_SECRET_KEY || 'your-very-secret-key';
+
     const user = jwt.verify(token[1], JWT_SECRET);
 
     req.user = user; // Attach user data to request

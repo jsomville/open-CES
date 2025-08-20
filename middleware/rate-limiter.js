@@ -7,6 +7,8 @@ const asyncHandler = fn => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
 export const rate_limiter_by_sub = asyncHandler(async (req, res, next) => {
+  if (!req.user || !req.user.sub) return next();
+
   if (!process.env.IS_TESTING) {
     const key = "RL" + req.user.sub;
 
@@ -14,6 +16,11 @@ export const rate_limiter_by_sub = asyncHandler(async (req, res, next) => {
 
     // check limit & send error
     if (remaining <= 0) {
+      //Add retry After header
+      const retryAfter = Math.ceil((callsHistory[0] + windowsMS - now) / 1000);
+      res.set('Retry-After', Math.max(retryAfter, 1));
+
+      //Send error
       const error = new Error('Too many requests');
       error.status = 429;
       next(error);
@@ -66,12 +73,15 @@ async function rate_limiter_by_key(key, res) {
   callsHistory.push(now);
 
   //Update limit in cache
-  redisHelper.set(key, JSON.stringify(callsHistory), windowsMS);
+  const ttlSeconds = Math.ceil(windowsMS / 1000);
+  await redisHelper.set(key, JSON.stringify(callsHistory), ttlSeconds);
 
   const remaining = Math.max(limit - callsHistory.length, 0);
 
   // Update response header for remaining rate limit
   res.set('X-RateLimit-Remaining', remaining);
+  res.set('X-RateLimit-Limit', limit);
+
 
   return remaining;
 };

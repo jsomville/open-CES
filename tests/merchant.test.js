@@ -4,6 +4,8 @@ import request from 'supertest';
 import { app } from "../app.js";
 import config from "./config.test.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient();
 
 describe("Merchant Test", () => {
   let admin_access_token;
@@ -56,6 +58,108 @@ describe("Merchant Test", () => {
     assert.ok(res.body.updatedAt);
 
     new_merchant_id = res.body.id;
+  });
+
+  it('Add Merchant - Name too short', async () => {
+    const payload = {
+      name: "abc",
+      email: "short@opences.org",
+      phone: "+3212345678",
+      region: "EU",
+    };
+    const res = await request(app)
+      .post('/api/merchant')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+  });
+
+  it('Add Merchant - Name too long', async () => {
+    const payload = {
+      name: 'x'.repeat(256),
+      email: "longname@opences.org",
+      phone: "+3212345678",
+      region: "EU",
+    };
+    const res = await request(app)
+      .post('/api/merchant')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+  });
+
+  it('Add Merchant - Invalid email', async () => {
+    const payload = {
+      name: "Valid Name",
+      email: "not-an-email",
+      phone: "+3212345678",
+      region: "EU",
+    };
+    const res = await request(app)
+      .post('/api/merchant')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+  });
+
+  it('Add Merchant - Phone too short', async () => {
+    const payload = {
+      name: "Valid Name",
+      email: "ok@opences.org",
+      phone: "1",
+      region: "EU",
+    };
+    const res = await request(app)
+      .post('/api/merchant')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+  });
+
+  it('Add Merchant - Phone too long', async () => {
+    const payload = {
+      name: "Valid Name",
+      email: "ok2@opences.org",
+      phone: "1234567890123456",
+      region: "EU",
+    };
+    const res = await request(app)
+      .post('/api/merchant')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+  });
+
+  it('Add Merchant - Region too long', async () => {
+    const payload = {
+      name: "Valid Name",
+      email: "ok3@opences.org",
+      phone: "+32123450000",
+      region: 'y'.repeat(300),
+    };
+    const res = await request(app)
+      .post('/api/merchant')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - No payload', async () => {
@@ -234,6 +338,27 @@ describe("Merchant Test", () => {
     assert.ok(res.body.updatedAt);
   });
 
+  it('Modify Merchant - Not found', async () => {
+    const res = await request(app)
+      .put(`/api/merchant/9999999`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send({ name: 'Name Ok', email: 'ok@opences.org', phone: '+32123', region: 'EU' });
+
+    assert.equal(res.statusCode, 404);
+    assert.equal(res.body.message, 'Merchant not found');
+  });
+
+  it('Modify Merchant - Invalid id param', async () => {
+    const res = await request(app)
+      .put(`/api/merchant/abc`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send({ name: 'Name Ok', email: 'ok@opences.org', phone: '+32123', region: 'EU' });
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, 'Validation failed');
+    assert.ok(res.body.errors);
+  });
+
   it('Modify Merchant - No Name', async () => {
     const payload = {
       //"name" : "new name",
@@ -351,6 +476,58 @@ describe("Merchant Test", () => {
       .set('Authorization', `Bearer ${admin_access_token}`);
 
     assert.equal(res.statusCode, 204);
+  });
+
+  it('Delete Merchant - Invalid id (string)', async () => {
+    const res = await request(app)
+      .delete(`/api/merchant/abc`)
+      .set('Authorization', `Bearer ${admin_access_token}`);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, 'Validation failed');
+    assert.ok(res.body.errors);
+  });
+
+  it('Delete Merchant - Invalid id (float)', async () => {
+    const res = await request(app)
+      .delete(`/api/merchant/4.5`)
+      .set('Authorization', `Bearer ${admin_access_token}`);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, 'Validation failed');
+    assert.ok(res.body.errors);
+  });
+
+  it('Delete Merchant - Not found', async () => {
+    const res = await request(app)
+      .delete(`/api/merchant/9999999`)
+      .set('Authorization', `Bearer ${admin_access_token}`);
+
+    assert.equal(res.statusCode, 404);
+    assert.equal(res.body.message, 'Merchant not found');
+  });
+
+  it('Delete Merchant - assigned to account', async () => {
+    // create merchant, currency, user, and account referencing merchant
+    const merch = await prisma.merchant.create({ data: { name: 'AcctAttach', email: 'acct@merch.org', phone: '+32000000000', region: 'EU' } });
+    const cur = await prisma.currency.create({ data: { symbol: 'MRG', name: 'MerchGuard', country: 'EU' } });
+    const usr = await prisma.user.create({
+      data: { firstname: 'A', lastname: 'B', email: 'merchant_attach_user@open-ces.org', phone: '+32479999999', region: 'EU', passwordHash: 'FAKE', role: 'user' }
+    });
+    await prisma.account.create({ data: { userId: usr.id, merchantId: merch.id, currencyId: cur.id, accountType: 1 } });
+
+    const res = await request(app)
+      .delete(`/api/merchant/${merch.id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`);
+
+    assert.equal(res.statusCode, 409);
+    assert.equal(res.body.message, 'Merchant is still assigned to an account');
+
+    // cleanup
+    await prisma.account.deleteMany({ where: { merchantId: merch.id } });
+    await prisma.user.delete({ where: { id: usr.id } });
+    await prisma.currency.delete({ where: { id: cur.id } });
+    await prisma.merchant.delete({ where: { id: merch.id } });
   });
 
   it('Delete Merchant - User', async () => {
