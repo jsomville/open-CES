@@ -35,7 +35,7 @@ const corsOptions = {
   origin: '*',
   methods: ['GET', 'PUT', 'POST', 'DELETE'],
 }
-app.use(cors(corsOptions))
+app.use(cors(corsOptions));
 
 
 //Hardening
