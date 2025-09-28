@@ -13,7 +13,7 @@ import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 const router = express.Router();
 
 // Use the Auth Middleware for all routes
-router.use(authenticateToken)
+router.use(authenticateToken);
 router.use(rate_limiter_by_sub);
 
 //get all currency

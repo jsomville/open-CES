@@ -12,7 +12,7 @@ const home_template = () => {
         <head>
             <meta charset='utf-8'>
             <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-            <title>Home</title>
+            <title>Open CES - Home</title>
             <meta name='viewport' content='width=device-width, initial-scale=1'>
             <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
             <script src='main.js'></script>
@@ -20,7 +20,9 @@ const home_template = () => {
         <body>
             <div class="header">
                 <h1>Welcome to <b>${pkg.name}</b></h1>
-                <h2>Version : ${pkg.version}</h2>
+                <div class="version-badge">
+                    <strong>Version ${pkg.version}</strong>
+                </div>
             </div>
             <div class="content">
                 <p>${pkg.description}</p>
@@ -28,16 +30,16 @@ const home_template = () => {
             <div class="content">
                  <table>
                     <tr>
-                        <th>Component</th>
-                        <th>Version</th>
+                        <th>Key</th>
+                        <th>Value</th>
                     </tr>
                     <tr>
-                        <td>Node.js</td>
-                        <td>${process.version}</td>
-                    </tr>
-                     <tr>
                         <td>Access Token Duration</td>
                         <td>${process.env.ACCESS_TOKEN_DURATION}</td>
+                    </tr>
+                    <tr>
+                        <td>Refresh Token Duration</td>
+                        <td>${process.env.REFRESH_TOKEN_DURATION}</td>
                     </tr>
                    
                 </table> 
