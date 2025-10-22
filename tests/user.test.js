@@ -449,6 +449,25 @@ describe("Test User", () => {
     assert.equal(res.body.error, "User not found");
   });
 
+  //Get current user detail
+  it('Get Me - User', async () => {
+    const res = await request(app)
+      .get(`/api/user/me`)
+      .set('Authorization', `Bearer ${user_access_token}`)
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.email, config.user1Email);
+  });
+
+  it('Get Me - Admin', async () => {
+    const res = await request(app)
+      .get(`/api/user/me`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.email, config.adminEmail);
+  });
+
   // Modify User
   it('Modify User - Admin', async () => {
     const payload = {

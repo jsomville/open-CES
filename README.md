@@ -13,6 +13,8 @@ For more detail look at our web site : http://open-ces.org/
 
 # To run the server
 
+Make sure to install depencencies : npm install
+
 use :
 
     npm run dev

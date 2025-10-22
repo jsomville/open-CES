@@ -4,7 +4,7 @@ import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
 import { getAllUsers, getUser, createUser, updateUser, deleteUser, setUserAdmin, setUserActive } from '../controller/userController.js'
-import { getUserDetail } from '../controller/userDetailController.js'
+import { getUserDetail, getUserDetailByEmail } from '../controller/userDetailController.js'
 
 import { validate } from '../middleware/validate.js';
 import { createUserSchema, modifyUserSchema, userIdSchema } from '../controller/user.schema.js'
@@ -18,6 +18,9 @@ router.use(rate_limiter_by_sub);
 
 // get all users
 router.get('/', authorizeRole("admin"), getAllUsers);
+
+// get current user
+router.get('/me', authorizeRole("admin", "user"), getUserDetail);
 
 // get user by ID
 router.get('/:id', authorizeRole("admin"), validate(userIdSchema), getUser);
@@ -38,6 +41,7 @@ router.post('/:id/set-admin', authorizeRole("admin"), setUserAdmin);
 router.post('/:id/set-active', authorizeRole("admin"), setUserActive);
 
 // get user by Email
-router.get('/by-email/:email', authorizeRole("admin", "user"), getUserDetail);
+router.get('/by-email/:email', authorizeRole("admin", "user"), getUserDetailByEmail);
+
 
 export default router;
