@@ -1,0 +1,15 @@
+meta {
+  name: getTransaction
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{URL}}/api/account/1597/transactions
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}

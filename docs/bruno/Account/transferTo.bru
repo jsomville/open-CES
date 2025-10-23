@@ -1,0 +1,23 @@
+meta {
+  name: transferTo
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{URL}}/api/account/22/transferTo
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}
+
+body:json {
+  {
+      "account" : 1597,
+      "amount" : 1.11,
+      "description" : "Pour service rendu!"
+  }
+}

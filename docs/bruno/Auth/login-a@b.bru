@@ -1,0 +1,22 @@
+meta {
+  name: login-a@b
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{URL}}/api/idp/login
+  body: json
+  auth: inherit
+}
+
+headers {
+  : 
+}
+
+body:json {
+  {
+      "username" : "a@b.com",
+      "password" : "Test12345!"
+  }
+}

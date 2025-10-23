@@ -76,7 +76,7 @@ export const getUserDetail = async (req, res, next) => {
             const currency = await getCurrencyById(account.currencyId);
             if (currency) {
                 account.currencySymbol = currency.symbol;
-            }
+            };
 
             // get the last transactions
             const latestTransactions = await prisma.transaction.findMany({
@@ -86,7 +86,7 @@ export const getUserDetail = async (req, res, next) => {
             });
             if (latestTransactions) {
                 account.latestTransactions = latestTransactions;
-            }
+            };
         }
 
         const userDetail = {

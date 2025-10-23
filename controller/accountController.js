@@ -217,3 +217,40 @@ export const transferTo = async (req, res, next) => {
 
 };
 
+// @desc Transfer to an Account
+// @route POST /api/account/id/transfer
+export const getTransactions = async (req, res, next) => {
+  try {
+    const id = req.validatedParams.id;
+    console.log(`Get transactions from account id ${id}`);  
+    
+    // Source account exists
+    const sourceAccount = await prisma.account.findUnique({ where: { id: id } })
+    if (!sourceAccount) {
+      return res.status(404).json({ error: "Source account not found" })
+    }
+
+    //Check user access to its own account
+    const user = await getUserByEmail(req.user.sub);
+    if (sourceAccount.userId != user.id) {
+      return res.status(422).json({ error: "Account must be owned by current user" })
+    }
+
+    //Get Transactions
+    const transactions =  await prisma.transaction.findMany({
+      where: {
+        accountId: sourceAccount.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return res.status(200).json(transactions);
+  }
+  catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Error getting transactions from account" })
+  }
+};
+

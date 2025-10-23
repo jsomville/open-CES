@@ -397,6 +397,7 @@ describe("Test Account", () => {
     await prisma.account.update({ where: { id: acc.id }, data: { balance: 0 } });
     await prisma.account.delete({ where: { id: acc.id } });
     await prisma.currency.delete({ where: { id: cur.id } });
-  });
+  })
+
 });
 

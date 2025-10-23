@@ -3,7 +3,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getAllAccount, getAccount, createAccount, deleteAccount, transferTo } from '../controller/accountController.js'
+import { getAllAccount, getAccount, createAccount, deleteAccount, transferTo, getTransactions } from '../controller/accountController.js'
 
 import { validate } from '../middleware/validate.js';
 import { createAccountSchema, accountIdSchema, accountTransferSchema } from '../controller/account.schema.js'
@@ -33,5 +33,8 @@ router.delete('/:id', authorizeRole("admin"), validate(accountIdSchema), deleteA
 
 //Transfer To
 router.post("/:id/transferTo", authorizeRole("admin", "user"), validate(accountTransferSchema), transferTo);
+
+//Transaction from account
+router.get("/:id/transactions", authorizeRole("admin", "user"), validate(accountIdSchema), getTransactions);
 
 export default router;
