@@ -184,7 +184,7 @@ export const transferTo = async (req, res, next) => {
             accountId: sourceAccount.id,
             amount: amount,
             currencyId: sourceAccount.currencyId,
-            description: `Transfer to account # ${destinationAccount.id}`,
+            description: `To account # ${destinationAccount.id}`,
             transactionType: "Transfer",
             status: "Completed"
           }
@@ -196,8 +196,8 @@ export const transferTo = async (req, res, next) => {
             accountId: destinationAccount.id,
             amount: amount,
             currencyId: sourceAccount.currencyId,
-            description: `Recieved from account # ${sourceAccount.id}`,
-            transactionType: "Transfer",
+            description: `From account # ${sourceAccount.id}`,
+            transactionType: "Received",
             status: "Completed"
           }
         }),
