@@ -4,6 +4,8 @@ const prisma = new PrismaClient()
 
 import { getUserByEmail, getUserAccountsAndTransactions } from '../services/user_service.js';
 
+import { getCurrencyById } from '../services/currency_service.js';  
+
 const transactionsCount = 5
 
 // @desc Get one user
@@ -66,8 +68,17 @@ export const getUserDetail = async (req, res, next) => {
             return res.status(404).json({ error: "User not found" })
         }
 
+        // get accounts & transactions
         const accounts = await prisma.account.findMany({ where: { userId: user.id } });
         for (const account of accounts) {
+
+            // Add the currency symbol
+            const currency = await getCurrencyById(account.currencyId);
+            if (currency) {
+                account.currencySymbol = currency.symbol;
+            }
+
+            // get the last transactions
             const latestTransactions = await prisma.transaction.findMany({
                 where: { accountId: account.id },
                 orderBy: { createdAt: 'desc' },
@@ -77,7 +88,6 @@ export const getUserDetail = async (req, res, next) => {
                 account.latestTransactions = latestTransactions;
             }
         }
-
 
         const userDetail = {
             ...user,
