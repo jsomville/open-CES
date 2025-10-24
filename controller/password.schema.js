@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const passwordSchema = z
   .string()
   .min(8, 'Password must be at least 8 characters')
-  .max(100, 'Password too long')
+  .max(64, 'Password too long')
   .refine((val) => /[A-Z]/.test(val), {
     message: 'Must include at least one uppercase letter',
   })

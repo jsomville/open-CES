@@ -4,15 +4,15 @@ import { passwordSchema } from './password.schema.js';
 export const createUserSchema = z.strictObject({
   params: z.strictObject({}).optional(),
   body: z.strictObject({
-    firstname: z.string().min(4).max(255),
-    lastname: z.string().min(4).max(255),
+    firstname: z.string().min(2).max(50),
+    lastname: z.string().min(2).max(50),
 
     email: z.string().email(),
-    phone: z.string().min(2).max(15),
-    region: z.string().max(255),
+    phone: z.string().min(8).max(15),
+    region: z.string().min(2).max(50),
 
     password: passwordSchema,
-    role: z.string().min(2).max(255).optional(),
+    role: z.string().min(2).max(50).optional(),
   }),
 });
 
@@ -23,11 +23,11 @@ export const userParamSchema = z.strictObject({
 export const modifyUserSchema = z.strictObject({
   params: userParamSchema,
   body: z.strictObject({
-    firstname: z.string().min(4).max(255),
-    lastname: z.string().min(4).max(255),
+    firstname: z.string().min(2).max(50),
+    lastname: z.string().min(2).max(50),
 
-    phone: z.string().min(2).max(15),
-    region: z.string().max(255),
+    phone: z.string().min(8).max(15),
+    region: z.string().min(2).max(50),
   }),
 });
 

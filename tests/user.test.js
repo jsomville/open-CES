@@ -16,7 +16,7 @@ describe("Test User", () => {
     "firstname": "user",
     "lastname": "test",
     "email": "test@opences.org",
-    "phone": "+32481040204",
+    "phone": "+32481040204567",
     "region": "EU",
     "password": "TestPWD1234!"
   };
@@ -57,16 +57,9 @@ describe("Test User", () => {
     assert.equal(res.body.message, "Forbidden: Insufficient role");
   });
 
-  it('Add User - User', async () => {
-    const res = await request(app)
-      .post('/api/user')
-      .set('Authorization', `Bearer ${user_access_token}`)
-      .send(user_payload)
-
-    assert.equal(res.statusCode, 403);
-    assert.equal(res.body.message, "Forbidden: Insufficient role");
-  });
-
+  //***************************************** */
+  // Add User
+  //***************************************** */
   it('Add User - Admin', async () => {
     const res = await request(app)
       .post('/api/user')
@@ -87,6 +80,16 @@ describe("Test User", () => {
     new_user_id = res.body.id
   });
 
+  it('Add User - User - Forbidden', async () => {
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${user_access_token}`)
+      .send(user_payload)
+
+    assert.equal(res.statusCode, 403);
+    assert.equal(res.body.message, "Forbidden: Insufficient role");
+  });
+
   it('Add User - No Payload', async () => {
     const res = await request(app)
       .post('/api/user')
@@ -100,6 +103,46 @@ describe("Test User", () => {
   it('Add User - No Firstname', async () => {
     const payload = {
       //"firstname" : "user",
+      "lastname": "test",
+      "email": "test2@opences.org",
+      "phone": "123456789",
+      "region": "EU",
+      "password": "Teestt1e23!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Add User - Firstname - Too short', async () => {
+    const payload = {
+      "firstname" : "u",
+      "lastname": "test",
+      "email": "test2@opences.org",
+      "phone": "123456789",
+      "region": "EU",
+      "password": "Teestt1e23!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Add User - Firstname - Too long', async () => {
+    const payload = {
+      "firstname" : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789",
       "lastname": "test",
       "email": "test2@opences.org",
       "phone": "123456789",
@@ -137,11 +180,71 @@ describe("Test User", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
+  it('Add User - Lastname - Too short', async () => {
+    const payload = {
+      "firstname" : "test",
+      "lastname": "u",
+      "email": "test2@opences.org",
+      "phone": "123456789",
+      "region": "EU",
+      "password": "Teestt1e23!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Add User - Lastname - Too long', async () => {
+    const payload = {
+      "firstname" : "test",
+      "lastname": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789",
+      "email": "test2@opences.org",
+      "phone": "123456789",
+      "region": "EU",
+      "password": "Teestt1e23!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
   it('Add User - No email', async () => {
     const payload = {
       "firstname": "user",
       "lastname": "test",
       //"email" : "test2@opences.org",
+      "phone": "123456789",
+      "region": "EU",
+      "password": "Test1etr23!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Add User - Email too short', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "email": "t@o.c",
       "phone": "123456789",
       "region": "EU",
       "password": "Test1etr23!",
@@ -177,6 +280,46 @@ describe("Test User", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
+  it('Add User - Phone too short', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "email": "test2@opences.org",
+      "phone" : "1234567",
+      "region": "EU",
+      "password": "Test1ee23!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+   it('Add User - Phone too long', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "email": "test2@opences.org",
+      "phone" : "1234567890123456",
+      "region": "EU",
+      "password": "Test1ee23!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
   it('Add User - No region', async () => {
     const payload = {
       "firstname": "user",
@@ -184,6 +327,46 @@ describe("Test User", () => {
       "email": "test2@opences.org",
       "phone": "123456789",
       //"region" : "EU",
+      "password": "Test122123!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Add User - Region too short', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "email": "test2@opences.org",
+      "phone": "123456789",
+      "region" : "E",
+      "password": "Test122123!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Add User - Region too long', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "email": "test2@opences.org",
+      "phone": "123456789",
+      "region" : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901",
       "password": "Test122123!",
     }
     const res = await request(app)
@@ -225,6 +408,26 @@ describe("Test User", () => {
       "phone": "123456789",
       "region": "EU",
       "password": "123Abc!",
+    }
+    const res = await request(app)
+      .post('/api/user')
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+   it('Add User - Password Too long', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "email": "test2@opences.org",
+      "phone": "123456789",
+      "region": "EU",
+      "password": "123Abc!ABCDEFGHIJHLKLMNOPQRSTUVWXYZabcdefghijhlklmnopqrstuvwxyz123456",
     }
     const res = await request(app)
       .post('/api/user')
@@ -374,6 +577,9 @@ describe("Test User", () => {
     assert.equal(res.body.message, "Phone already used");
   });
 
+  //***************************************** */
+  // GET User
+  //***************************************** */
   it('Get User - Admin', async () => {
     const res = await request(app)
       .get(`/api/user/${new_user_id}`)
@@ -468,7 +674,9 @@ describe("Test User", () => {
     assert.equal(res.body.email, config.adminEmail);
   });
 
+  //***************************************** */
   // Modify User
+  //***************************************** */
   it('Modify User - Admin', async () => {
     const payload = {
       "firstname": "user",
@@ -492,7 +700,6 @@ describe("Test User", () => {
     assert.ok(res.body.updatedAt);
   });
 
-  // Modify User
   it('Modify User - User', async () => {
     const payload = {
       "firstname": "user",
@@ -510,7 +717,6 @@ describe("Test User", () => {
     assert.equal(res.body.message, "Forbidden: Insufficient role");
   });
 
-  // Modify User
   it('Modify User - User self', async () => {
 
     const user = await getUserByEmail(config.user1Email)
@@ -536,8 +742,6 @@ describe("Test User", () => {
     assert.ok(res.body.updatedAt);
   });
 
-
-  // Modify User
   it('Modify User - Missing Firstname', async () => {
     const payload = {
       //"firstname" : "user",
@@ -557,7 +761,44 @@ describe("Test User", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
-  // Modify User
+  it('Modify User - Firstname Too short', async () => {
+    const payload = {
+      "firstname" : "u",
+      "lastname": "test",
+      "phone": user_payload.phone,
+      "region": "EU",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${new_user_id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Modify User - Firstname Too long', async () => {
+    const payload = {
+      "firstname" : "uABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789",
+      "lastname": "test",
+      "phone": user_payload.phone,
+      "region": "EU",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${new_user_id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
   it('Modify User - Missing Lastname', async () => {
     const payload = {
       "firstname": "user",
@@ -577,7 +818,44 @@ describe("Test User", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
-  // Modify User
+  it('Modify User - Lastname too short', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname" : "a",
+      "phone": user_payload.phone,
+      "region": "EU",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${new_user_id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Modify User - Lastname too long', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname" : "uABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789",
+      "phone": user_payload.phone,
+      "region": "EU",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${new_user_id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+  
   it('Modify User - Missing Phone', async () => {
     const payload = {
       "firstname": "user",
@@ -597,13 +875,88 @@ describe("Test User", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
-  // Modify User
+  it('Modify User - Phone too short', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "phone": "123",
+      "region": "EU",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${new_user_id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+   it('Modify User - Phone too long', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "phone": "12345678912345678",
+      "region": "EU",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${new_user_id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
   it('Modify User - Missing Region', async () => {
     const payload = {
       "firstname": "user",
       "lastname": "test",
       "phone": user_payload.phone,
       //"region" : "EU",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${new_user_id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+  it('Modify User - Region too short', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "phone": user_payload.phone,
+      "region" : "E",
+    };
+
+    const res = await request(app)
+      .put(`/api/user/${new_user_id}`)
+      .set('Authorization', `Bearer ${admin_access_token}`)
+      .send(payload)
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, "Validation failed");
+    assert.ok(res.body.errors);
+    assert.strictEqual(res.body.errors.length, 1);
+  });
+
+   it('Modify User - Region too long', async () => {
+    const payload = {
+      "firstname": "user",
+      "lastname": "test",
+      "phone": user_payload.phone,
+      "region" : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901",
     };
 
     const res = await request(app)
@@ -637,7 +990,6 @@ describe("Test User", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
-  // Modify User
   it('Modify User - ID not found', async () => {
     const payload = {
       "firstname": "user",
@@ -655,7 +1007,6 @@ describe("Test User", () => {
     assert.equal(res.body.message, "User not found");
   });
 
-  // Modify User
   it('Modify User - ID as string', async () => {
     const payload = {
       "firstname": "user",
@@ -675,7 +1026,6 @@ describe("Test User", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
-  // Modify User
   it('Modify User - Existing Phone', async () => {
     const payload = {
       "firstname": "user",
@@ -693,8 +1043,10 @@ describe("Test User", () => {
     assert.equal(res.body.message, "Phone already used");
   });
 
-
-  it('Modify User - set Admin by User', async () => {
+  //***************************************** */
+  // Set Admin
+  //***************************************** */
+  it('set Admin by User', async () => {
     const res = await request(app)
       .post(`/api/user/${new_user_id}/set-admin`)
       .set('Authorization', `Bearer ${user_access_token}`);
@@ -703,7 +1055,7 @@ describe("Test User", () => {
     assert.equal(res.body.message, "Forbidden: Insufficient role");
   });
 
-  it('Modify User - set Admin by Admin', async () => {
+  it('set Admin by Admin', async () => {
     const res = await request(app)
       .post(`/api/user/${new_user_id}/set-admin`)
       .set('Authorization', `Bearer ${admin_access_token}`);
@@ -711,7 +1063,10 @@ describe("Test User", () => {
     assert.equal(res.statusCode, 204);
   });
 
-  it('Modify User - set active by User', async () => {
+  //***************************************** */
+  // Set active
+  //***************************************** */
+  it('set active by User', async () => {
     const res = await request(app)
       .post(`/api/user/${new_user_id}/set-active`)
       .set('Authorization', `Bearer ${user_access_token}`);
@@ -720,7 +1075,7 @@ describe("Test User", () => {
     assert.equal(res.body.message, "Forbidden: Insufficient role");
   });
 
-  it('Modify User - set active by Admin', async () => {
+  it('set active by Admin', async () => {
     const res = await request(app)
       .post(`/api/user/${new_user_id}/set-active`)
       .set('Authorization', `Bearer ${admin_access_token}`);
@@ -728,7 +1083,7 @@ describe("Test User", () => {
     assert.equal(res.statusCode, 204);
   });
 
-  it('Modify User - set active user not found', async () => {
+  it('set active user not found', async () => {
     const res = await request(app)
       .post(`/api/user/123456789/set-active`)
       .set('Authorization', `Bearer ${admin_access_token}`);
@@ -737,6 +1092,9 @@ describe("Test User", () => {
     assert.equal(res.body.message, "User not found");
   });
 
+  //***************************************** */
+  // Delete
+  //***************************************** */
   it('Delete User - User', async () => {
     const res = await request(app)
       .delete(`/api/user/${new_user_id}`)
