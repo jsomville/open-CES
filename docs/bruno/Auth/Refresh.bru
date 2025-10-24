@@ -1,0 +1,21 @@
+meta {
+  name: Refresh
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{URL}}/api/idp/refresh
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}
+
+body:json {
+  {
+      "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBvcGVuY2VzLm9yZyIsImp0aSI6ImE0NDM4MjFkLTQ3MzQtNGNkNy04YTAwLTE2OTQ3MjUyZTBjYyIsImF1ZCI6Ik9wZW5DRVMiLCJleHAiOjE3NjEzMTIxNzcsImlhdCI6MTc2MTMwODU3NywiaXNzIjoiT3Blbi1DRVMifQ.Z7mCqWFyiriMTx0IXn-iDLRgBvgRUht6jKXUJrxlgAM"
+  }
+}

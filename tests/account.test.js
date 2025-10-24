@@ -10,6 +10,7 @@ import { getCurrencyBySymbol } from '../services/currency_service.js'
 import { deleteUserAndAccount } from '../services/user_service.js';
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
 
+ const userEmail = "test@openced.org";
 
 describe("Test Account", () => {
   let new_account_id;
@@ -20,11 +21,6 @@ describe("Test Account", () => {
   let testCurrencyId;
 
   before(async () => {
-    //Wait for 1 sec --> bug before
-    //await new Promise(resolve => setTimeout(resolve, 100)); // 1 second
-
-    //console.log("Account - Before")
-
     //Get main Testing Tokens
     user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
     admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
@@ -33,7 +29,7 @@ describe("Test Account", () => {
     testCurrencyId = testCurrency.id;
 
     //Create User to relate to account creation
-    const userEmail = "test@openced.org";
+   
     await deleteUserAndAccount(userEmail);
 
     const user = await prisma.user.create({
@@ -59,6 +55,10 @@ describe("Test Account", () => {
       "accountType": 1,
     };
 
+  });
+
+  after(async () => {
+    await deleteUserAndAccount(userEmail);
   });
 
   it('List all Account - Admin', async () => {

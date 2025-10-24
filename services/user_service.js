@@ -70,6 +70,14 @@ export const getUserByEmail = async (email) => {
   return null;
 };
 
+export const getLoginUserByEmail = async (email) => {
+  const user = await prisma.user.findUnique({ where: { email: email } });
+  if (user) {
+    return user;
+  }
+  return null;
+};
+
 export const getUserById = async (id) => {
   const user = await prisma.user.findUnique({ where: { id: id } });
   if (user) {

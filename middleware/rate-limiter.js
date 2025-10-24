@@ -10,7 +10,7 @@ export const rate_limiter_by_sub = asyncHandler(async (req, res, next) => {
   if (!req.user || !req.user.sub) return next();
 
   if (!process.env.IS_TESTING) {
-    const key = "RL" + req.user.sub;
+    const key = "RateLimit:" + req.user.sub;
 
     const remaining = await rate_limiter_by_key(key, res);
 
@@ -36,7 +36,8 @@ export const rate_limiter_by_sub = asyncHandler(async (req, res, next) => {
 
 export const rate_limiter_by_ip = asyncHandler(async (req, res, next) => {
   if (!process.env.IS_TESTING) {
-    const key = "RL" + req.ip;
+
+    const key = "RateLimit:" + req.ip;
 
     const remaining = await rate_limiter_by_key(key, res);
 
@@ -81,7 +82,6 @@ async function rate_limiter_by_key(key, res) {
   // Update response header for remaining rate limit
   res.set('X-RateLimit-Remaining', remaining);
   res.set('X-RateLimit-Limit', limit);
-
 
   return remaining;
 };
