@@ -255,7 +255,7 @@ describe("Login Test", () => {
       .send(payload)
 
     assert.equal(res.statusCode, 403);
-    assert.equal(res.body.error, "Forbidden");
+    assert.equal(res.body.error, "User is not active");
   });
 
   /****************************************** */
