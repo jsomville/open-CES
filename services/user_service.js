@@ -2,7 +2,6 @@ import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
-
 export const addUser = async (email, phone, password, role = "user", firstname = "john", lastname = "doe", region = "EU") => {
   //Hash the password
   const hashedPassword = await argon2.hash(password);
@@ -46,29 +45,19 @@ export const getUserAccountsAndTransactions = async (userId, transactionsCount) 
   }
 }
 
-export const getUserAccounts = async (userId) => {
+/*export const getUserAccounts = async (userId) => {
   const accounts = await prisma.account.findMany({ where: { userId: userId } });
   return accounts;
-};
+};*/
 
-export const getUserAccountsByEmail = async (email) => {
+/*export const getUserAccountsByEmail = async (email) => {
   const user = await getUserByEmail(email);
   if (user) {
     const accounts = await prisma.account.findMany({ where: { userId: user.id } });
     return accounts;
   }
   return null;
-};
-
-export const getUserByEmail = async (email) => {
-  const user = await prisma.user.findUnique({ where: { email: email } });
-  if (user) {
-    // Remove password hash
-    const { passwordHash, ...safeUser } = user;
-    return safeUser;
-  }
-  return null;
-};
+};*/
 
 export const getLoginUserByEmail = async (email) => {
   const user = await prisma.user.findUnique({ where: { email: email } });
@@ -88,14 +77,25 @@ export const getUserById = async (id) => {
   return null;
 };
 
-export const getAccountByEmailAndCurrencyId = async (email, currencyId) => {
-  const user = await getUserByEmail(email);
+export const getUserByEmail = async (email) => {
+  const user = await prisma.user.findUnique({ where: { email: email } });
   if (user) {
-    const account = await prisma.account.findFirst({ where: { userId: user.id, currencyId: currencyId } });
-    return account;
+    // Remove password hash
+    const { passwordHash, ...safeUser } = user;
+    return safeUser;
   }
   return null;
-}
+};
+
+export const getUserByPhone = async (phone) => {
+  const user = await prisma.user.findUnique({ where: { phone: phone } });
+  if (user) {
+    // Remove password hash
+    const { passwordHash, ...safeUser } = user;
+    return safeUser;
+  }
+  return null;
+};
 
 export const setUserIsActiveByEmail = async (email) => {
   const user = await prisma.user.findUnique({ where: { email: email } });

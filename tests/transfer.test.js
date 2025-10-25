@@ -6,9 +6,9 @@ const prisma = new PrismaClient();
 
 import { app } from "../app.js";
 import config from "./config.test.js";
-import { getAccountByEmailAndCurrencyId, createUserAndAccount, deleteUserAndAccount } from "../services/user_service.js";
+import { createUserAndAccount, deleteUserAndAccount } from "../services/user_service.js";
 import { getAccessTokenByEmailAndRole, getAccessToken } from "../services/auth_service.js";
-
+import {getAccountByEmailAndCurrencyId} from "../services/account_service.js";
 
 describe("Test Transfer", () => {
     let admin_access_token;
@@ -260,7 +260,7 @@ describe("Test Transfer", () => {
             .send(payload)
 
         assert.equal(res.statusCode, 422);
-        assert.equal(res.body.error, "Cannot transfert to same account");
+        assert.equal(res.body.error, "Cannot transfer to same account");
     });
 
     it('Transfer - Not own account', async () => {
@@ -289,7 +289,7 @@ describe("Test Transfer", () => {
         const payload = {
             "account": user2AccountId,
             "amount": transferAmount,
-            "description": "Transfer OK",
+            "description": "Transfer Test",
         }
 
         const res = await request(app)

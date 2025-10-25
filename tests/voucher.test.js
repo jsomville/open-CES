@@ -5,7 +5,7 @@ import { app } from "../app.js";
 import config from "./config.test.js";
 import { getCurrencyBySymbol } from "../services/currency_service.js";
 import { daysFromNow } from "../controller/voucherController.js";
-import { getAccountByEmailAndCurrencyId } from "../services/user_service.js";
+import { getAccountByEmailAndCurrencyId } from "../services/account_service.js";
 import { getVoucherByCode } from "../services/voucher_service.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
 

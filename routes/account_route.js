@@ -3,10 +3,10 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getAllAccount, getAccount, createAccount, deleteAccount, transferTo, getTransactions } from '../controller/accountController.js'
-
 import { validate } from '../middleware/validate.js';
-import { createAccountSchema, accountIdSchema, accountTransferSchema } from '../controller/account.schema.js'
+
+import { getAllAccount, getAccount, createAccount, deleteAccount, transferToAccount, getTransactions, getAccountInfoByEmailAndSymbol, getAccountInfoByPhoneAndSymbol } from '../controller/accountController.js'
+import { createAccountSchema, accountIdSchema, accountTransferSchema, accountInfoByEmail, accountInfoByPhone } from '../controller/account.schema.js'
 
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 
@@ -32,9 +32,15 @@ router.post('/', authorizeRole("admin"), validate(createAccountSchema), createAc
 router.delete('/:id', authorizeRole("admin"), validate(accountIdSchema), deleteAccount);
 
 //Transfer To
-router.post("/:id/transferTo", authorizeRole("admin", "user"), validate(accountTransferSchema), transferTo);
+router.post("/:id/transferTo", authorizeRole("admin", "user"), validate(accountTransferSchema), transferToAccount);
 
 //Transaction from account
 router.get("/:id/transactions", authorizeRole("admin", "user"), validate(accountIdSchema), getTransactions);
+
+//get Account info from email and currency
+router.post('/by-email-and-symbol', authorizeRole("admin", "user"), validate(accountInfoByEmail), getAccountInfoByEmailAndSymbol);
+
+//get Account info from email and currency
+router.post('/by-phone-and-symbol', authorizeRole("admin", "user"), validate(accountInfoByPhone), getAccountInfoByPhoneAndSymbol);
 
 export default router;

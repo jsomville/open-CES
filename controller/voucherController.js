@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountByEmailAndCurrencyId } from '../services/user_service.js';
+import { getAccountByEmailAndCurrencyId } from '../services/account_service.js';
 import { getVoucherById } from '../services/voucher_service.js';
 import { getCurrencyById } from '../services/currency_service.js';
 

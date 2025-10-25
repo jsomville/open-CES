@@ -10,7 +10,7 @@ import { getCurrencyBySymbol } from '../services/currency_service.js'
 import { deleteUserAndAccount } from '../services/user_service.js';
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
 
- const userEmail = "test@openced.org";
+const userEmail = "test@openced.org";
 
 describe("Test Account", () => {
   let new_account_id;

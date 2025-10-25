@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import { getUserByEmail } from '../services/user_service.js';
-import { getCurrencyById } from '../services/currency_service.js';
+import { getUserByEmail , getUserByPhone } from '../services/user_service.js';
+import { getCurrencyById, getCurrencyBySymbol} from '../services/currency_service.js';
+import { transferTo, getAccountByUserIDAndCurrencyId } from '../services/account_service.js';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 // @desc Get Account
 // @route GET /api/account
@@ -113,22 +114,28 @@ export const deleteAccount = async (req, res, next) => {
     console.error(error.message);
     return res.status(500).json({ error: "Error deleting account" })
   }
-
 };
 
 // @desc Transfer to an Account
 // @route POST /api/account/id/transfer
-export const transferTo = async (req, res, next) => {
+export const transferToAccount = async (req, res, next) => {
   try {
 
     const id = req.validatedParams.id;
     const accountNumber = req.validatedBody.account;
     const amount = req.validatedBody.amount;
+    const description = req.validatedBody.description;
 
     // Source account exists
     const sourceAccount = await prisma.account.findUnique({ where: { id: id } })
     if (!sourceAccount) {
       return res.status(404).json({ error: "Source account not found" })
+    }
+
+    //Check user transfer from own account
+    const user = await getUserByEmail(req.user.sub);
+    if (sourceAccount.userId != user.id) {
+      return res.status(422).json({ error: "Account must be owned by current user" })
     }
 
     // Destination account exists
@@ -137,15 +144,9 @@ export const transferTo = async (req, res, next) => {
       return res.status(404).json({ error: "Destination account not found" })
     }
 
-    //Check transfer to itself...
-    if (id === accountNumber) {
-      return res.status(422).json({ error: "Cannot transfert to same account" })
-    }
-
-    //Check user transfer from its own account
-    const user = await getUserByEmail(req.user.sub);
-    if (sourceAccount.userId != user.id) {
-      return res.status(422).json({ error: "Account must be owned by current user" })
+    //Source and Destination are different accounts
+    if (sourceAccount.id === destinationAccount.id) {
+      return res.status(422).json({ error: "Cannot transfer to same account" })
     }
 
     //Source and Destination using the same currency
@@ -159,49 +160,12 @@ export const transferTo = async (req, res, next) => {
     }
 
     try {
-      const newSourceBalance = (Number(sourceAccount.balance) - Number(amount)).toFixed(2);
-      //console.log(`New Source balance : ${newSourceBalance}`);
 
-      const newDestinationBalance = (Number(destinationAccount.balance) + Number(amount)).toFixed(2);
-      //console.log(`New Destination balance : ${newDestinationBalance}`);
+      const result = await transferTo(sourceAccount, destinationAccount, amount, description);
 
-      await prisma.$transaction([
-        //Update Source Account Balance
-        prisma.account.update({
-          where: { id: sourceAccount.id },
-          data: { balance: newSourceBalance },
-        }),
-
-        //Update Destination Account Balance
-        prisma.account.update({
-          where: { id: destinationAccount.id },
-          data: { balance: newDestinationBalance },
-        }),
-
-        //Create From Transaction
-        prisma.transaction.create({
-          data: {
-            accountId: sourceAccount.id,
-            amount: amount,
-            currencyId: sourceAccount.currencyId,
-            description: `To account # ${destinationAccount.id}`,
-            transactionType: "Transfer",
-            status: "Completed"
-          }
-        }),
-
-        //Create From Transaction
-        prisma.transaction.create({
-          data: {
-            accountId: destinationAccount.id,
-            amount: amount,
-            currencyId: sourceAccount.currencyId,
-            description: `From account # ${sourceAccount.id}`,
-            transactionType: "Received",
-            status: "Completed"
-          }
-        }),
-      ]);
+      if (!result) {
+        return res.status(500).json({ message: "Transfer Failed" })
+      }
 
       return res.status(201).send()
     }
@@ -222,8 +186,8 @@ export const transferTo = async (req, res, next) => {
 export const getTransactions = async (req, res, next) => {
   try {
     const id = req.validatedParams.id;
-    console.log(`Get transactions from account id ${id}`);  
-    
+    console.log(`Get transactions from account id ${id}`);
+
     // Source account exists
     const sourceAccount = await prisma.account.findUnique({ where: { id: id } })
     if (!sourceAccount) {
@@ -237,7 +201,7 @@ export const getTransactions = async (req, res, next) => {
     }
 
     //Get Transactions
-    const transactions =  await prisma.transaction.findMany({
+    const transactions = await prisma.transaction.findMany({
       where: {
         accountId: sourceAccount.id
       },
@@ -254,3 +218,74 @@ export const getTransactions = async (req, res, next) => {
   }
 };
 
+// get Account info from email and currency
+// @route GET /api/account/by-email-and-symbol
+export const getAccountInfoByEmailAndSymbol = async (req, res, next) => {
+  try {
+    const email = req.validatedBody.email;
+    const symbol = req.validatedBody.symbol;
+
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const currency = await getCurrencyBySymbol(symbol);
+    if (!currency) {
+      return res.status(404).json({ message: "Currency not found" });
+    }
+
+    const account = await getAccountByUserIDAndCurrencyId(user.id, currency.id);
+    if (!account) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    const safeAccountInfo = {
+      id: account.id,
+      firstname: user.firstname,
+      lastname: user.lastname
+    };
+
+    return res.status(200).json(safeAccountInfo);
+  }
+  catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Error obtaining account info" });
+  }
+};
+
+// get Account info from email and currency
+// @route GET /api/account/by-email-and-symbol
+export const getAccountInfoByPhoneAndSymbol = async (req, res, next) => {
+  try {
+    const phone = req.validatedBody.phone;
+    const symbol = req.validatedBody.symbol;
+
+    const user = await getUserByPhone(phone);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const currency = await getCurrencyBySymbol(symbol);
+    if (!currency) {
+      return res.status(404).json({ message: "Currency not found" });
+    }
+
+    const account = await getAccountByUserIDAndCurrencyId(user.id, currency.id);
+    if (!account) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    const safeAccountInfo = {
+      id: account.id,
+      firstname: user.firstname,
+      lastname: user.lastname
+    };
+
+    return res.status(200).json(safeAccountInfo);
+  }
+  catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Error obtaining account info" });
+  }
+};

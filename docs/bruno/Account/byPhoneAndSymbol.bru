@@ -1,0 +1,22 @@
+meta {
+  name: byPhoneAndSymbol
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{URL}}/api/account/by-phone-and-symbol
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}
+
+body:json {
+  {
+      "phone" : "+34123456789",
+      "symbol" : "CES"
+  }
+}

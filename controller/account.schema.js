@@ -27,3 +27,19 @@ export const accountTransferSchema = z.strictObject({
         description: z.string().max(255).optional()
     })
 });
+
+export const accountInfoByEmail= z.strictObject({
+    params: z.strictObject({}).optional(),
+    body: z.strictObject({
+        email: z.string().email(),
+        symbol: z.string().min(1).max(6),
+    })
+});
+
+export const accountInfoByPhone= z.strictObject({
+    params: z.strictObject({}).optional(),
+    body: z.strictObject({
+        phone: z.string().min(8).max(15),
+        symbol: z.string().min(1).max(6),
+    })
+});

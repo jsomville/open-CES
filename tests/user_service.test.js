@@ -6,9 +6,6 @@ import {
     removeUser,
     getUserByEmail,
     getUserById,
-    getUserAccounts,
-    getUserAccountsByEmail,
-    getAccountByEmailAndCurrencyId,
     setActiveUser,
     setPhoneValidated,
     setEmailValidated,
@@ -16,6 +13,7 @@ import {
     deleteUserAndAccount,
     createUserAndAccount,
 } from '../services/user_service.js';
+import { getAccountByEmailAndCurrencyId, getUserAccounts, getUserAccountsByEmail} from '../services/account_service.js';
 
 const prisma = new PrismaClient();
 

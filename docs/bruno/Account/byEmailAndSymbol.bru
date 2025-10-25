@@ -1,0 +1,22 @@
+meta {
+  name: byEmailAndSymbol
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{URL}}/api/account/by-email-and-symbol
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: {{MY_TOKEN}}
+}
+
+body:json {
+  {
+      "email" : "a@b.com",
+      "symbol" : "CES"
+  }
+}
