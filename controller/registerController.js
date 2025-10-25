@@ -1,6 +1,8 @@
 export const register = async (req, res, next) => {
   try {
     
+    
+
 
     return res.status(200).send()
   }
