@@ -111,3 +111,15 @@ model Voucher {
   Currency       Currency @relation("Vouchers", fields: [currencyId], references: [id])
   ClaimedAccount Account? @relation("ClaimedAccount", fields: [claimedAccountId], references: [id])
 }
+
+model UserRegistration{
+  id               Int      @id @default(autoincrement())
+  firstname        String   @db.VarChar(255)
+  lastname         String   @db.VarChar(255)
+  email            String   @unique @db.VarChar(255)
+  phone            String   @unique @db.VarChar(15)
+  region           String
+  code             String   @unique @db.VarChar(36)
+  passwordHash     String   @map("password_hash") @db.VarChar(255)
+  symbol           String   @unique @db.VarChar(5)
+}

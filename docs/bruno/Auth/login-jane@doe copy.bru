@@ -1,0 +1,22 @@
+meta {
+  name: login-jane@doe copy
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{URL}}/api/idp/login
+  body: json
+  auth: inherit
+}
+
+headers {
+  : 
+}
+
+body:json {
+  {
+      "username" : "jane@doe.com",
+      "password" : "Test12345!"
+  }
+}

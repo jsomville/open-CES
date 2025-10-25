@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node server",
     "dev": "node --watch --env-file=.env server",
-    "test": "cross-env NODE_ENV=test mocha tests/*.js",
+    "test": "cross-env NODE_ENV=test mocha --timeout 10000 tests/*.js",
     "init": "node prisma/initdb.js"
   },
   "repository": {

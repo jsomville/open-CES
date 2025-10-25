@@ -19,7 +19,8 @@ import currency_route from './routes/currency_route.js'
 import account_route from './routes/account_route.js'
 import merchant_route from './routes/merchant_route.js'
 import voucher_route from './routes/voucher_route.js'
-import test_route from './routes/test_route.js'
+import register_route from './routes/register_route.js'
+//import test_route from './routes/test_route.js'
 
 //get Dfunctions to deal with static files
 const __filename = fileURLToPath(import.meta.url);
@@ -60,9 +61,10 @@ app.use('/api/user', user_route);
 app.use('/api/account', account_route);
 app.use('/api/merchant', merchant_route);
 app.use('/api/voucher', voucher_route);
+app.use('/api/register', register_route);
 
 //Test Route
-app.use('/test', test_route);
+//app.use('/test', test_route);
 
 
 //Add after routes middleware

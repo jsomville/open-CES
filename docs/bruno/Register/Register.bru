@@ -1,0 +1,23 @@
+meta {
+  name: Register
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{URL}}/api/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "firstname" : "John",
+    "lastname" : "Doe",
+    "email" : "john@doe.org",
+    "region": "EU",
+    "phone": "+3267890765",
+    "password": "TestABC123!",
+    "symbol" : "CES"
+  }
+}

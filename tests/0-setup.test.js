@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
-//import { redisClient } from './redis/redisClient.js';
+
 import { shutdown } from '../app.js'
 
 import config from "./config.test.js";
