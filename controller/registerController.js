@@ -1,5 +1,4 @@
 
-import argon2 from 'argon2';
 import { addUserRegistration, getUserRegistrationByEmail, getUserRegistrationByCode, deleteUserRegistrationById} from '../services/register_service.js';
 import nodemailer from 'nodemailer';
 import { addUser, getUserByEmail } from '../services/user_service.js';
@@ -65,7 +64,8 @@ export const register = async (req, res, next) => {
     );
 
     //Send Email with code
-    await sendValidationEmail(data.email, code);
+    //await sendValidationEmail(data.email, code);
+    //https://docs.railway.com/reference/outbound-networking#debugging-smtp-issues
 
     return res.status(200).json({ message: "Registration successful, check your email for the confirmation code" });
   }
