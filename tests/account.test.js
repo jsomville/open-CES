@@ -19,9 +19,7 @@ describe("Test Account", () => {
   let admin_access_token;
   let user_access_token;
   let user_id;
-  let testCurrencyId;
-
-  before(async () => {
+  let testCurrencyId;  before(async () => {
     //Get main Testing Tokens
     user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
     admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
@@ -55,8 +53,9 @@ describe("Test Account", () => {
       "currencyId": testCurrencyId,
       "accountType": 1,
     };
-
   });
+
+
 
   after(async () => {
     await deleteUserAndAccount(userEmail);

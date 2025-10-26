@@ -28,6 +28,12 @@ export const removeUser = async (id) => {
   });
 }
 
+export const deleteUserByEmail = async (email) => {
+  await prisma.user.delete({
+    where: { email: email }
+  });
+}
+
 export const getUserAccountsAndTransactions = async (userId, transactionsCount) => {
   const accounts = await prisma.account.findMany({ where: { userId: userId } });
   for (const account of accounts) {
