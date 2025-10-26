@@ -1,8 +1,8 @@
 
 import argon2 from 'argon2';
-import { addUserRegistration, getUserRegistrationByEmail, getUserRegistrationByCode} from '../services/register_service.js';
+import { addUserRegistration, getUserRegistrationByEmail, getUserRegistrationByCode, deleteUserRegistrationById} from '../services/register_service.js';
 import nodemailer from 'nodemailer';
-import { addUser } from '../services/user_service.js';
+import { addUser, getUserByEmail } from '../services/user_service.js';
 
 // Create transporter outside for reuse
 const transporter = nodemailer.createTransport({
@@ -37,8 +37,15 @@ export const register = async (req, res, next) => {
   try {
     const data = req.validatedBody;
 
+    // Check if registration already exists
     const existingUser = await getUserRegistrationByEmail(data.email);
     if (existingUser) {
+      return res.status(409).json({ message: "Registration already exists" });
+    }
+
+    // Check if user already exists
+    const user = await getUserByEmail(data.email);
+    if (user) {
       return res.status(409).json({ message: "User already exists" });
     }
 
@@ -57,10 +64,10 @@ export const register = async (req, res, next) => {
       data.symbol
     );
 
-    //Send Email with code (TODO)
+    //Send Email with code
     await sendValidationEmail(data.email, code);
 
-    return res.status(200).send()
+    return res.status(200).json({ message: "Registration successful, check your email for the confirmation code" });
   }
   catch (error) {
     console.error(error.message);
@@ -82,12 +89,12 @@ export const validateRegistration = async (req, res, next) => {
 
     //Create Account
     
-
     // Activate User
      
     // Delete registration after validation
+    await deleteUserRegistrationById(registration.id);
 
-    return res.status(200).send()
+    return res.status(200).json({ message: "Registration validated successfully" })
   }
   catch (error) {
     console.error(error.message);

@@ -32,3 +32,8 @@ export const getUserRegistrationByCode = async (code) => {
   const userRegistration = await prisma.userRegistration.findUnique({ where: { code: code } });
   return userRegistration;
 }
+
+export const deleteUserRegistrationById = async (id) => {
+  await prisma.userRegistration.delete({ where: { id: id } });
+}
+
