@@ -51,7 +51,7 @@ export const login = async (req, res, next) => {
         res.status(200).json({ accessToken, refreshToken })
     }
     catch (error) {
-        console.log(error.message)
+        console.log("login", error)
         return res.status(500).json({ error: error.message })
     }
 }

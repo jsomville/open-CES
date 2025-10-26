@@ -117,9 +117,11 @@ model UserRegistration{
   firstname        String   @db.VarChar(255)
   lastname         String   @db.VarChar(255)
   email            String   @unique @db.VarChar(255)
-  phone            String   @unique @db.VarChar(15)
-  region           String
+  phone            String   @db.VarChar(15)
+  region           String   @db.VarChar(50)
   code             String   @unique @db.VarChar(36)
   passwordHash     String   @map("password_hash") @db.VarChar(255)
   symbol           String   @unique @db.VarChar(5)
+
+  createdAt        DateTime  @default(now()) @map("created_at")
 }

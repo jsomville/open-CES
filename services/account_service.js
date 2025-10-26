@@ -4,6 +4,22 @@ const prisma = new PrismaClient()
 import { getUserByEmail } from './user_service.js';
 import { getAccount } from '../controller/accountController.js';
 
+export const createAccount = async (userId, currencyId, accountType) => {
+  try {
+    const newAccount = await prisma.account.create({
+      data: {
+        userId: userId,
+        currencyId: currencyId,
+        accountType: accountType
+      }
+    });
+    return newAccount;
+  } catch (error) {
+    console.error("Error Create Account Service : " + error.message);
+    return null;
+  }
+}
+
 export const transferTo = async (sourceAccount, destinationAccount, amount, description) => {
   try {
     const newSourceBalance = (Number(sourceAccount.balance) - Number(amount)).toFixed(2);
@@ -82,4 +98,3 @@ export const getAccountByUserIDAndCurrencyId = async (userId, currencyId) => {
   const account = await prisma.account.findFirst({ where: { userId: userId, currencyId: currencyId } });
   return account;
 }
- 

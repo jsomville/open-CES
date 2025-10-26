@@ -2,6 +2,8 @@ import assert from "node:assert";
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
+import argon2 from 'argon2';
+
 import { app } from "../app.js";
 //import config from "./config.test.js";
 import { setActiveUser, setPhoneValidated, setEmailValidated, getUserByEmail, addUser, removeUser } from "../services/user_service.js";
@@ -43,7 +45,8 @@ describe("Login Test", () => {
       //Check and create for validated user
       userTemp = await getUserByEmail(okUser.email);
       if (!userTemp) {
-        const user = await addUser(okUser.email, okUser.phone, okUser.password);
+        const hashedPassword = await argon2.hash(okUser.password);
+        const user = await addUser(okUser.email, okUser.phone, hashedPassword);
 
         await setActiveUser(user.id);
         await setEmailValidated(user.id);
@@ -53,7 +56,8 @@ describe("Login Test", () => {
       //Check and create for validated admin
       userTemp = await getUserByEmail(okAdmin.email);
       if (!userTemp) {
-        const user = await addUser(okAdmin.email, okAdmin.phone, okAdmin.password, "admin");
+        const hashedPassword = await argon2.hash(okAdmin.password);
+        const user = await addUser(okAdmin.email, okAdmin.phone, hashedPassword, "admin");
 
         await setActiveUser(user.id);
         await setEmailValidated(user.id);
@@ -63,7 +67,8 @@ describe("Login Test", () => {
       //Check and create for not activated user
       userTemp = await getUserByEmail(notValidatedUser.email);
       if (!userTemp) {
-        const user = await addUser(notValidatedUser.email, notValidatedUser.phone, notValidatedUser.password);
+        const hashedPassword = await argon2.hash(notValidatedUser.password);
+        const user = await addUser(notValidatedUser.email, notValidatedUser.phone, hashedPassword);
         //await setActiveUser(user.id);
         await setEmailValidated(user.id);
         await setPhoneValidated(user.id);
@@ -72,7 +77,8 @@ describe("Login Test", () => {
       //Check and create for no Phone
       userTemp = await getUserByEmail(noPhoneUser.email);
       if (!userTemp) {
-        const user = await addUser(noPhoneUser.email, noPhoneUser.phone, noPhoneUser.password);
+        const hashedPassword = await argon2.hash(noPhoneUser.password);
+        const user = await addUser(noPhoneUser.email, noPhoneUser.phone, hashedPassword);
         await setActiveUser(user.id);
         await setEmailValidated(user.id);
         //await setPhoneValidated(user.id);
@@ -81,7 +87,8 @@ describe("Login Test", () => {
       //Check and create for no validated Email
       userTemp = await getUserByEmail(noEmailUser.email);
       if (!userTemp) {
-        const user = await addUser(noEmailUser.email, noEmailUser.phone, noEmailUser.password);
+        const hashedPassword = await argon2.hash(noEmailUser.password);
+        const user = await addUser(noEmailUser.email, noEmailUser.phone, hashedPassword);
         await setActiveUser(user.id);
         //await setEmailValidated(user.id);
         await setPhoneValidated(user.id);
@@ -89,6 +96,7 @@ describe("Login Test", () => {
     }
     catch (error) {
       console.error(error);
+      throw error;
     }
 
   });

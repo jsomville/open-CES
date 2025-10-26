@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
-import { getUserByEmail , getUserByPhone } from '../services/user_service.js';
+import { getUserByEmail , getUserById, getUserByPhone } from '../services/user_service.js';
 import { getCurrencyById, getCurrencyBySymbol} from '../services/currency_service.js';
-import { transferTo, getAccountByUserIDAndCurrencyId } from '../services/account_service.js';
+import { createAccount, transferTo, getAccountByUserIDAndCurrencyId } from '../services/account_service.js';
 
 const prisma = new PrismaClient();
 
@@ -39,7 +39,7 @@ export const getAccount = async (req, res, next) => {
 
 // @desc Create Account
 // @route POST /api/account
-export const createAccount = async (req, res, next) => {
+export const addAccount = async (req, res, next) => {
   try {
     const data = req.validatedBody;
 
@@ -47,6 +47,12 @@ export const createAccount = async (req, res, next) => {
     const currency = await getCurrencyById(data.currencyId);
     if (!currency) {
       return res.status(404).json({ message: "Currency not found" })
+    }
+
+    //Check User exists
+    const user = await getUserById(data.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" })
     }
 
     //Account exist for this user and this currency
@@ -71,7 +77,7 @@ export const createAccount = async (req, res, next) => {
     }
 
     //Create the New account
-    const newAccount = await prisma.account.create({ data });
+    const newAccount = await createAccount(data.userId, data.currencyId, data.accountType);
 
     return res.status(201).json(newAccount)
   }

@@ -2,10 +2,7 @@ import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
-export const addUser = async (email, phone, password, role = "user", firstname = "john", lastname = "doe", region = "EU") => {
-  //Hash the password
-  const hashedPassword = await argon2.hash(password);
-
+export const addUser = async (email, phone, hashedPassword, role = "user", firstname = "john", lastname = "doe", region = "EU") => {
   //Create User
   const user = await prisma.user.create({
     data: {
@@ -44,20 +41,6 @@ export const getUserAccountsAndTransactions = async (userId, transactionsCount) 
     }
   }
 }
-
-/*export const getUserAccounts = async (userId) => {
-  const accounts = await prisma.account.findMany({ where: { userId: userId } });
-  return accounts;
-};*/
-
-/*export const getUserAccountsByEmail = async (email) => {
-  const user = await getUserByEmail(email);
-  if (user) {
-    const accounts = await prisma.account.findMany({ where: { userId: user.id } });
-    return accounts;
-  }
-  return null;
-};*/
 
 export const getLoginUserByEmail = async (email) => {
   const user = await prisma.user.findUnique({ where: { email: email } });

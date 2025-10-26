@@ -16,3 +16,10 @@ export const registerSchema = z.strictObject({
     symbol: z.string().min(1).max(6),
   }),
 });
+
+export const registerValidationSchema = z.strictObject({
+  params: z.strictObject({
+    code: z.string().min(6).max(6),
+  }),
+  body: z.strictObject({}).optional(),
+});

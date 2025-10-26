@@ -60,14 +60,11 @@ export const createUser = async (req, res, next) => {
       return res.status(409).json({ message: "Phone already used" })
     }
 
-    const email = data.email;
-    const phone = data.phone;
     const password = data.password;
     const role = "user";
-    const firstname = data.firstname;
-    const lastname = data.lastname;
-    const region = data.region;
-    const user = await addUser(email, phone, password, role, firstname, lastname, region);
+    const hashedPassword = await argon2.hash(password);
+
+    const user = await addUser(data.email, data.phone, hashedPassword, role, data.firstname, data.lastname, data.region);
 
     return res.status(201).json(user)
   }

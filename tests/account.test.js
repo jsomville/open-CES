@@ -9,6 +9,7 @@ import config from "./config.test.js";
 import { getCurrencyBySymbol } from '../services/currency_service.js'
 import { deleteUserAndAccount } from '../services/user_service.js';
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
+import { createCurrency } from "../controller/currencyController.js";
 
 const userEmail = "test@openced.org";
 
@@ -125,9 +126,8 @@ describe("Test Account", () => {
       .set('Authorization', `Bearer ${admin_access_token}`)
       .send(payload)
 
-    // Prisma FK violation is handled as 500 by controller
-    assert.equal(res.statusCode, 500);
-    assert.equal(res.body.message, "Error creating account");
+    assert.equal(res.statusCode, 404);
+    assert.equal(res.body.message, "User not found");
   });
 
   it('Add account - User', async () => {

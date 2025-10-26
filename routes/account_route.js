@@ -5,7 +5,7 @@ import { authorizeRole } from '../middleware/authorizeRole.js'
 
 import { validate } from '../middleware/validate.js';
 
-import { getAllAccount, getAccount, createAccount, deleteAccount, transferToAccount, getTransactions, getAccountInfoByEmailAndSymbol, getAccountInfoByPhoneAndSymbol } from '../controller/accountController.js'
+import { getAllAccount, getAccount, addAccount, deleteAccount, transferToAccount, getTransactions, getAccountInfoByEmailAndSymbol, getAccountInfoByPhoneAndSymbol } from '../controller/accountController.js'
 import { createAccountSchema, accountIdSchema, accountTransferSchema, accountInfoByEmail, accountInfoByPhone } from '../controller/account.schema.js'
 
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
@@ -23,7 +23,7 @@ router.get('/', authorizeRole("admin"), getAllAccount);
 router.get('/:id', authorizeRole("admin"), validate(accountIdSchema), getAccount);
 
 //create account
-router.post('/', authorizeRole("admin"), validate(createAccountSchema), createAccount);
+router.post('/', authorizeRole("admin"), validate(createAccountSchema), addAccount);
 
 //Modify account
 //Account cannot be modified
