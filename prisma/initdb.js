@@ -11,7 +11,7 @@ async function init() {
     const userPwdHash = await argon2.hash(password);
     await prisma.user.create({
         data: {
-            firstname: "default",
+            firstname: "admin",
             lastname: "admin",
             email: email,
             phone: "+32488040204",

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
-import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName } from '../services/currency_service.js';
+import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, doFundAccount} from '../services/currency_service.js';
 
 // @desc Get Currencies
 // @route GET /api/currency
@@ -168,17 +168,8 @@ export const deleteCurrency = async (req, res, next) => {
 //@route POST /api/currency/id/fundAccount
 export const fundAccount = async (req, res, next) => {
   try {
-    //Account is mandatory
-    const accountNumber = req.body.account;
-    if (!accountNumber) {
-      return res.status(422).json({ error: "Account field mandatory" })
-    }
-
-    // Amount is a positive float
-    const amount = Number(req.body.amount)
-    if (isNaN(amount) || amount < 0) {
-      return res.status(422).json({ error: "Amount must be a positive number" })
-    }
+    const accountNumber = req.validatedBody.account;
+    const amount = req.validatedBody.amount;
 
     //Currency exists
     const currency = await prisma.currency.findUnique({ where: { id: parseInt(req.params.id) } })
@@ -187,8 +178,7 @@ export const fundAccount = async (req, res, next) => {
     }
 
     // Destination account exists
-    const destinationAccountNumber = parseInt(req.body.account)
-    const destinationAccount = await prisma.account.findUnique({ where: { id: destinationAccountNumber } })
+    const destinationAccount = await prisma.account.findUnique({ where: { id: accountNumber } })
     if (!destinationAccount) {
       return res.status(404).json({ error: "Destination account not found" })
     }
@@ -200,46 +190,9 @@ export const fundAccount = async (req, res, next) => {
 
     //Fund the account
     try {
-      const destinationBalance = Number(destinationAccount.balance) + Number(amount);
-      const currencyBalance = Number(currency.balance) - Number(amount);
+      
+      await doFundAccount(currency, destinationAccount, amount);
 
-      await prisma.$transaction([
-        //Deduct the Currency Balance
-        prisma.currency.update({
-          where: { id: currency.id },
-          data: { balance: currencyBalance }
-        }),
-
-        //Add to Destination Account
-        prisma.account.update({
-          where: { id: destinationAccount.id },
-          data: { balance: destinationBalance },
-        }),
-
-        //Create Currency Transaction
-        prisma.transaction.create({
-          data: {
-            accountId: destinationAccount.id,
-            amount: amount,
-            currencyId: currency.id,
-            transactionType: "Fund Account",
-            description: `From account # ${accountNumber}`,
-            status: "Completed"
-          }
-        }),
-
-        //Create user Transaction
-        prisma.transaction.create({
-          data: {
-            accountId: accountNumber,
-            amount: amount,
-            currencyId: currency.id,
-            transactionType: "Fund Account",
-            description: `To account # ${destinationAccount.id}`,
-            status: "Completed"
-          }
-        }),
-      ])
     }
     catch (error) {
       console.error(error.message);

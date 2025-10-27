@@ -1,7 +1,9 @@
 
 import { addUserRegistration, getUserRegistrationByEmail, getUserRegistrationByCode, deleteUserRegistrationById} from '../services/register_service.js';
 import nodemailer from 'nodemailer';
-import { addUser, getUserByEmail } from '../services/user_service.js';
+import { addUser, getUserByEmail, setActiveUser} from '../services/user_service.js';
+import { createAccount } from '../services/account_service.js';
+import { getCurrencyBySymbol } from '../services/currency_service.js';
 
 // Create transporter outside for reuse
 const transporter = nodemailer.createTransport({
@@ -85,12 +87,32 @@ export const validateRegistration = async (req, res, next) => {
     }
 
     // Create User
-    await addUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
+    const user = await addUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
+    if (!user) {
+      return res.status(500).json({ message: "Error creating user" });
+    }
+
+    // Activate User
+    await setActiveUser(user.id);
+
+    // get Currency
+    const currency = await getCurrencyBySymbol(registration.symbol);
+    if (!currency) {
+      return res.status(404).json({ message: "Currency not found" });
+    }
 
     //Create Account
-    
-    // Activate User
-     
+    const accountType = 1; // TO FIX
+    const account = await createAccount(user.id, currency.id, accountType);
+    if (!account) {
+      return res.status(500).json({ message: "Error creating account" });
+    }
+
+    // *****************************
+    // Temp fund account
+    // *****************************
+    //await fundAccount(account.id, 100);
+
     // Delete registration after validation
     await deleteUserRegistrationById(registration.id);
 

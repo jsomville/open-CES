@@ -5,7 +5,7 @@ import { app } from "../app.js"
 
 import { getCurrencyBySymbol } from "../services/currency_service.js";
 import { deleteUserRegistrationByEmail, addUserRegistration } from "../services/register_service.js";
-import { deleteUserByEmail } from "../services/user_service.js";
+import { deleteUserAndAccount } from "../services/user_service.js";
 import config from "./config.test.js";
 
 describe("Registration", () => {
@@ -23,7 +23,7 @@ describe("Registration", () => {
         }
 
          try {
-            await deleteUserByEmail(registerTestMail)
+            await deleteUserAndAccount(registerTestMail)
         }
         catch (err) {
 
@@ -33,7 +33,7 @@ describe("Registration", () => {
     after(async () => {
         try {
             await deleteUserRegistrationByEmail(registerTestMail)
-            await deleteUserByEmail(registerTestMail)
+            await deleteUserAndAccount(registerTestMail)
         }
         catch (err) {
 
@@ -64,6 +64,7 @@ describe("Registration", () => {
         assert.equal(res.body.message, "Registration successful, check your email for the confirmation code");
 
         await deleteUserRegistrationByEmail(registerTestMail)
+        
     });
 
     it('Register a user - firstname missing', async () => {
@@ -264,7 +265,8 @@ describe("Registration", () => {
         assert.equal(res.statusCode, 200);
         assert.equal(res.body.message, "Registration validated successfully");
 
-        await deleteUserByEmail(registerTestMail);
+        await deleteUserAndAccount(registerTestMail);
+        
     });
 
     it('Validate - Invalid Code format', async () => {

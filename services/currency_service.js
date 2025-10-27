@@ -39,3 +39,41 @@ export const getCurrencyList = async () => {
 
     return currencyList;
 }
+
+export const doFundAccount = async (currency, account, amount) => {
+    try {
+        const newAccountBalance = Number(account.balance) + Number(amount);
+        const currencyBalance = Number(currency.balance) - Number(amount);
+
+        await prisma.$transaction([
+
+            //Update Currency Balance
+            prisma.currency.update({
+                where: { id: currency.id },
+                data: { balance: currencyBalance }
+            }),
+
+            //Update Account Balance
+            prisma.account.update({
+                where: { id: account.id },
+                data: { balance: newAccountBalance },
+            }),
+
+            //Create Transaction
+            prisma.transaction.create({
+                data: {
+                    accountId: account.id,
+                    amount: amount,
+                    currencyId: currency.id,
+                    transactionType: "Fund Account",
+                    description: `To account # ${account.id}`,
+                    status: "Completed"
+                }
+            }),
+        ])
+    }
+    catch (error) {
+        console.error("Error Fund Account Service : " + error.message);
+        throw error;
+    }
+}
