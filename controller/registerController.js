@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import { addUser, getUserByEmail, setActiveUser} from '../services/user_service.js';
 import { createAccount } from '../services/account_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
+import { doFundAccount } from '../services/currency_service.js';
 
 // Create transporter outside for reuse
 const transporter = nodemailer.createTransport({
@@ -50,11 +51,17 @@ export const register = async (req, res, next) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
+    // get Currency
+    const currency = await getCurrencyBySymbol(data.symbol);
+    if (!currency) {
+      return res.status(404).json({ message: "Currency not found" });
+    }
+
     // Generate a code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Create Registration in DB
-    await addUserRegistration(
+    const registration = await addUserRegistration(
       data.email,
       data.phone,
       data.password,
@@ -68,6 +75,31 @@ export const register = async (req, res, next) => {
     //Send Email with code
     //await sendValidationEmail(data.email, code);
     //https://docs.railway.com/reference/outbound-networking#debugging-smtp-issues
+
+    //TEMP BECAUSE MAIL DOSENT WORK
+     // Create User
+    const newUser = await addUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
+    if (!newUser) {
+      return res.status(500).json({ message: "Error creating user" });
+    }
+
+    // Activate User
+    await setActiveUser(newUser.id);
+
+    //Create Account
+    const accountType = 1; // TO FIX
+    const account = await createAccount(newUser.id, currency.id, accountType);
+    if (!account) {
+      return res.status(500).json({ message: "Error creating account" });
+    }
+
+    // *****************************
+    // Temp fund account
+    // *****************************
+    await doFundAccount(currency, account, 10);
+
+    // Delete registration after validation
+    await deleteUserRegistrationById(registration.id);
 
     return res.status(200).json({ message: "Registration successful, check your email for the confirmation code" });
   }
@@ -86,32 +118,27 @@ export const validateRegistration = async (req, res, next) => {
       return res.status(404).json({ message: "Registration not found" });
     }
 
-    // Create User
-    const user = await addUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
-    if (!user) {
-      return res.status(500).json({ message: "Error creating user" });
-    }
-
-    // Activate User
-    await setActiveUser(user.id);
-
     // get Currency
     const currency = await getCurrencyBySymbol(registration.symbol);
     if (!currency) {
       return res.status(404).json({ message: "Currency not found" });
     }
 
+    // Create User
+    const newUser = await addUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
+    if (!newUser) {
+      return res.status(500).json({ message: "Error creating user" });
+    }
+
+    // Activate User
+    await setActiveUser(newUser.id);
+
     //Create Account
     const accountType = 1; // TO FIX
-    const account = await createAccount(user.id, currency.id, accountType);
+    const account = await createAccount(newUser.id, currency.id, accountType);
     if (!account) {
       return res.status(500).json({ message: "Error creating account" });
     }
-
-    // *****************************
-    // Temp fund account
-    // *****************************
-    //await fundAccount(account.id, 100);
 
     // Delete registration after validation
     await deleteUserRegistrationById(registration.id);

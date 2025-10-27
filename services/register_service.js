@@ -40,3 +40,8 @@ export const deleteUserRegistrationById = async (id) => {
 export const deleteUserRegistrationByEmail = async (email) => {
   await prisma.userRegistration.delete({ where: { email: email } });
 }
+
+export const validateRegistration = async () => {
+
+  
+}
