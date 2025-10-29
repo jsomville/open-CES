@@ -5,13 +5,17 @@ Open **C**urrency **E**xchange **S**ystem is a back-end solution for local curre
 - Currency Management
 - Account Management
 - Account Top Off
-- Transfer / Exchange
 - Voucher Management
-- Claim Voucher
+- Transfer / Exchange / claim voucher
 
 For more detail look at our web site : http://open-ces.org/
 
-# To run the server
+## pre requisite
+ - postgres db
+ - redis
+ - node.js
+
+## To run the server
 
 Make sure to install depencencies : npm install
 
@@ -29,11 +33,8 @@ to run the tests :
 
 ---
 
-# Configuration
-
-All configuration can be find in a .env file
-The following variables are expected:
-
+# Configuration file
+An .env file is expected on the root of thhe project. Containing the following variables:
 - PORT=port number
 - ENVIRO=string for environement, a value of "PRD" refers to production
 - JWT_ACCESS_SECRET_KEY=Key for JWT Access token
