@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
-import { getUserByEmail , getUserById, getUserByPhone } from '../services/user_service.js';
-import { getCurrencyById, getCurrencyBySymbol} from '../services/currency_service.js';
-import { createAccount, transferTo, getAccountByUserIDAndCurrencyId } from '../services/account_service.js';
+import { getUserByEmail, getUserById, getUserByPhone } from '../services/user_service.js';
+import { getCurrencyById, getCurrencyBySymbol } from '../services/currency_service.js';
+import { createAccount, transferTo, getAccountById, getAccountByUserIDAndCurrencyId, getTransactionByAccountId, getTransactionByAccountIdAndPage} from '../services/account_service.js';
 
 const prisma = new PrismaClient();
 
@@ -188,35 +188,70 @@ export const transferToAccount = async (req, res, next) => {
 };
 
 // @desc Transfer to an Account
-// @route POST /api/account/id/transfer
+// @route POST /api/account/id/transactions
 export const getTransactions = async (req, res, next) => {
   try {
     const id = req.validatedParams.id;
-    console.log(`Get transactions from account id ${id}`);
 
     // Source account exists
-    const sourceAccount = await prisma.account.findUnique({ where: { id: id } })
-    if (!sourceAccount) {
+    const account = await getAccountById(id);
+    if (!account) {
       return res.status(404).json({ error: "Source account not found" })
     }
 
     //Check user access to its own account
     const user = await getUserByEmail(req.user.sub);
-    if (sourceAccount.userId != user.id) {
+    if (account.userId != user.id) {
+      return res.status(422).json({ error: "Account must be owned by current user" })
+    }
+
+    const transactions = await getTransactionByAccountId(account.id);
+
+    return res.status(200).json(transactions);
+  }
+  catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Error getting transactions from account" })
+  }
+};
+
+// @desc Transfer to an Account
+// @route POST /api/account/id/transactions
+export const getTransactionsByPage = async (req, res, next) => {
+  try {
+    const id = req.validatedParams.id;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    console.log(`Page: ${page}, Limit: ${limit}, Skip: ${skip}`);
+
+    // Source account exists
+    const account = await getAccountById(id);
+    if (!account) {
+      return res.status(404).json({ error: "Source account not found" })
+    }
+
+    //Check user access to its own account
+    const user = await getUserByEmail(req.user.sub);
+    if (account.userId != user.id) {
       return res.status(422).json({ error: "Account must be owned by current user" })
     }
 
     //Get Transactions
-    const transactions = await prisma.transaction.findMany({
-      where: {
-        accountId: sourceAccount.id
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    const transactions = await getTransactionByAccountIdAndPage(account.id, skip, limit);
 
-    return res.status(200).json(transactions);
+    const totalCount = transactions.length;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    const pagination = {
+      totalCount: totalCount,
+      totalPages: totalPages,
+      currentPage: page,
+    };
+
+    return res.status(200).json({ transactions, pagination });
   }
   catch (error) {
     console.error(error.message);

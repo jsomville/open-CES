@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 import { getUserByEmail } from './user_service.js';
-import { getAccount } from '../controller/accountController.js';
+import { getCurrencyBySymbol } from './currency_service.js';
 
 export const createAccount = async (userId, currencyId, accountType) => {
   try {
@@ -80,6 +80,18 @@ export const getAccountByEmailAndCurrencyId = async (email, currencyId) => {
   return null;
 }
 
+export const getAccountByEmailAndCurrencySymbol = async (email, currencySymbol) => {
+  const user = await getUserByEmail(email);
+  if (user) {
+    const currency = await getCurrencyBySymbol(currencySymbol);
+    if (currency) {
+      const account = await getAccountByUserIDAndCurrencyId(user.id, currency.id);
+      return account;
+    }
+  }
+  return null;
+}
+
 export const getUserAccountsByEmail = async (email) => {
   const user = await getUserByEmail(email);
   if (user) {
@@ -111,10 +123,47 @@ export function getAccountCountByCurrencyId(currencyId) {
         }
     });
 }
+
 export function getAccountCountByUserId(userId) {
     return prisma.account.count({
         where: {
             userId: userId
         }
     });
-}  
+}
+
+export function getTransactionByAccountId(accountId) {
+    return prisma.transaction.findMany({
+        where: {
+            accountId: accountId
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+}
+
+export function getLatestTransactionByAccountId(accountId, transactionCount) {
+    return prisma.transaction.findMany({
+        where: {
+            accountId: accountId
+        },
+        orderBy: {
+            createdAt: 'desc'
+        },
+        take: transactionCount
+    });
+}
+
+export function getTransactionByAccountIdAndPage(accountId, skip, limit) {
+    return prisma.transaction.findMany({
+        where: {
+            accountId: accountId
+        },
+        orderBy: {
+            createdAt: 'desc'
+        },
+        skip: skip,
+        take: limit
+    });
+}

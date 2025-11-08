@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 import { app } from "../app.js";
 import config from "./config.test.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
+import { getAccountByEmailAndCurrencySymbol } from '../services/account_service.js';    
 
 describe("Test Account Extra", () => {
     let admin_access_token;
@@ -200,4 +201,68 @@ describe("Test Account Extra", () => {
 
         assert.equal(res.statusCode, 404);
     });
+
+    /********************************* */
+    // Get Account Transactions
+    /********************************* */
+    it('Get Account Transactions', async () => {
+        //Get Account
+        const account = await getAccountByEmailAndCurrencySymbol(config.user1Email, config.testCurrency);
+
+        // add transactions
+        for (let i = 0; i < 10; i++) {
+            await prisma.transaction.create({
+                data: {
+                    accountId: account.id,
+                    currencyId: account.currencyId,
+                    amount: 100 + i,
+                    description: `Test Transaction ${i + 1}`,
+                    status: "Completed",
+                    transactionType: "Test"
+                }
+            });
+        }
+
+        const res = await request(app)
+            .get(`/api/account/${account.id}/transactions`)
+            .set('Authorization', `Bearer ${user_access_token}`)
+            .send();
+
+        assert.equal(res.statusCode, 200);
+        assert.ok(Array.isArray(res.body));
+    });
+
+    it('Get Account Transactions - By Pages', async () => {
+        //Get Account
+        const account = await getAccountByEmailAndCurrencySymbol(config.user1Email, config.testCurrency);
+
+         // add transactions
+        for (let i = 0; i < 10; i++) {
+            await prisma.transaction.create({
+                data: {
+                    accountId: account.id,
+                    currencyId: account.currencyId,
+                    amount: 100 + i,
+                    description: `Test Transaction ${i + 1}`,
+                    status: "Completed",
+                    transactionType: "Test"
+                }
+            });
+        }
+
+        const page=1;
+        const limit=5;
+
+        const res = await request(app)
+            .get(`/api/account/${account.id}/transactions-by-page?page=${page}&limit=${limit}`)
+            .set('Authorization', `Bearer ${user_access_token}`)
+            .send();
+
+        assert.equal(res.statusCode, 200);
+        assert.ok(Array.isArray(res.body.transactions));
+        assert.ok(res.body.pagination);
+        assert.equal(res.body.pagination.currentPage, page);
+        assert.equal(res.body.pagination.totalCount, limit);
+    });
+
 });

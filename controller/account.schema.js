@@ -19,6 +19,15 @@ export const accountIdSchema = z.strictObject({
     body: z.strictObject({}).optional(),
 });
 
+export const accountIdTransactionPageSchema = z.strictObject({
+    params: accountParamSchema,
+    body: z.strictObject({}).optional(),
+    query: z.object({
+        page: z.string().regex(/^\d+$/).transform(Number).optional(),
+        limit: z.string().regex(/^\d+$/).transform(Number).optional()
+    }).optional(),
+});
+
 export const accountTransferSchema = z.strictObject({
     params: accountParamSchema,
     body: z.strictObject({

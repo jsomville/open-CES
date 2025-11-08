@@ -4,7 +4,9 @@ const prisma = new PrismaClient()
 
 import { getUserByEmail, getUserAccountsAndTransactions } from '../services/user_service.js';
 
-import { getCurrencyById } from '../services/currency_service.js';  
+import { getCurrencyById } from '../services/currency_service.js';
+
+import { getLatestTransactionByAccountId } from '../services/account_service.js';
 
 const transactionsCount = 5
 
@@ -79,11 +81,13 @@ export const getUserDetail = async (req, res, next) => {
             };
 
             // get the last transactions
-            const latestTransactions = await prisma.transaction.findMany({
+            /*const latestTransactions = await prisma.transaction.findMany({
                 where: { accountId: account.id },
                 orderBy: { createdAt: 'desc' },
                 take: transactionsCount,
-            });
+            });*/
+            const latestTransactions = await getLatestTransactionByAccountId(account.id, transactionsCount);
+
             if (latestTransactions) {
                 account.latestTransactions = latestTransactions;
             };
