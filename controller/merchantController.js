@@ -1,9 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
-
 import { getMerchantList, getMerchantById, createMerchant, updateMerchant, deleteMerchant} from '../services/merchant_service.js'
 import { getMerchantAccounts } from '../services/account_service.js'
-
 
 // @desc Get Merchants
 // @route GET /api/merchant
