@@ -1,7 +1,7 @@
 
 import { addUserRegistration, getUserRegistrationByEmail, getUserRegistrationByCode, deleteUserRegistrationById} from '../services/register_service.js';
 import nodemailer from 'nodemailer';
-import { addUser, getUserByEmail, setActiveUser} from '../services/user_service.js';
+import { createUser, getUserByEmail, setActiveUserById} from '../services/user_service.js';
 import { createAccount } from '../services/account_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
 import { doFundAccount } from '../services/currency_service.js';
@@ -78,13 +78,13 @@ export const register = async (req, res, next) => {
 
     //TEMP BECAUSE MAIL DOSENT WORK
      // Create User
-    const newUser = await addUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
+    const newUser = await createUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
     if (!newUser) {
       return res.status(500).json({ message: "Error creating user" });
     }
 
     // Activate User
-    await setActiveUser(newUser.id);
+    await setActiveUserById(newUser.id);
 
     //Create Account
     const accountType = 1; // TO FIX
@@ -131,7 +131,7 @@ export const validateRegistration = async (req, res, next) => {
     }
 
     // Activate User
-    await setActiveUser(newUser.id);
+    await setActiveUserById(newUser.id);
 
     //Create Account
     const accountType = 1; // TO FIX

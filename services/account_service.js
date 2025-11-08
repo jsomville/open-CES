@@ -110,4 +110,11 @@ export function getAccountCountByCurrencyId(currencyId) {
             currencyId: currencyId
         }
     });
-}   
+}
+export function getAccountCountByUserId(userId) {
+    return prisma.account.count({
+        where: {
+            userId: userId
+        }
+    });
+}  

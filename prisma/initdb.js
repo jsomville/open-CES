@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function init() {
 
-    //await createAdminUser();
+    await createAdminUser();
 
     await createCESCurrency();
 }

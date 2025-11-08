@@ -5,8 +5,8 @@ import jwt from 'jsonwebtoken';
 import argon2 from 'argon2';
 
 import { app } from "../app.js";
-//import config from "./config.test.js";
-import { setActiveUser, setPhoneValidated, setEmailValidated, getUserByEmail, addUser, removeUser } from "../services/user_service.js";
+import { setActiveUserById, getUserByEmail, createUser, deleteUserByEmail } from "../services/user_service.js";
+import redisHelper from '../utils/redisHelper.js';
 
 describe("Login Test", () => {
   const okUser = {
@@ -19,20 +19,15 @@ describe("Login Test", () => {
     password: "Abcd1234efgh!",
     phone: "2113465987",
   }
+   const lockedUser = {
+    email: "locked_user@open-ces.org",
+    password: "Abcd1234efgh!",
+    phone: "3113465987",
+  }
   const notValidatedUser = {
     email: "unvalidated@open-ces.org",
     password: "Abcd1234efgh!",
     phone: "312523465987",
-  };
-  const noPhoneUser = {
-    email: "no_phone@open-ces.org",
-    password: "Abcd1234efgh!",
-    phone: "462523465987",
-  };
-  const noEmailUser = {
-    email: "no_email@open-ces.org",
-    password: "Abcd1234efgh!",
-    phone: "5125234999987",
   };
 
   let validAccessToken = ""
@@ -46,52 +41,34 @@ describe("Login Test", () => {
       userTemp = await getUserByEmail(okUser.email);
       if (!userTemp) {
         const hashedPassword = await argon2.hash(okUser.password);
-        const user = await addUser(okUser.email, okUser.phone, hashedPassword);
+        const user = await createUser(okUser.email, okUser.phone, hashedPassword);
 
-        await setActiveUser(user.id);
-        await setEmailValidated(user.id);
-        await setPhoneValidated(user.id);
+        await setActiveUserById(user.id);
       }
 
       //Check and create for validated admin
       userTemp = await getUserByEmail(okAdmin.email);
       if (!userTemp) {
         const hashedPassword = await argon2.hash(okAdmin.password);
-        const user = await addUser(okAdmin.email, okAdmin.phone, hashedPassword, "admin");
+        const user = await createUser(okAdmin.email, okAdmin.phone, hashedPassword, "admin");
 
-        await setActiveUser(user.id);
-        await setEmailValidated(user.id);
-        await setPhoneValidated(user.id);
+        await setActiveUserById(user.id);
       }
 
-      //Check and create for not activated user
+      //Check and create for not validated user
       userTemp = await getUserByEmail(notValidatedUser.email);
       if (!userTemp) {
         const hashedPassword = await argon2.hash(notValidatedUser.password);
-        const user = await addUser(notValidatedUser.email, notValidatedUser.phone, hashedPassword);
-        //await setActiveUser(user.id);
-        await setEmailValidated(user.id);
-        await setPhoneValidated(user.id);
+        await createUser(notValidatedUser.email, notValidatedUser.phone, hashedPassword);
       }
 
-      //Check and create for no Phone
-      userTemp = await getUserByEmail(noPhoneUser.email);
+      //Check and create for validated admin
+      userTemp = await getUserByEmail(lockedUser.email);
       if (!userTemp) {
-        const hashedPassword = await argon2.hash(noPhoneUser.password);
-        const user = await addUser(noPhoneUser.email, noPhoneUser.phone, hashedPassword);
-        await setActiveUser(user.id);
-        await setEmailValidated(user.id);
-        //await setPhoneValidated(user.id);
-      }
+        const hashedPassword = await argon2.hash(lockedUser.password);
+        const user = await createUser(lockedUser.email, lockedUser.phone, hashedPassword);
 
-      //Check and create for no validated Email
-      userTemp = await getUserByEmail(noEmailUser.email);
-      if (!userTemp) {
-        const hashedPassword = await argon2.hash(noEmailUser.password);
-        const user = await addUser(noEmailUser.email, noEmailUser.phone, hashedPassword);
-        await setActiveUser(user.id);
-        //await setEmailValidated(user.id);
-        await setPhoneValidated(user.id);
+        await setActiveUserById(user.id);
       }
     }
     catch (error) {
@@ -103,21 +80,13 @@ describe("Login Test", () => {
 
   after(async () => {
     try {
-      let userTemp;
-      userTemp = await getUserByEmail(okUser.email);
-      await removeUser(userTemp.id);
+      await deleteUserByEmail(okUser.email);
+      await deleteUserByEmail(okAdmin.email);
+      await deleteUserByEmail(notValidatedUser.email);
+      await deleteUserByEmail(lockedUser.email);
 
-      userTemp = await getUserByEmail(okAdmin.email);
-      await removeUser(userTemp.id);
-
-      userTemp = await getUserByEmail(notValidatedUser.email);
-      await removeUser(userTemp.id);
-
-      userTemp = await getUserByEmail(noPhoneUser.email);
-      await removeUser(userTemp.id);
-
-      userTemp = await getUserByEmail(noEmailUser.email);
-      await removeUser(userTemp.id);
+      await redisHelper.del(`LoginAttempts:${lockedUser.email}`);
+      await redisHelper.del(`Lockout:${lockedUser.email}`);
     }
     catch (error) {
       console.error(error);
@@ -219,6 +188,12 @@ describe("Login Test", () => {
 
     validAccessToken = res.body.accessToken;
     validRefreshToken = res.body.refreshToken;
+
+    //Check Last Login updated
+    const user = await getUserByEmail(okUser.email);
+    const now = new Date();
+    const timeDiff = Math.abs(now.getTime() - user.lastLoginAt.getTime());
+    assert.ok(timeDiff < 1000); //10 seconds
   });
 
   it('Login - Admin', async () => {
@@ -252,6 +227,7 @@ describe("Login Test", () => {
     assert.ok(decoded_refresh_token.exp);
   });
 
+
   it('Login - Inactive User', async () => {
     const payload = {
       "username": notValidatedUser.email,
@@ -266,15 +242,42 @@ describe("Login Test", () => {
     assert.equal(res.body.error, "User is not active");
   });
 
+  it('account locked after too many failed login attempts', async () => {
+    const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS) || 5;
+
+    const username = lockedUser.email;
+
+    for (let i = 0; i < maxAttempts; i++) {
+      const res = await request(app)
+        .post('/api/idp/login')
+        .send({ username, password: 'WrongPassword123!' });
+
+      assert.equal(res.statusCode, 401);
+      assert.equal(res.body.error, "Invalid username or password");
+    }
+
+    const res = await request(app)
+      .post('/api/idp/login')
+      .send({ username, password: 'WrongPassword123!' });
+
+    assert.equal(res.statusCode, 403);
+    assert.equal(res.body.error, "Account locked due to too many failed login attempts. Please try again later.");
+
+    //Delete redis count and lockout for next tests
+    await redisHelper.del(`LoginAttempts:${username}`);
+    await redisHelper.del(`Lockout:${username}`);
+
+  });
+
   /****************************************** */
   // Refresh
   /****************************************** */
 
   it('Refresh', async () => {
     const res = await request(app)
-        .post('/api/idp/refresh')
-        .set('Authorization', `Bearer ${validAccessToken}`)
-        .send({ "refreshToken": validRefreshToken });
+      .post('/api/idp/refresh')
+      .set('Authorization', `Bearer ${validAccessToken}`)
+      .send({ "refreshToken": validRefreshToken });
 
     assert.strictEqual(res.statusCode, 200);
     assert.ok(res.body.accessToken);
@@ -284,43 +287,43 @@ describe("Login Test", () => {
 
 
   it('Refresh - returns 400 when refreshToken is missing', async () => {
-      const res = await request(app)
-          .post('/api/idp/refresh')
-          .send({});
+    const res = await request(app)
+      .post('/api/idp/refresh')
+      .send({});
 
-      assert.strictEqual(res.statusCode, 400);
-      assert.strictEqual(res.body.message, 'Validation failed');
+    assert.strictEqual(res.statusCode, 400);
+    assert.strictEqual(res.body.message, 'Validation failed');
   });
 
   it('Refresh - returns 500 for malformed refresh token', async () => {
-      const res = await request(app)
-          .post('/api/idp/refresh')
-          .send({ refreshToken: 'not-a-valid-jwt' });
+    const res = await request(app)
+      .post('/api/idp/refresh')
+      .send({ refreshToken: 'not-a-valid-jwt' });
 
-      assert.strictEqual(res.statusCode, 500);
-      assert.ok(res.body.error);
+    assert.strictEqual(res.statusCode, 500);
+    assert.ok(res.body.error);
   });
 
   /****************************************** */
   // Logout
   /****************************************** */
-  
+
   it('Logout', async () => {
     const res = await request(app)
-        .post('/api/idp/logout')
-        .set('Authorization', `Bearer ${validAccessToken}`)
-        .send();
+      .post('/api/idp/logout')
+      .set('Authorization', `Bearer ${validAccessToken}`)
+      .send();
 
     assert.strictEqual(res.statusCode, 200);
   });
 
   it('Logout - no token', async () => {
-      const res = await request(app)
-          .post('/api/idp/logout')
-          .set('Authorization', `Bearer`)
-          .send({});
+    const res = await request(app)
+      .post('/api/idp/logout')
+      .set('Authorization', `Bearer`)
+      .send({});
 
-      assert.strictEqual(res.statusCode, 401);
-      assert.strictEqual(res.body.message, 'Invalid token');
+    assert.strictEqual(res.statusCode, 401);
+    assert.strictEqual(res.body.message, 'Invalid token');
   });
 });

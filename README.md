@@ -57,6 +57,8 @@ An .env file is expected on the root of thhe project. Containing the following v
  - EMAIL_PWD="your_email_password"
  - EMAIL_USER="your_email_user"
  - MOBILE_APP_VERSION="1.0.0"
+ - MAX_LOGIN_ATTEMPTS="maximum fulty login attempts"
+ - LOCKOUT_DURATION="lockout duration in seconds"   
 
 ## Database Config
 

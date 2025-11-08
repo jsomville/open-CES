@@ -27,4 +27,8 @@ export default class RedisHelper {
     const result = await redisClient.exists(key);
     return result === 1;
   }
+
+  static async incr(key) {
+    return await redisClient.incr(key);
+  }
 }

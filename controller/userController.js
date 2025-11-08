@@ -1,19 +1,16 @@
 import argon2 from 'argon2';
-import { PrismaClient } from '@prisma/client'
-import { addUser, getUserById } from '../services/user_service.js';
 
-const prisma = new PrismaClient()
+import { getUserList, createUser, updateUser, removeUser, getUserById, getUserByEmail, getUserByPhone, setUserAdminById, setActiveUserById } from '../services/user_service.js';
+import { getAccountCountByUserId } from '../services/account_service.js';
+
 
 // @desc Get users
 // @route GET /api/user
 export const getAllUsers = async (req, res, next) => {
   try {
-    const users = await prisma.user.findMany()
+    const users = await getUserList()
 
-    // Remove password hash
-    const safeUsers = users.map(({ passwordHash, ...user }) => user);
-
-    return res.status(200).json(safeUsers);
+    return res.status(200).json(users);
   }
   catch (error) {
     console.error(error);
@@ -22,19 +19,17 @@ export const getAllUsers = async (req, res, next) => {
 }
 
 // @desc Get one user
-// @toute GET /api/user:id
+// @route GET /api/user/:id
 export const getUser = async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } })
+    const userId = req.validatedParams.id;
 
+    const user = await getUserById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" })
     }
 
-    // Remove password hash
-    const { passwordHash, ...safeUser } = user;
-
-    return res.status(200).json(safeUser);
+    return res.status(200).json(user);
   }
   catch (error) {
     console.error(error);
@@ -44,27 +39,27 @@ export const getUser = async (req, res, next) => {
 
 // @desc Create a User
 // @route POST /api/user
-export const createUser = async (req, res, next) => {
+export const addUser = async (req, res, next) => {
   try {
 
     const data = req.validatedBody;
+
     //Check email is unique
-    const user_email = await prisma.user.findUnique({ where: { email: data.email } })
+    const user_email = await getUserByEmail(data.email);
     if (user_email) {
       return res.status(409).json({ message: "Email already used" })
     }
 
     //Check phone is unique
-    const user_phone = await prisma.user.findUnique({ where: { phone: data.phone } })
+    const user_phone = await getUserByPhone(data.phone);
     if (user_phone) {
       return res.status(409).json({ message: "Phone already used" })
     }
 
-    const password = data.password;
     const role = "user";
-    const hashedPassword = await argon2.hash(password);
+    const hashedPassword = await argon2.hash(data.password);
 
-    const user = await addUser(data.email, data.phone, hashedPassword, role, data.firstname, data.lastname, data.region);
+    const user = await createUser(data.email, data.phone, hashedPassword, role, data.firstname, data.lastname, data.region);
 
     return res.status(201).json(user)
   }
@@ -76,7 +71,7 @@ export const createUser = async (req, res, next) => {
 
 // @desc Modify User
 // @route PUT /api/user
-export const updateUser = async (req, res, next) => {
+export const modifyUser = async (req, res, next) => {
   try {
     const data = req.validatedBody;
     const id = req.validatedParams.id;
@@ -95,22 +90,14 @@ export const updateUser = async (req, res, next) => {
     }
 
     //Check phone is unique and not self
-    const userByPhone = await prisma.user.findUnique({ where: { phone: data.phone } })
+    const userByPhone = await getUserByPhone(data.phone);
     if (userByPhone && userByPhone.id != id) {
       return res.status(409).json({ message: "Phone already used" })
     }
 
-    const updatedUser = await prisma.user.update({
-      data,
-      where: {
-        id: id,
-      }
-    })
+    const updatedUser = await updateUser(id, data);
 
-    // Remove password hash
-    const { passwordHash, ...safeUser } = updatedUser;
-
-    return res.status(201).json(safeUser)
+    return res.status(201).json(updatedUser)
   }
   catch (error) {
     console.error(error);
@@ -123,17 +110,15 @@ export const updateUser = async (req, res, next) => {
 export const setUserAdmin = async (req, res, next) => {
   try {
 
+    const userId = req.validatedParams.id;
+
     // User exists
-    if (!await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } })) {
+    const user = await getUserById(userId);
+    if (!user) {
       return res.status(404).json({ error: "User not found" })
     }
 
-    const updatedUser = await prisma.user.update({
-      data: {
-        role: "admin",
-      },
-      where: { id: parseInt(req.params.id) }
-    })
+    await setUserAdminById(userId);
 
     return res.status(204).send()
   }
@@ -148,17 +133,15 @@ export const setUserAdmin = async (req, res, next) => {
 export const setUserActive = async (req, res, next) => {
   try {
 
-    // User exists
-    if (!await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } })) {
+    const userId = req.validatedParams.id;
+
+    //User exists
+    const user = await getUserById(userId);
+    if (!user) {
       return res.status(404).json({ message: "User not found" })
     }
 
-    const updatedUser = await prisma.user.update({
-      data: {
-        isActive: true,
-      },
-      where: { id: parseInt(req.params.id) }
-    })
+    await setActiveUserById(userId);
 
     return res.status(204).send()
   }
@@ -172,28 +155,22 @@ export const setUserActive = async (req, res, next) => {
 // @route DELETE /api/user
 export const deleteUser = async (req, res, next) => {
   try {
-    // User exists
-    if (!await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } })) {
+    const userId = req.validatedParams.id;
+
+    const user = await getUserById(userId);
+    if (!user) {
       return res.status(404).json({ message: "User not found" })
     }
 
-    //Get Number of Account 
-    const accountCount = await prisma.account.count({
-      where: {
-        userId: parseInt(req.params.id)
-      }
-    })
-    // Number of accounts must be zero
+    //Get Number of Account
+    const accountCount = await getAccountCountByUserId(userId);
+
     if (accountCount) {
       return res.status(409).json({ message: `User is still assigned to an account` })
     }
 
     //Delete user
-    await prisma.user.delete({
-      where: {
-        id: parseInt(req.params.id)
-      }
-    })
+    await removeUser(userId);
 
     return res.status(204).send()
   }

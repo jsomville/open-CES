@@ -2,7 +2,16 @@ import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
-export const addUser = async (email, phone, hashedPassword, role = "user", firstname = "john", lastname = "doe", region = "EU") => {
+export const getUserList = async () => {
+  const users = await prisma.user.findMany();
+
+  // Remove password hash
+  const safeUsers = users.map(({ passwordHash, ...user }) => user);
+
+  return safeUsers;
+}
+
+export const createUser = async (email, phone, hashedPassword, role = "user", firstname = "john", lastname = "doe", region = "EU") => {
   //Create User
   const user = await prisma.user.create({
     data: {
@@ -18,6 +27,18 @@ export const addUser = async (email, phone, hashedPassword, role = "user", first
 
   // Remove password hash
   const { passwordHash, ...safeUser } = user;
+
+  return safeUser;
+}
+
+export const updateUser = async (id, data) => {
+  const updatedUser = await prisma.user.update({
+    data,
+    where: { id: id }
+  });
+
+  // Remove password hash
+  const { passwordHash, ...safeUser } = updatedUser;
 
   return safeUser;
 }
@@ -104,7 +125,7 @@ export const setUserIsActiveByEmail = async (email) => {
   return null;
 }
 
-export const setActiveUser = async (userId) => {
+export const setActiveUserById = async (userId) => {
   await prisma.user.update({
     data: {
       isActive: true
@@ -113,19 +134,19 @@ export const setActiveUser = async (userId) => {
   });
 }
 
-export const setPhoneValidated = async (userId) => {
+export const setUserAdminById = async (id) => {
   await prisma.user.update({
     data: {
-      isPhoneValidated: true
+      role: "admin",
     },
-    where: { id: userId }
+    where: { id: id }
   });
 }
 
-export const setEmailValidated = async (userId) => {
+export const setLastLogin = async (userId) => {
   await prisma.user.update({
     data: {
-      isEmailValidated: true
+      lastLoginAt: new Date()
     },
     where: { id: userId }
   });

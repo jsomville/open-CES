@@ -2,13 +2,11 @@ import assert from 'node:assert';
 import { PrismaClient } from '@prisma/client';
 
 import {
-    addUser,
+    createUser,
     removeUser,
     getUserByEmail,
     getUserById,
-    setActiveUser,
-    setPhoneValidated,
-    setEmailValidated,
+    setActiveUserById,
     setUserIsActiveByEmail,
     deleteUserAndAccount,
     createUserAndAccount,
@@ -45,7 +43,7 @@ describe('Test User_service', () => {
 
         currency = await prisma.currency.create({ data: currencyPayload });
 
-        user1 = await addUser(user1Payload.email, user1Payload.phone, user1Payload.password);
+        user1 = await createUser(user1Payload.email, user1Payload.phone, user1Payload.password);
     });
 
     after(async () => {
@@ -82,15 +80,11 @@ describe('Test User_service', () => {
         assert.ok(!('passwordHash' in byId));
     });
 
-    it('setActiveUser, setPhoneValidated, setEmailValidated update flags', async () => {
-        await setActiveUser(user1.id);
-        await setPhoneValidated(user1.id);
-        await setEmailValidated(user1.id);
+    it('setActiveUser update flags', async () => {
+        await setActiveUserById(user1.id);
 
         const updated = await getUserById(user1.id);
         assert.strictEqual(updated.isActive, true);
-        assert.strictEqual(updated.isPhoneValidated, true);
-        assert.strictEqual(updated.isEmailValidated, true);
     });
 
     it('setUserIsActiveByEmail returns safe user and sets isActive', async () => {

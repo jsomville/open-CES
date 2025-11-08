@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import argon2 from 'argon2';
 
-
 import { getAccessToken, getRefreshToken } from "../services/auth_service.js";
 import redisHelper from '../utils/redisHelper.js'
-import { getUserByEmail, getLoginUserByEmail } from "../services/user_service.js";
+import { getUserByEmail, getLoginUserByEmail, setLastLogin } from "../services/user_service.js";
 
 // @desc Login
 // @toute POST /api/idp/login
@@ -12,6 +11,13 @@ export const login = async (req, res, next) => {
     try {
         const username = req.validatedBody.username;
         const password = req.validatedBody.password;
+
+        //Check if account is locked
+        const lockoutKey = `Lockout:${username}`;
+        const isLocked = await redisHelper.get(lockoutKey);
+        if (isLocked) {
+            return res.status(403).json({ error: "Account is locked due to too many failed login attempts. Please try again later." });
+        }
 
         //Get User if exists
         const user = await getLoginUserByEmail(username);
@@ -27,12 +33,27 @@ export const login = async (req, res, next) => {
         //Verify User Password
         const isPasswordMatch = await argon2.verify(user.passwordHash, password)
         if (!isPasswordMatch) {
+            // Increase failed login attempt counter
+            const count = await redisHelper.incr(`LoginAttempts:${user.email}`);
+
+            if (process.env.MAX_LOGIN_ATTEMPTS) {
+                const attempts = await redisHelper.get(`LoginAttempts:${user.email}`);
+                if (attempts > parseInt(process.env.MAX_LOGIN_ATTEMPTS)) {
+                    // Lock user account
+                    await redisHelper.set(`Lockout:${user.email}`, 'locked', process.env.ACCOUNT_LOCKOUT_DURATION);
+                    return res.status(403).json({ error: "Account locked due to too many failed login attempts. Please try again later." });
+                }
+            }
+
             return res.status(401).json({ error: "Invalid username or password" })
         }
 
+        //Update Last Login
+        await setLastLogin(user.id);
 
-        // TODO #68 : Update Last Login
-
+        //reset login attempts on successful login
+        const attemptsKey = `LoginAttempts:${user.email}`;
+        await redisHelper.del(attemptsKey);
 
         // Get Access Token
         const accessToken = getAccessToken(user);
