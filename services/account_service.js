@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 import { getUserByEmail } from './user_service.js';
 import { getCurrencyBySymbol } from './currency_service.js';
@@ -108,6 +108,11 @@ export const getAccountById = async (accountId) => {
 
 export const getUserAccounts = async (userId) => {
   const accounts = await prisma.account.findMany({ where: { userId: userId } });
+  return accounts;
+};
+
+export const getMerchantAccounts = async (merchantId) => {
+  const accounts = await prisma.account.findMany({ where: { merchantId: merchantId } });
   return accounts;
 };
 

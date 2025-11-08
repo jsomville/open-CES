@@ -70,7 +70,11 @@ model Merchant {
   name      String   @db.VarChar(255)
   email     String?
   phone     String?
-  region    String?
+  region    String
+  latitude  Decimal? @db.Decimal(10, 8)
+  longitude Decimal? @db.Decimal(11, 8)
+  address   String?  @db.VarChar(512)
+  website   String?  @db.VarChar(1024)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

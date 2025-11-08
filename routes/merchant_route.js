@@ -3,10 +3,10 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getAllMerchant, getMerchant, createMerchant, updateMerchant, deleteMerchant } from '../controller/merchantController.js'
+import { getAllMerchant, getMerchant, addMerchant, modifyMerchant, removeMerchant } from '../controller/merchantController.js'
 
 import { validate } from '../middleware/validate.js';
-import { createMerchantSchema, modifyMerchantSchema, merchentIdSchema } from '../controller/merchant.schema.js'
+import { createMerchantSchema, modifyMerchantSchema, merchantIdSchema } from '../controller/merchant.schema.js'
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 
 const router = express.Router();
@@ -18,15 +18,15 @@ router.use(rate_limiter_by_sub);
 router.get('/', authorizeRole("admin"), getAllMerchant);
 
 // get one
-router.get('/:id', authorizeRole("admin"), validate(merchentIdSchema), getMerchant);
+router.get('/:id', authorizeRole("admin"), validate(merchantIdSchema), getMerchant);
 
 // gcreate
-router.post('/', authorizeRole("admin"), validate(createMerchantSchema), createMerchant);
+router.post('/', authorizeRole("admin"), validate(createMerchantSchema), addMerchant);
 
 // modify
-router.put('/:id', authorizeRole("admin"), validate(modifyMerchantSchema), updateMerchant);
+router.put('/:id', authorizeRole("admin"), validate(modifyMerchantSchema), modifyMerchant);
 
 // delete
-router.delete('/:id', authorizeRole("admin"), validate(merchentIdSchema), deleteMerchant);
+router.delete('/:id', authorizeRole("admin"), validate(merchantIdSchema), removeMerchant);
 
 export default router;

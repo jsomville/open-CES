@@ -1,12 +1,15 @@
 import { PrismaClient } from '@prisma/client'
-
 const prisma = new PrismaClient()
+
+import { getMerchantList, getMerchantById, createMerchant, updateMerchant, deleteMerchant} from '../services/merchant_service.js'
+import { getMerchantAccounts } from '../services/account_service.js'
+
 
 // @desc Get Merchants
 // @route GET /api/merchant
 export const getAllMerchant = async (req, res, next) => {
   try {
-    const merchants = await prisma.merchant.findMany()
+    const merchants = await getMerchantList();
 
     return res.status(200).json(merchants);
   }
@@ -17,11 +20,12 @@ export const getAllMerchant = async (req, res, next) => {
 }
 
 // @desc Get one merchant
-// @toute GET /api/merchant:id
+// @route GET /api/merchant/:id
 export const getMerchant = async (req, res, next) => {
   try {
-    const merchant = await prisma.merchant.findUnique({ where: { id: parseInt(req.params.id) } })
+    const id = req.validatedParams.id;
 
+    const merchant = await getMerchantById(id);
     if (!merchant) {
       return res.status(404).json({ message: "Merchant not found" })
     }
@@ -37,12 +41,11 @@ export const getMerchant = async (req, res, next) => {
 
 // @desc Create a Merchant
 // @route POST /api/merchant
-export const createMerchant = async (req, res, next) => {
+export const addMerchant = async (req, res, next) => {
   try {
-
     const data = req.validatedBody;
 
-    const newMerchant = await prisma.merchant.create({ data });
+    const newMerchant = await createMerchant(data);
 
     return res.status(201).json(newMerchant)
   }
@@ -54,23 +57,19 @@ export const createMerchant = async (req, res, next) => {
 
 // @desc Modify Merchant
 // @route PUT /api/merchant
-export const updateMerchant = async (req, res, next) => {
+export const modifyMerchant = async (req, res, next) => {
   try {
 
     const data = req.validatedBody;
-    const id = req.validatedParams.id
+    const id = req.validatedParams.id;
 
-    // User exists
-    if (!await prisma.merchant.findUnique({ where: { id: id } })) {
+    //Merchant exists
+    const merchant = await getMerchantById(id);
+    if (!merchant) {
       return res.status(404).json({ message: "Merchant not found" })
     }
 
-    const updatedMerchant = await prisma.merchant.update({
-      data,
-      where: {
-        id: id
-      }
-    })
+    const updatedMerchant = await updateMerchant(id, data);
 
     return res.status(201).json(updatedMerchant)
   }
@@ -82,35 +81,29 @@ export const updateMerchant = async (req, res, next) => {
 
 // @desc Delete a Merchant
 // @route DELETE /api/merchant
-export const deleteMerchant = async (req, res, next) => {
+export const removeMerchant = async (req, res, next) => {
   try {
-    const merchantId = parseInt(req.params.id);
+    const id = req.validatedParams.id;
 
-    // User exists
-    if (!await prisma.merchant.findUnique({ where: { id: merchantId } })) {
-      return res.status(404).json({ message: "Merchant not found" })
+    // Merchant exists
+    const merchant = await getMerchantById(id);
+    if (!merchant) {
+      return res.status(404).json({ message: "Merchant not found" });
     }
 
-    //Validate number of accoutn must be 0
-    const accountCount = await prisma.account.count({
-      where: { merchantId: merchantId }
-    })
-    if (accountCount) {
+    //Validate number of accounts must be 0
+    const accounts = await getMerchantAccounts(id);
+    if (accounts.length > 0) {
       return res.status(409).json({ message: `Merchant is still assigned to an account` })
     }
 
-    //Demete user
-    await prisma.merchant.delete({
-      where: {
-        id: merchantId
-      }
-    })
+    //Delete merchant
+    await deleteMerchant(id);
 
-    return res.status(204).send()
+    return res.status(204).send();
   }
   catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error deleting merchant" })
+    return res.status(500).json({ message: "Error deleting merchant" });
   }
-
 };
