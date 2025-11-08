@@ -3,7 +3,10 @@ const prisma = new PrismaClient();
 
 import redisHelper from '../utils/redisHelper.js';
 
-const cache_ttl = 60; //in seconds
+import { getAccountCountByCurrencyId, getMerchantAccountCountByCurrencyId } from './account_service.js';
+
+const cached_ttl = 60; //in seconds
+const cached_stats_ttl = 900; //in seconds
 
 export const getCurrencyBySymbol = async (symbol) => {
     const currency = await prisma.currency.findUnique({ where: { symbol: symbol } })
@@ -22,7 +25,7 @@ export const getCurrencyById = async (id) => {
 
 export const setCurrencyInCache = async (currencyList) => {
 
-    await redisHelper.set("currencyList", JSON.stringify(currencyList), cache_ttl);
+    await redisHelper.set("currencyList", JSON.stringify(currencyList), cached_ttl);
 }
 
 export const updateCurrencyListCache = async () => {
@@ -45,7 +48,7 @@ export const getCurrencyList = async () => {
     return currencyList;
 }
 
-export const getSafeCurrencyList = async () => {    
+export const getSafeCurrencyList = async () => {
 
     const currencyList = await getCurrencyList();
 
@@ -53,6 +56,49 @@ export const getSafeCurrencyList = async () => {
     const safeCurrency = currencyList.map(({ balance, accountMax, createdAt, updatedAt, activeAccount, accountNextNumber, ...currencies }) => currencies);
 
     return safeCurrency;
+}
+
+export const getCurrencyListWithStats = async () => {
+
+    const cachedCurrencyListStats = await redisHelper.get("currencyListStats");
+    if (cachedCurrencyListStats) {
+        return JSON.parse(cachedCurrencyListStats);
+    }
+
+    const currencyList = await getCurrencyList();
+
+    // For each currency, get stats
+    const currencyListWithStats = await Promise.all(currencyList.map(async (currency) => {
+        //Get number of merchants
+        const merchantCount = await getMerchantAccountCountByCurrencyId(currency.id);
+
+        //Get number of accounts
+        const accountCount = await getAccountCountByCurrencyId(currency.id);
+
+        //Get monthly transaction volume for last 30 days
+        const monthlyTransVol = await prisma.transaction.aggregate({
+            _sum: {
+                amount: true
+            },
+            where: {
+                currencyId: currency.id,
+                createdAt: {
+                    gte: new Date(new Date().setDate(new Date().getDate() - 30))
+                }
+            }
+        });
+
+        return {
+            ...currency,
+            merchantCount: merchantCount,
+            accountCount: accountCount,
+            monthlyTransVol: monthlyTransVol._sum.amount || 0
+        };
+    }));
+
+    await redisHelper.set("currencyListStats", JSON.stringify(currencyListWithStats), cached_stats_ttl);
+
+    return currencyListWithStats;
 }
 
 export const createCurrency = async (data) => {
@@ -121,39 +167,39 @@ export const doFundAccount = async (currency, account, amount) => {
 }
 
 export const doRefundAccount = async (currency, account, amount) => {
-  try{
-    const newCurrencyBalance = Number(currency.balance) + Number(amount);
-      const newAccountBalance = Number(account.balance) - Number(amount);
+    try {
+        const newCurrencyBalance = Number(currency.balance) + Number(amount);
+        const newAccountBalance = Number(account.balance) - Number(amount);
 
-      await prisma.$transaction([
-        //Update Currency Balance
-        prisma.currency.update({
-          where: { id: currency.id },
-          data: { balance: newCurrencyBalance }
-        }),
+        await prisma.$transaction([
+            //Update Currency Balance
+            prisma.currency.update({
+                where: { id: currency.id },
+                data: { balance: newCurrencyBalance }
+            }),
 
-        //Update Account Balance
-        prisma.account.update({
-          where: { id: account.id },
-          data: { balance: newAccountBalance },
-        }),
+            //Update Account Balance
+            prisma.account.update({
+                where: { id: account.id },
+                data: { balance: newAccountBalance },
+            }),
 
-        //Create a Transaction
-        prisma.transaction.create({
-          data: {
-            accountId: account.id,
-            amount: amount,
-            currencyId: currency.id,
-            transactionType: "Refund Account",
-            description: `From account # ${account.id}`,
-            status: "Completed"
-          }
-        }),
-      ]);
-  }
-  catch (error) {
-    console.error("Error Refund Account Service : " + error.message);
-    throw error;
-  }
+            //Create a Transaction
+            prisma.transaction.create({
+                data: {
+                    accountId: account.id,
+                    amount: amount,
+                    currencyId: currency.id,
+                    transactionType: "Refund Account",
+                    description: `From account # ${account.id}`,
+                    status: "Completed"
+                }
+            }),
+        ]);
+    }
+    catch (error) {
+        console.error("Error Refund Account Service : " + error.message);
+        throw error;
+    }
 }
 

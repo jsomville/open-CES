@@ -36,6 +36,9 @@ async function createCESCurrency() {
             name: "Open CES",
             symbol: "CES",
             country: "EU",
+            logo: "ces.png",
+            webSiteURL: "https://open-ces.org",
+
         }
     });
     console.log("CES currency created") 

@@ -129,6 +129,17 @@ export function getAccountCountByCurrencyId(currencyId) {
     });
 }
 
+export function getMerchantAccountCountByCurrencyId(currencyId) {
+    return prisma.account.count({
+        where: {
+            currencyId: currencyId,
+            merchantId: {
+                not: null
+            }
+        }
+    });
+}
+
 export function getAccountCountByUserId(userId) {
     return prisma.account.count({
         where: {
