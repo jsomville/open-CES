@@ -27,6 +27,15 @@ model Currency {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
+  newAccountWizardURL String @default("") @map("new_account_wizard_URL") @db.VarChar(1024)
+  topOffWizardURL String @default("") @map("top_off_wizard_URL") @db.VarChar(1024)
+  androidAppURL String @default("") @map("android_app_URL") @db.VarChar(1024)
+  iphoneAppURL String @default("") @map("iphone_app_URL") @db.VarChar(1024)
+  androidAppLatestVersion String @default("1.0.0") @map("android_app_latest_version") @db.VarChar(20)
+  iphoneAppLatestVersion String @default("1.0.0") @map("iphone_app_latest_version") @db.VarChar(20)
+  accountFormatNumber String @default("") @map("account_format_number") @db.VarChar(50)
+  accountNextNumber Int @default(1) @map("account_next_number") @db.Integer()
+
   Vouchers     Voucher[]     @relation("Vouchers")
   Transactions Transaction[] @relation("Transactions")
   Account      Account[]

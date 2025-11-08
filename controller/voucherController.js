@@ -191,6 +191,14 @@ export const claimVoucher = async (req, res, next) => {
     }
 };
 
+export function getAccountCountByCurrencyId(currencyId) {
+    return prisma.account.count({
+        where: {
+            currencyId: currencyId
+        }
+    });
+}   
+
 export function daysFrom(date, days) {
     const future = new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
     return future;

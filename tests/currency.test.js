@@ -16,14 +16,24 @@ describe("Test Currency", () => {
   let new_currency_id;
 
   const currency_payload = {
-    "symbol": "TST",
-    "name": "TestCurrency",
-    "country": "BE",
-    "accountMax": 150,
-    "regionList": '[1000, 1030, 1040, 1050, 1060, 1070, 1080, 1081, 1082, 1083, 1090, 1130, 1140, 1150, 1160, 1170, 1180, 1190, 1200, 1210, 1212 ]',
-    "logoURL": "https://www.zinne.brussels/wp-content/uploads/2023/08/logo-200.png",
-    "webSiteURL": "https://www.zinne.brussels",
+    symbol: "TST",
+    name: "TestCurrency",
+    country: "BE",
+    accountMax: 150,
+    regionList: '[1000, 1030]',
+    logoURL: "https://www.example.com",
+
+    webSiteURL: "https://www.example.com",
+    newAccountWizardURL: "https://www.example.com/",
+    topOffWizardURL: "https://www.example.com/",
+    androidAppURL: "https://www.example.com/",
+    iphoneAppURL: "https://www.example.com/",
+    androidAppLatestVersion: "1.2.3",
+    iphoneAppLatestVersion: "1.2.3",
+    accountFormatNumber: "N/A",
+
   };
+
   const new_symbol = "TTT";
 
   before(async () => {
@@ -87,9 +97,10 @@ describe("Test Currency", () => {
       const item = res.body[0];
       assert.ok(!('balance' in item));
       assert.ok(!('accountMax' in item));
-      assert.ok(!('regionList' in item));
       assert.ok(!('createdAt' in item));
       assert.ok(!('updatedAt' in item));
+      assert.ok(!('activeAccount' in item));
+      assert.ok(!('accountNextNumber' in item));
     }
   });
 
@@ -128,6 +139,13 @@ describe("Test Currency", () => {
     assert.equal(res.body.balance, 0);
     assert.ok(res.body.createdAt);
     assert.ok(res.body.updatedAt);
+    assert.equal(res.body.newAccountWizardURL, currency_payload.newAccountWizardURL);
+    assert.equal(res.body.topOffWizardURL, currency_payload.topOffWizardURL);
+    assert.equal(res.body.androidAppURL, currency_payload.androidAppURL);
+    assert.equal(res.body.iphoneAppURL, currency_payload.iphoneAppURL);
+    assert.equal(res.body.androidAppLatestVersion, currency_payload.androidAppLatestVersion);
+    assert.equal(res.body.iphoneAppLatestVersion, currency_payload.iphoneAppLatestVersion);
+    assert.equal(res.body.accountFormatNumber, currency_payload.accountFormatNumber);
 
     new_currency_id = res.body.id
   });
@@ -200,7 +218,7 @@ describe("Test Currency", () => {
     assert.equal(res.body.message, "Validation failed");
   });
 
-  it('Add currency - No Name', async () => {
+  it('Add currency - Mandatory field No Name', async () => {
     const payload = {
       //"name": "Test Currency",
       "symbol": "TC",
@@ -218,7 +236,7 @@ describe("Test Currency", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
-  it('Add currency - No Symbol', async () => {
+  it('Add currency - Mandatory field No Symbol', async () => {
     const payload = {
       "name": "Test Currency",
       //"symbol": "TC",
@@ -236,7 +254,7 @@ describe("Test Currency", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
-  it('Add currency - No Country', async () => {
+  it('Add currency - Mandatory field No Country', async () => {
     const payload = {
       "name": "Test Currency",
       "symbol": "TC",
@@ -432,8 +450,15 @@ describe("Test Currency", () => {
     assert.equal(res.body.regionList, currency_payload.regionList);
     assert.equal(res.body.webSiteURL, currency_payload.webSiteURL);
     assert.equal(res.body.balance, 0);
-    assert.ok(res.body.createdAt)
-    assert.ok(res.body.updatedAt)
+    assert.ok(res.body.createdAt);
+    assert.ok(res.body.updatedAt);
+    assert.equal(res.body.newAccountWizardURL, currency_payload.newAccountWizardURL);
+    assert.equal(res.body.topOffWizardURL, currency_payload.topOffWizardURL);
+    assert.equal(res.body.androidAppURL, currency_payload.androidAppURL);
+    assert.equal(res.body.iphoneAppURL, currency_payload.iphoneAppURL);
+    assert.equal(res.body.androidAppLatestVersion, currency_payload.androidAppLatestVersion);
+    assert.equal(res.body.iphoneAppLatestVersion, currency_payload.iphoneAppLatestVersion);
+    assert.equal(res.body.accountFormatNumber, currency_payload.accountFormatNumber);
   });
 
   it('Get Currency - Invalid ID', async () => {

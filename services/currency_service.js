@@ -20,9 +20,15 @@ export const getCurrencyById = async (id) => {
     return currency;
 }
 
-export const updateCurrencyCache = async (currencyList) => {
+export const setCurrencyInCache = async (currencyList) => {
 
     await redisHelper.set("currencyList", JSON.stringify(currencyList), cache_ttl);
+}
+
+export const updateCurrencyListCache = async () => {
+    const currencyList = await prisma.currency.findMany();
+
+    await setCurrencyInCache(currencyList);
 }
 
 export const getCurrencyList = async () => {
@@ -34,23 +40,59 @@ export const getCurrencyList = async () => {
 
     //If not in cache, get from DB
     const currencyList = await prisma.currency.findMany();
-    //Update cache
-    await updateCurrencyCache(currencyList);
+    await setCurrencyInCache(currencyList); //Update cache
 
     return currencyList;
+}
+
+export const getSafeCurrencyList = async () => {    
+
+    const currencyList = await getCurrencyList();
+
+    // Remove unwanted fields in list of Currencies
+    const safeCurrency = currencyList.map(({ balance, accountMax, createdAt, updatedAt, activeAccount, accountNextNumber, ...currencies }) => currencies);
+
+    return safeCurrency;
+}
+
+export const createCurrency = async (data) => {
+    const newCurrency = await prisma.currency.create({ data });
+
+    await updateCurrencyListCache();
+
+    return newCurrency;
+}
+
+export const modifyCurrency = async (id, data) => {
+    const updatedCurrency = await prisma.currency.update({
+        where: { id: id },
+        data: data
+    });
+
+    await updateCurrencyListCache();
+
+    return updatedCurrency;
+}
+
+export const removeCurrency = async (id) => {
+    await prisma.currency.delete({
+        where: { id: id }
+    });
+
+    await updateCurrencyListCache();
 }
 
 export const doFundAccount = async (currency, account, amount) => {
     try {
         const newAccountBalance = Number(account.balance) + Number(amount);
-        const currencyBalance = Number(currency.balance) - Number(amount);
+        const newCurrencyBalance = Number(currency.balance) - Number(amount);
 
         await prisma.$transaction([
 
             //Update Currency Balance
             prisma.currency.update({
                 where: { id: currency.id },
-                data: { balance: currencyBalance }
+                data: { balance: newCurrencyBalance }
             }),
 
             //Update Account Balance
@@ -77,3 +119,41 @@ export const doFundAccount = async (currency, account, amount) => {
         throw error;
     }
 }
+
+export const doRefundAccount = async (currency, account, amount) => {
+  try{
+    const newCurrencyBalance = Number(currency.balance) + Number(amount);
+      const newAccountBalance = Number(account.balance) - Number(amount);
+
+      await prisma.$transaction([
+        //Update Currency Balance
+        prisma.currency.update({
+          where: { id: currency.id },
+          data: { balance: newCurrencyBalance }
+        }),
+
+        //Update Account Balance
+        prisma.account.update({
+          where: { id: account.id },
+          data: { balance: newAccountBalance },
+        }),
+
+        //Create a Transaction
+        prisma.transaction.create({
+          data: {
+            accountId: account.id,
+            amount: amount,
+            currencyId: currency.id,
+            transactionType: "Refund Account",
+            description: `From account # ${account.id}`,
+            status: "Completed"
+          }
+        }),
+      ]);
+  }
+  catch (error) {
+    console.error("Error Refund Account Service : " + error.message);
+    throw error;
+  }
+}
+

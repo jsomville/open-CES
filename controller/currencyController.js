@@ -1,16 +1,12 @@
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient();
+import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, getSafeCurrencyList, createCurrency, modifyCurrency, removeCurrency, doFundAccount, doRefundAccount} from '../services/currency_service.js';
+import { getAccountById, getAccountCountByCurrencyId} from '../services/account_service.js';
 
-import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, doFundAccount} from '../services/currency_service.js';
 
 // @desc Get Currencies
 // @route GET /api/currency
 export const getAllCurrencies = async (req, res, next) => {
   try {
-    const currencies = await prisma.currency.findMany()
-
-    // Remove Balance in list of Currencies
-    const safeCurrency = currencies.map(({ balance, ...currencies }) => currencies);
+    const safeCurrency = await getSafeCurrencyList();
 
     return res.status(200).json(safeCurrency)
   }
@@ -24,10 +20,7 @@ export const getAllCurrencies = async (req, res, next) => {
 // @route GET /api/currency
 export const getCurrenciesDetails = async (req, res, next) => {
   try {
-    const currencies = await prisma.currency.findMany()
-
-    // Remove Balance in list of Currencies
-    const safeCurrency = currencies.map(({ balance, accountMax, regionList, createdAt, updatedAt, ...currencies }) => currencies);
+    const safeCurrency = await getSafeCurrencyList();
 
     return res.status(200).json(safeCurrency)
   }
@@ -39,7 +32,7 @@ export const getCurrenciesDetails = async (req, res, next) => {
 
 // @desc Create Currency
 // @route POST /api/currency
-export const createCurrency = async (req, res, next) => {
+export const addCurrency = async (req, res, next) => {
   try {
     const data = req.validatedBody;
 
@@ -57,7 +50,7 @@ export const createCurrency = async (req, res, next) => {
     }
 
     //Create Currency
-    const newCurrency = await prisma.currency.create({ data })
+    const newCurrency = await createCurrency(data);
 
     return res.status(201).json(newCurrency)
   }
@@ -72,9 +65,6 @@ export const createCurrency = async (req, res, next) => {
 export const getCurrency = async (req, res, next) => {
   try {
     const id = req.validatedParams.id;
-    if (isNaN(id)) {
-      return res.status(422).json({ message: "Currency Id must be a positive integer" })
-    }
 
     //Currency exists
     const currency = await getCurrencyById(id);
@@ -103,13 +93,7 @@ export const updateCurrency = async (req, res, next) => {
       return res.status(404).json({ message: "Currency not found" })
     }
 
-    //Update Currency
-    const updatedCurrency = await prisma.currency.update({
-      data,
-      where: {
-        id: id,
-      }
-    })
+    const updatedCurrency = await modifyCurrency(id, data);
 
     return res.status(201).json(updatedCurrency)
   }
@@ -123,13 +107,10 @@ export const updateCurrency = async (req, res, next) => {
 // @route DELETE /api/currency/id
 export const deleteCurrency = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(422).json({ message: "Currency Id must be a positive integer" })
-    }
+    const currencyId = req.validatedParams.id;
 
     //Currency exists
-    const currency = await prisma.currency.findUnique({ where: { id: id } })
+    const currency = await getCurrencyById(currencyId);
     if (!currency) {
       return res.status(404).json({ message: "Currency not found" })
     }
@@ -139,23 +120,14 @@ export const deleteCurrency = async (req, res, next) => {
       return res.status(422).json({ message: "Balance must be zero" })
     }
 
-    //Get Number of Account 
-    const accountCount = await prisma.account.count({
-      where: {
-        currencyId: parseInt(req.params.id)
-      }
-    })
-    // Number of accounts must be zero
+    //Get Number of Account
+    const accountCount = await getAccountCountByCurrencyId(currencyId);
     if (accountCount) {
       return res.status(409).json({ message: `Currency id is being used in ${accountCount} account(s)` })
     }
 
     // Delete Currency
-    await prisma.currency.delete({
-      where: {
-        id: parseInt(req.params.id)
-      }
-    })
+    await removeCurrency(currencyId);
 
     return res.status(204).send()
   }
@@ -168,30 +140,31 @@ export const deleteCurrency = async (req, res, next) => {
 //@route POST /api/currency/id/fundAccount
 export const fundAccount = async (req, res, next) => {
   try {
+    const currencyId = req.validatedParams.id;
     const accountNumber = req.validatedBody.account;
     const amount = req.validatedBody.amount;
 
     //Currency exists
-    const currency = await prisma.currency.findUnique({ where: { id: parseInt(req.params.id) } })
+    const currency = await getCurrencyById(currencyId);
     if (!currency) {
       return res.status(404).json({ error: "Currency not found" })
     }
 
     // Destination account exists
-    const destinationAccount = await prisma.account.findUnique({ where: { id: accountNumber } })
-    if (!destinationAccount) {
+    const account = await getAccountById(accountNumber);
+    if (!account) {
       return res.status(404).json({ error: "Destination account not found" })
     }
 
-    //Destination acount is the same currency
-    if (currency.id != destinationAccount.currencyId) {
+    //Destination account is the same currency
+    if (currency.id != account.currencyId) {
       return res.status(422).json({ error: "Accounts must be from the same currency" })
     }
 
     //Fund the account
     try {
-      
-      await doFundAccount(currency, destinationAccount, amount);
+
+      await doFundAccount(currency, account, amount);
 
     }
     catch (error) {
@@ -212,87 +185,35 @@ export const fundAccount = async (req, res, next) => {
 export const refundAccount = async (req, res, next) => {
   try {
     //Account is mandatory
-    const accountNumber = req.body.account;
-    if (!accountNumber) {
-      return res.status(422).json({ error: "Account field mandatory" })
-    }
-
-    //Amount is mandatory
-    if (!req.body.amount) {
-      return res.status(422).json({ error: "Amount field mandatory" })
-    }
-
-    // Amount is a positive float
-    const amount = Number(req.body.amount)
-    if (isNaN(amount) || amount < 0) {
-      return res.status(422).json({ error: "Amount must be a positive number" })
-    }
+    const currencyId = req.validatedParams.id;
+    const accountNumber = req.validatedBody.account;
+    const amount = req.validatedBody.amount;
 
     //Currency exists
-    const currency = await prisma.currency.findUnique({ where: { id: parseInt(req.params.id) } })
+    const currency = await getCurrencyById(currencyId);
     if (!currency) {
       return res.status(404).json({ error: "Currency not found" })
     }
 
     // Destination account exists
-    const destinationAccountNumber = parseInt(req.body.account)
-    const destinationAccount = await prisma.account.findUnique({ where: { id: destinationAccountNumber } })
-    if (!destinationAccount) {
+    const account = await getAccountById(accountNumber);
+    if (!account) {
       return res.status(404).json({ error: "Destination account not found" })
     }
 
-    //Destination acount is the same currency
-    if (currency.id != destinationAccount.currencyId) {
+    //Destination account is the same currency
+    if (currency.id != account.currencyId) {
       return res.status(422).json({ error: "Accounts must be from the same currency" })
     }
 
     //Amount is below of equal account balance
-    if (destinationAccount.balance < amount) {
+    if (account.balance < amount) {
       return res.status(400).json({ error: "Insufficient funds" })
     }
 
     //Refund the account
     try {
-      const currencyBalance = Number(currency.balance) + Number(amount);
-      const destinationBalance = Number(destinationAccount.balance) - Number(amount);
-
-      await prisma.$transaction([
-        //Update Currency Balance
-        prisma.currency.update({
-          where: { id: currency.id },
-          data: { balance: currencyBalance }
-        }),
-
-        //Update Account Balance
-        prisma.account.update({
-          where: { id: destinationAccount.id },
-          data: { balance: destinationBalance },
-        }),
-
-        //Create a Transaction
-        prisma.transaction.create({
-          data: {
-            accountId: accountNumber,
-            amount: amount,
-            currencyId: currency.id,
-            transactionType: "Refund Account",
-            description: `From account # ${destinationAccount.id}`,
-            status: "Completed"
-          }
-        }),
-
-        //Create a Transaction
-        prisma.transaction.create({
-          data: {
-            accountId: destinationAccount.id,
-            amount: amount,
-            currencyId: currency.id,
-            transactionType: "Refund Account",
-            description: `To account # ${accountNumber}`,
-            status: "Completed"
-          }
-        }),
-      ]);
+      await doRefundAccount(currency, account, amount);
     }
     catch (error) {
       console.error(error.message);

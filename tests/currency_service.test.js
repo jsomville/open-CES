@@ -16,11 +16,20 @@ describe('Test Currency_service', () => {
         regionList: '[1000, 2000]',
         webSiteURL: 'https://example.com',
         logoURL: 'https://example.com/logo.png',
+        webSiteURL: "https://www.example.com",
+        newAccountWizardURL: "https://www.example.com/",
+        topOffWizardURL: "https://www.example.com/",
+        androidAppURL: "https://www.example.com/",
+        iphoneAppURL: "https://www.example.com/",
+        androidAppLatestVersion: "1.2.3",
+        iphoneAppLatestVersion: "1.2.3",
+        accountFormatNumber: "N/A",
     };
 
     before(async () => {
         // ensure clean slate
         await prisma.currency.deleteMany({ where: { OR: [{ symbol: payload.symbol }, { name: payload.name }] } });
+
         created = await prisma.currency.create({ data: payload });
     });
 
@@ -35,20 +44,68 @@ describe('Test Currency_service', () => {
         assert.ok(found);
         assert.strictEqual(found.id, created.id);
         assert.strictEqual(found.name, payload.name);
+        assert.strictEqual(found.symbol, payload.symbol);
+        assert.strictEqual(found.country, payload.country);
+        assert.strictEqual(found.accountMax, payload.accountMax);
+        assert.strictEqual(found.regionList, payload.regionList);
+        assert.strictEqual(found.webSiteURL, payload.webSiteURL);
+        assert.strictEqual(found.newAccountWizardURL, payload.newAccountWizardURL);
+        assert.strictEqual(found.topOffWizardURL, payload.topOffWizardURL);
+        assert.strictEqual(found.androidAppURL, payload.androidAppURL);
+        assert.strictEqual(found.iphoneAppURL, payload.iphoneAppURL);
+        assert.strictEqual(found.androidAppLatestVersion, payload.androidAppLatestVersion);
+        assert.strictEqual(found.iphoneAppLatestVersion, payload.iphoneAppLatestVersion);
+        assert.strictEqual(found.accountFormatNumber, payload.accountFormatNumber);
+        assert.ok(found.balance);
+        assert.ok(found.createdAt);
+        assert.ok(found.updatedAt);
+        assert.ok(found.accountNextNumber);
     });
 
     it('getCurrencyByName returns the currency', async () => {
         const found = await getCurrencyByName(payload.name);
         assert.ok(found);
         assert.strictEqual(found.id, created.id);
+        assert.strictEqual(found.name, payload.name);
         assert.strictEqual(found.symbol, payload.symbol);
+        assert.strictEqual(found.country, payload.country);
+        assert.strictEqual(found.accountMax, payload.accountMax);
+        assert.strictEqual(found.regionList, payload.regionList);
+        assert.strictEqual(found.webSiteURL, payload.webSiteURL);
+        assert.strictEqual(found.newAccountWizardURL, payload.newAccountWizardURL);
+        assert.strictEqual(found.topOffWizardURL, payload.topOffWizardURL);
+        assert.strictEqual(found.androidAppURL, payload.androidAppURL);
+        assert.strictEqual(found.iphoneAppURL, payload.iphoneAppURL);
+        assert.strictEqual(found.androidAppLatestVersion, payload.androidAppLatestVersion);
+        assert.strictEqual(found.iphoneAppLatestVersion, payload.iphoneAppLatestVersion);
+        assert.strictEqual(found.accountFormatNumber, payload.accountFormatNumber);
+        assert.ok(found.balance);
+        assert.ok(found.createdAt);
+        assert.ok(found.updatedAt);
+        assert.ok(found.accountNextNumber);
     });
 
     it('getCurrencyById returns the currency', async () => {
         const found = await getCurrencyById(created.id);
         assert.ok(found);
+        assert.strictEqual(found.id, created.id);
         assert.strictEqual(found.name, payload.name);
         assert.strictEqual(found.symbol, payload.symbol);
+        assert.strictEqual(found.country, payload.country);
+        assert.strictEqual(found.accountMax, payload.accountMax);
+        assert.strictEqual(found.regionList, payload.regionList);
+        assert.strictEqual(found.webSiteURL, payload.webSiteURL);
+        assert.strictEqual(found.newAccountWizardURL, payload.newAccountWizardURL);
+        assert.strictEqual(found.topOffWizardURL, payload.topOffWizardURL);
+        assert.strictEqual(found.androidAppURL, payload.androidAppURL);
+        assert.strictEqual(found.iphoneAppURL, payload.iphoneAppURL);
+        assert.strictEqual(found.androidAppLatestVersion, payload.androidAppLatestVersion);
+        assert.strictEqual(found.iphoneAppLatestVersion, payload.iphoneAppLatestVersion);
+        assert.strictEqual(found.accountFormatNumber, payload.accountFormatNumber);
+        assert.ok(found.balance);
+        assert.ok(found.createdAt);
+        assert.ok(found.updatedAt);
+        assert.ok(found.accountNextNumber);
     });
 
     it('returns null when not found', async () => {

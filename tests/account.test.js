@@ -9,7 +9,6 @@ import config from "./config.test.js";
 import { getCurrencyBySymbol } from '../services/currency_service.js'
 import { deleteUserAndAccount } from '../services/user_service.js';
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
-import { createCurrency } from "../controller/currencyController.js";
 
 const userEmail = "test@openced.org";
 

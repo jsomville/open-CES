@@ -5,6 +5,12 @@ const prisma = new PrismaClient();
 
 async function init() {
 
+    //await createAdminUser();
+
+    await createCESCurrency();
+}
+
+async function createAdminUser() {
     const password = "OpenCES2025!";
     const email = "admin@opences.org"
 
@@ -23,6 +29,22 @@ async function init() {
     });
     console.log("admin user created")
 }
+
+async function createCESCurrency() {
+    await prisma.currency.create({
+        data: {
+            name: "Open CES",
+            symbol: "CES",
+            country: "EU",
+        }
+    });
+    console.log("CES currency created") 
+}
+
+async function createAllCurrencys() {
+     //"regionList": '[1000, 1030, 1040, 1050, 1060, 1070, 1080, 1081, 1082, 1083, 1090, 1130, 1140, 1150, 1160, 1170, 1180, 1190, 1200, 1210, 1212 ]',
+}
+
 
 async function deleteAllTransactions() {
 

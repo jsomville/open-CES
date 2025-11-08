@@ -89,6 +89,11 @@ export const getUserAccountsByEmail = async (email) => {
   return null;
 };
 
+export const getAccountById = async (accountId) => {
+  const account = await prisma.account.findUnique({ where: { id: accountId } });
+  return account;
+};
+
 export const getUserAccounts = async (userId) => {
   const accounts = await prisma.account.findMany({ where: { userId: userId } });
   return accounts;
@@ -98,3 +103,11 @@ export const getAccountByUserIDAndCurrencyId = async (userId, currencyId) => {
   const account = await prisma.account.findFirst({ where: { userId: userId, currencyId: currencyId } });
   return account;
 }
+
+export function getAccountCountByCurrencyId(currencyId) {
+    return prisma.account.count({
+        where: {
+            currencyId: currencyId
+        }
+    });
+}   

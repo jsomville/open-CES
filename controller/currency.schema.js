@@ -10,6 +10,13 @@ export const createCurrencySchema = z.strictObject({
     regionList: z.string().min(0).max(1024).optional(),
     logoURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
     webSiteURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    newAccountWizardURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    topOffWizardURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    androidAppURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    iphoneAppURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    androidAppLatestVersion: z.string().max(10).optional().or(z.literal('').transform(() => undefined)),
+    iphoneAppLatestVersion: z.string().max(10).optional().or(z.literal('').transform(() => undefined)),
+    accountFormatNumber: z.string().max(50).optional().or(z.literal('').transform(() => undefined)),
   }),
 });
 
