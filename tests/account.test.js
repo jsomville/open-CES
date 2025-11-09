@@ -9,6 +9,7 @@ import config from "./config.test.js";
 import { getCurrencyBySymbol } from '../services/currency_service.js'
 import { deleteUserAndAccount } from '../services/user_service.js';
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
+import { AccountType } from "../utils/accountTypes.js";
 
 const userEmail = "test@openced.org";
 
@@ -50,7 +51,7 @@ describe("Test Account", () => {
     account_payload = {
       "userId": user_id,
       "currencyId": testCurrencyId,
-      "accountType": 1,
+      "accountType": AccountType.PERSONAL,
     };
   });
 
@@ -122,7 +123,7 @@ describe("Test Account", () => {
     const payload = {
       "userId": 9999999,
       "currencyId": testCurrencyId,
-      "accountType": 1,
+      "accountType": AccountType.PERSONAL,
     };
 
     const res = await request(app)
@@ -158,7 +159,7 @@ describe("Test Account", () => {
     const payload = {
       //"userId" : user.id,
       "currencyId": testCurrencyId,
-      "accountType": 0
+      "accountType": AccountType.PERSONAL,
     };
     const res = await request(app)
       .post('/api/account')
@@ -175,7 +176,7 @@ describe("Test Account", () => {
     const payload = {
       "userId": user_id,
       //"currencyId" : testCurrencyId,
-      "accountType": 0
+      "accountType": AccountType.PERSONAL,
     };
     const res = await request(app)
       .post('/api/account')
@@ -192,7 +193,7 @@ describe("Test Account", () => {
     const payload = {
       "userId": user_id,
       "currencyId": testCurrencyId,
-      "accountType": 0,
+      "accountType": AccountType.PERSONAL,
       "some field": "blabla"
     };
 
@@ -211,7 +212,7 @@ describe("Test Account", () => {
     const payload = {
       "userId": user_id,
       "currencyId": testCurrencyId,
-      //"accountType" : 0
+      //"accountType" : AccountType.PERSONAL,
     };
     const res = await request(app)
       .post('/api/account')

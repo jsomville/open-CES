@@ -1,11 +1,14 @@
 import { z } from 'zod';
+import { AccountType, isValidAccountType } from '../utils/accountTypes.js';
 
 export const createAccountSchema = z.strictObject({
     params: z.strictObject({}).optional(),
     body: z.strictObject({
         userId: z.number().min(1),
         currencyId: z.number().min(1),
-        accountType: z.number().min(0),
+        accountType: z.number().refine(isValidAccountType, {
+            message: `Account type must be one of: ${Object.entries(AccountType).map(([k, v]) => `${k}=${v}`).join(', ')}`
+        }),
     })
 
 });

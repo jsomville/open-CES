@@ -3,6 +3,7 @@ const prisma = new PrismaClient();
 
 import { getUserByEmail } from './user_service.js';
 import { getCurrencyBySymbol } from './currency_service.js';
+import { AccountType, isValidAccountType } from '../utils/accountTypes.js'; 
 
 export const createAccount = async (userId, currencyId, accountType) => {
   try {
