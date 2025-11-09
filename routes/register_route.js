@@ -6,7 +6,7 @@ import { validate } from '../middleware/validate.js';
 
 import { register, validateRegistration } from '../controller/registerController.js';
 
-import { registerSchema, registerValidationSchema} from '../controller/registerSchema.js';
+import { registerSchema, registerValidationSchema} from '../schema/registerSchema.js';
 
 const router = express.Router();
 

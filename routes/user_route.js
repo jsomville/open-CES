@@ -7,7 +7,7 @@ import { getAllUsers, getUser, addUser, modifyUser, deleteUser, setUserAdmin, se
 import { getUserDetail, getUserDetailByEmail } from '../controller/userDetailController.js'
 
 import { validate } from '../middleware/validate.js';
-import { createUserSchema, modifyUserSchema, userIdSchema, userParamSchema} from '../controller/user.schema.js'
+import { createUserSchema, modifyUserSchema, userIdSchema, userParamSchema} from '../schema/user.schema.js'
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 
 const router = express.Router();

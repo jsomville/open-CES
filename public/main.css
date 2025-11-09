@@ -58,6 +58,7 @@ p {
 
 table, th, td {
     color : white;
+    border-color: black;
     border: 1px;
     padding: 5px;
     margin-left: auto;

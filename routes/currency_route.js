@@ -6,7 +6,7 @@ import { authorizeRole } from '../middleware/authorizeRole.js'
 import { getCurrency, getCurrenciesDetails, getAllCurrencies, addCurrency, updateCurrency, deleteCurrency, fundAccount, refundAccount } from '../controller/currencyController.js'
 
 import { validate } from '../middleware/validate.js';
-import { createCurrencySchema, modifyCurrencySchema, currencyIdSchema, currencyFundRefundSchema } from '../controller/currency.schema.js'
+import { createCurrencySchema, modifyCurrencySchema, currencyIdSchema, currencyFundRefundSchema } from '../schema/currency.schema.js'
 
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 

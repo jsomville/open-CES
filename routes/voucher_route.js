@@ -5,7 +5,7 @@ import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
 import { validate } from '../middleware/validate.js';
-import { createVoucherSchema, modifyVoucherSchema, voucherIdSchema } from '../controller/voucher.schema.js'
+import { createVoucherSchema, modifyVoucherSchema, voucherIdSchema } from '../schema/voucher.schema.js'
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 
 const router = express.Router();

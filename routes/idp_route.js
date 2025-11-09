@@ -5,7 +5,7 @@ import { rate_limiter_by_ip } from "../middleware/rate-limiter.js";
 import { authenticateToken } from '../middleware/auth.js';
 
 import { validate } from '../middleware/validate.js';
-import { loginSchema, emptyApiSchema, refreshApiSchema} from '../controller/idpSchema.js';
+import { loginSchema, emptyApiSchema, refreshApiSchema} from '../schema/idpSchema.js';
 
 const router = express.Router();
 
