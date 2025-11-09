@@ -131,7 +131,6 @@ describe("Test Transfer", () => {
         const payload = {
             //"account" : user2AccountId,
             "amount": transferAmount,
-            "description": "Account Missing",
         }
 
         const res = await request(app)
@@ -149,7 +148,6 @@ describe("Test Transfer", () => {
         const payload = {
             "account": user2AccountId,
             //"amount" : transferAmount,
-            "description": "Amount Missing",
         }
 
         const res = await request(app)
@@ -167,7 +165,6 @@ describe("Test Transfer", () => {
         const payload = {
             "account": user2AccountId,
             "amount": -5,
-            "description": "Negative Amount",
         }
 
         const res = await request(app)
@@ -185,7 +182,6 @@ describe("Test Transfer", () => {
         const payload = {
             "account": 123,
             "amount": transferAmount,
-            "description": "Account not found",
         }
 
         const res = await request(app)
@@ -201,7 +197,6 @@ describe("Test Transfer", () => {
         const payload = {
             "account": user2AccountId,
             "amount": transferAmount,
-            "description": "Account not found",
         }
 
         const res = await request(app)
@@ -219,7 +214,6 @@ describe("Test Transfer", () => {
         const payload = {
             "account": account.id,
             "amount": transferAmount,
-            "description": "Not same currency",
         }
 
         const res = await request(app)
@@ -235,7 +229,6 @@ describe("Test Transfer", () => {
         const payload = {
             "account": user2AccountId,
             "amount": 1000,
-            "description": "Insuficient fund",
         }
 
         const res = await request(app)
@@ -251,7 +244,6 @@ describe("Test Transfer", () => {
         const payload = {
             "account": user1AccountId,
             "amount": 1,
-            "description": "Transfer to self",
         }
 
         const res = await request(app)
@@ -267,7 +259,6 @@ describe("Test Transfer", () => {
         const payload = {
             "account": user1AccountId,
             "amount": 10,
-            "description": "Transfer to self",
         }
 
         const res = await request(app)
@@ -289,7 +280,6 @@ describe("Test Transfer", () => {
         const payload = {
             "account": user2AccountId,
             "amount": transferAmount,
-            "description": "Transfer Test",
         }
 
         const res = await request(app)

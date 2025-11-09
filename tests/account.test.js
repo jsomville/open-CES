@@ -54,11 +54,13 @@ describe("Test Account", () => {
     };
   });
 
-
-
   after(async () => {
     await deleteUserAndAccount(userEmail);
   });
+
+  /********************************* */
+  // List  Account
+  /********************************* */
 
   it('List all Account - Admin', async () => {
     const res = await request(app)
@@ -76,6 +78,10 @@ describe("Test Account", () => {
     assert.equal(res.statusCode, 403);
     assert.equal(res.body.message, "Forbidden: Insufficient role");
   });
+
+  /********************************* */
+  // Add Account
+  /********************************* */
 
   it('Add account - Admin', async () => {
     const res = await request(app)
@@ -268,6 +274,11 @@ describe("Test Account", () => {
     await prisma.currency.delete({ where: { id: cur.id } });
   });
 
+
+  /********************************* */
+  // Get  Account
+  /********************************* */
+
   it('Get account - Admin', async () => {
     const res = await request(app)
       .get(`/api/account/${new_account_id}`)
@@ -321,6 +332,11 @@ describe("Test Account", () => {
     assert.ok(res.body.errors);
     assert.strictEqual(res.body.errors.length, 1);
   });
+
+
+  /********************************* */
+  // Delete  Account
+  /********************************* */
 
   it('Delete Account - user', async () => {
     const res = await request(app)

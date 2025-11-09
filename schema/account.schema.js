@@ -33,7 +33,6 @@ export const accountTransferSchema = z.strictObject({
     body: z.strictObject({
         account: z.number().int().min(1),
         amount: z.number().positive(),
-        description: z.string().max(255).optional()
     })
 });
 

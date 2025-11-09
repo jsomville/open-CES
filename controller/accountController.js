@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { getUserByEmail, getUserById, getUserByPhone } from '../services/user_service.js';
 import { getCurrencyById, getCurrencyBySymbol } from '../services/currency_service.js';
-import { createAccount, transferTo, getAccountById, getAccountByUserIDAndCurrencyId, getTransactionByAccountId, getTransactionByAccountIdAndPage} from '../services/account_service.js';
+import { createAccount, getAccountById, getAccountByUserIDAndCurrencyId, getTransactionByAccountId, getTransactionByAccountIdAndPage } from '../services/account_service.js';
+import { transferTo } from '../services/transfer_service.js';
 
 const prisma = new PrismaClient();
 
@@ -130,10 +131,9 @@ export const transferToAccount = async (req, res, next) => {
     const id = req.validatedParams.id;
     const accountNumber = req.validatedBody.account;
     const amount = req.validatedBody.amount;
-    const description = req.validatedBody.description;
 
     // Source account exists
-    const sourceAccount = await prisma.account.findUnique({ where: { id: id } })
+    const sourceAccount = await getAccountById(id);
     if (!sourceAccount) {
       return res.status(404).json({ error: "Source account not found" })
     }
@@ -167,7 +167,11 @@ export const transferToAccount = async (req, res, next) => {
 
     try {
 
-      const result = await transferTo(sourceAccount, destinationAccount, amount, description);
+      const userString = user.firstname + " " + user.lastname;
+      const descriptionFrom = `From ${sourceAccount.id} (${userString})`;
+      const descriptionTo = `To ${destinationAccount.id}`;
+
+      const result = await transferTo(sourceAccount, destinationAccount, amount, descriptionFrom, descriptionTo);
 
       if (!result) {
         return res.status(500).json({ message: "Transfer Failed" })
