@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 import redisHelper from '../utils/redisHelper.js';
 
 import { getAccountCountByCurrencyId, getMerchantAccountCountByCurrencyId } from './account_service.js';
+import { AccountType, getAccountId } from '../utils/accountUtil.js';
 
 const cached_ttl = 60; //in seconds
 const cached_stats_ttl = 900; //in seconds
@@ -128,78 +129,28 @@ export const removeCurrency = async (id) => {
     await updateCurrencyListCache();
 }
 
-export const doFundAccount = async (currency, account, amount) => {
-    try {
-        const newAccountBalance = Number(account.balance) + Number(amount);
-        const newCurrencyBalance = Number(currency.balance) - Number(amount);
+export const getNextAccountId = async (symbol, accountType) => {
 
-        await prisma.$transaction([
-
-            //Update Currency Balance
-            prisma.currency.update({
-                where: { id: currency.id },
-                data: { balance: newCurrencyBalance }
-            }),
-
-            //Update Account Balance
-            prisma.account.update({
-                where: { id: account.id },
-                data: { balance: newAccountBalance },
-            }),
-
-            //Create Transaction
-            prisma.transaction.create({
-                data: {
-                    accountId: account.id,
-                    amount: amount,
-                    currencyId: currency.id,
-                    transactionType: "Fund Account",
-                    description: `To account # ${account.id}`,
-                    status: "Completed"
-                }
-            }),
-        ])
+    const currency = await getCurrencyBySymbol(symbol);
+    if (!currency) {
+        throw new Error("Currency not found");
     }
-    catch (error) {
-        console.error("Error Fund Account Service : " + error.message);
-        throw error;
+
+    let startAccountNumber = currency.accountNextNumber;
+    let accountExists = false;
+    let accountId = "";
+    while(!accountExists){
+
+        startAccountNumber +=1;
+        accountId = getAccountId(accountType, currency.id, startAccountNumber);
+
+        accountExists = await prisma.account.count({
+            where: { accountId: accountId }
+        });
     }
+
+    //Update next number in currency
+    await modifyCurrency(currency.id, { accountNextNumber: startAccountNumber});
+
+    return accountId;
 }
-
-export const doRefundAccount = async (currency, account, amount) => {
-    try {
-        const newCurrencyBalance = Number(currency.balance) + Number(amount);
-        const newAccountBalance = Number(account.balance) - Number(amount);
-
-        await prisma.$transaction([
-            //Update Currency Balance
-            prisma.currency.update({
-                where: { id: currency.id },
-                data: { balance: newCurrencyBalance }
-            }),
-
-            //Update Account Balance
-            prisma.account.update({
-                where: { id: account.id },
-                data: { balance: newAccountBalance },
-            }),
-
-            //Create a Transaction
-            prisma.transaction.create({
-                data: {
-                    accountId: account.id,
-                    amount: amount,
-                    currencyId: currency.id,
-                    transactionType: "Refund Account",
-                    description: `From account # ${account.id}`,
-                    status: "Completed"
-                }
-            }),
-        ]);
-    }
-    catch (error) {
-        console.error("Error Refund Account Service : " + error.message);
-        throw error;
-    }
-}
-

@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 import { createUser, getUserByEmail, setActiveUserById} from '../services/user_service.js';
 import { createAccount } from '../services/account_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { doFundAccount } from '../services/currency_service.js';
+import { doFundAccount } from '../services/fundRefund_service.js';
 
 // Create transporter outside for reuse
 const transporter = nodemailer.createTransport({

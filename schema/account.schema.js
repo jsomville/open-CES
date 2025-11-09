@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AccountType, isValidAccountType } from '../utils/accountTypes.js';
+import { AccountType, isValidAccountType } from '../utils/accountUtil.js';
 
 export const createAccountSchema = z.strictObject({
     params: z.strictObject({}).optional(),

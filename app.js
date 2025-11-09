@@ -43,12 +43,14 @@ app.use(cors(corsOptions));
 app.disable('x-powered-by');
 app.set('trust proxy', true);
 
+
 //Add Middleware
 app.use(express.json()); //Json parsing
 app.use(express.urlencoded({ extended: false })); //url encoder
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(logger); //Logger Middleware
 app.use(requestDuration); // add X-response-Time
+
 
 //Connect Redis
 await connectRedis();
