@@ -23,7 +23,6 @@ describe('Test Currency_service', () => {
         iphoneAppURL: "https://www.example.com/",
         androidAppLatestVersion: "1.2.3",
         iphoneAppLatestVersion: "1.2.3",
-        accountFormatNumber: "N/A",
     };
 
     before(async () => {
@@ -55,8 +54,6 @@ describe('Test Currency_service', () => {
         assert.strictEqual(found.iphoneAppURL, payload.iphoneAppURL);
         assert.strictEqual(found.androidAppLatestVersion, payload.androidAppLatestVersion);
         assert.strictEqual(found.iphoneAppLatestVersion, payload.iphoneAppLatestVersion);
-        assert.strictEqual(found.accountFormatNumber, payload.accountFormatNumber);
-        assert.ok(found.balance);
         assert.ok(found.createdAt);
         assert.ok(found.updatedAt);
         assert.ok(found.accountNextNumber);
@@ -78,8 +75,6 @@ describe('Test Currency_service', () => {
         assert.strictEqual(found.iphoneAppURL, payload.iphoneAppURL);
         assert.strictEqual(found.androidAppLatestVersion, payload.androidAppLatestVersion);
         assert.strictEqual(found.iphoneAppLatestVersion, payload.iphoneAppLatestVersion);
-        assert.strictEqual(found.accountFormatNumber, payload.accountFormatNumber);
-        assert.ok(found.balance);
         assert.ok(found.createdAt);
         assert.ok(found.updatedAt);
         assert.ok(found.accountNextNumber);
@@ -101,8 +96,6 @@ describe('Test Currency_service', () => {
         assert.strictEqual(found.iphoneAppURL, payload.iphoneAppURL);
         assert.strictEqual(found.androidAppLatestVersion, payload.androidAppLatestVersion);
         assert.strictEqual(found.iphoneAppLatestVersion, payload.iphoneAppLatestVersion);
-        assert.strictEqual(found.accountFormatNumber, payload.accountFormatNumber);
-        assert.ok(found.balance);
         assert.ok(found.createdAt);
         assert.ok(found.updatedAt);
         assert.ok(found.accountNextNumber);

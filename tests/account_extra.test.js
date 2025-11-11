@@ -1,29 +1,98 @@
 import assert from "node:assert";
 import request from 'supertest';
 
+import argon2 from 'argon2';
+
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 import { app } from "../app.js";
 import config from "./config.test.js";
-import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
-import { getAccountByEmailAndCurrencySymbol } from '../services/account_service.js';    
+import { getAccessTokenByEmailAndRole } from '../services/auth_service.js';
+import { createPersonnalAccount } from '../services/account_service.js';
+import { getUserByEmail, createUser, removeUser } from '../services/user_service.js';
+import { getCurrencyBySymbol } from '../services/currency_service.js';
+import { AccountType } from '../utils/accountUtil.js';
 
 describe("Test Account Extra", () => {
     let admin_access_token;
     let user_access_token;
+    let user_token;
+
+    let testUser;
+    let testCurrency;
+    let personalAccount;
+    let test_currency
+
+    const testUserEmail = "account_extra_test@test.com";
 
     before(async () => {
-        //Get main Testing Tokens
-        user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
-        admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
+        try {
+            //Get main Testing Tokens
+            user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
+            admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
 
-        //config.testCurrency
+            test_currency = await getCurrencyBySymbol(config.testCurrency);
 
+            testUser = await getUserByEmail(testUserEmail);
+            if (testUser) {
+                await removeUser(testUser.id);
+            }
+            const userInfo = {
+                email: testUserEmail,
+                phone: "5551234567",
+                password: "TestPass123!",
+                role: "user",
+                firstname: "Firstname",
+                lastname: "Lastname"
+            }
+            // Create test user
+            const hashedPassword = await argon2.hash(userInfo.password);
+            testUser = await createUser(userInfo.email, userInfo.phone, hashedPassword, userInfo.role, userInfo.firstname, userInfo.lastname);
+
+            user_token = getAccessTokenByEmailAndRole(testUser.email, "user");
+
+            // Get test currency
+            testCurrency = await getCurrencyBySymbol(config.testCurrency);
+
+            // Create Personnal Account
+            personalAccount = await createPersonnalAccount(testUser, config.testCurrency);
+
+            //Create Transactions
+            for (let i = 0; i < 15; i++) {
+                await prisma.transaction.create({
+                    data: {
+                        accountNumber: personalAccount.number,
+                        currencyId: testCurrency.id,
+                        amount: 50 + i,
+                        description: `Test Transaction Extra ${i + 1}`,
+                        status: "Completed",
+                        transactionType: "Test"
+                    }
+                });
+            }
+        }
+        catch (error) {
+            console.error("Error in before hook Account Extra Test: " + error.message);
+            throw error;
+        }
     });
 
     after(async () => {
+        try {
 
+            // Cleanup
+            if (personalAccount) {
+                await prisma.transaction.deleteMany({ where: { accountNumber: personalAccount.number } });
+            }
+
+            await prisma.personalAccount.deleteMany({ where: { Account: { currencyId: test_currency.id } } });
+            await prisma.account.deleteMany({ where: { currencyId: test_currency.id, accountType: AccountType.PERSONAL } });
+
+            await removeUser(testUser.id);
+        } catch (error) {
+            console.error("Cleanup error:", error);
+        }
     });
 
     /********************************* */
@@ -32,7 +101,7 @@ describe("Test Account Extra", () => {
 
     it('Get Account By Email and Symbol - Admin', async () => {
         const payload = {
-            "email": config.user1Email,
+            "email": testUser.email,
             "symbol": config.testCurrency
         };
         const res = await request(app)
@@ -48,7 +117,7 @@ describe("Test Account Extra", () => {
 
     it('Get Account By Email and Symbol - User', async () => {
         const payload = {
-            "email": config.user1Email,
+            "email": testUser.email,
             "symbol": config.testCurrency
         };
         const res = await request(app)
@@ -120,7 +189,7 @@ describe("Test Account Extra", () => {
 
     it('Get Account By Phone and Symbol - Admin', async () => {
         const payload = {
-            "phone": config.user1Phone,
+            "phone": testUser.phone,
             "symbol": config.testCurrency
         };
         const res = await request(app)
@@ -136,7 +205,7 @@ describe("Test Account Extra", () => {
 
     it('Get Account By Phone and Symbol - User', async () => {
         const payload = {
-            "phone": config.user1Phone,
+            "phone": testUser.phone,
             "symbol": config.testCurrency
         };
         const res = await request(app)
@@ -163,7 +232,7 @@ describe("Test Account Extra", () => {
         assert.equal(res.statusCode, 400);
     });
 
-     it('Get Account By Phone and Symbol - No symbol', async () => {
+    it('Get Account By Phone and Symbol - No symbol', async () => {
         const payload = {
             "phone": config.user1Phone,
             //"symbol": config.testCurrency
@@ -176,7 +245,7 @@ describe("Test Account Extra", () => {
         assert.equal(res.statusCode, 400);
     });
 
-     it('Get Account By Phone and Symbol - Invalid phone', async () => {
+    it('Get Account By Phone and Symbol - Invalid phone', async () => {
         const payload = {
             "phone": "000000000",
             "symbol": config.testCurrency
@@ -192,7 +261,7 @@ describe("Test Account Extra", () => {
     it('Get Account By Phone and Symbol - Invalid symbol', async () => {
         const payload = {
             "phone": config.user1Phone,
-            "symbol":"ISYM"
+            "symbol": "ISYM"
         };
         const res = await request(app)
             .post('/api/account/by-phone-and-symbol')
@@ -205,59 +274,51 @@ describe("Test Account Extra", () => {
     /********************************* */
     // Get Account Transactions
     /********************************* */
-    it('Get Account Transactions', async () => {
-        //Get Account
-        const account = await getAccountByEmailAndCurrencySymbol(config.user1Email, config.testCurrency);
-
-        // add transactions
-        for (let i = 0; i < 10; i++) {
-            await prisma.transaction.create({
-                data: {
-                    accountId: account.id,
-                    currencyId: account.currencyId,
-                    amount: 100 + i,
-                    description: `Test Transaction ${i + 1}`,
-                    status: "Completed",
-                    transactionType: "Test"
-                }
-            });
-        }
-
+    it('Get Account Transactions - Admin', async () => {
         const res = await request(app)
-            .get(`/api/account/${account.id}/transactions`)
-            .set('Authorization', `Bearer ${user_access_token}`)
+            .get(`/api/account/${personalAccount.number}/transactions`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send();
-
+        
         assert.equal(res.statusCode, 200);
         assert.ok(Array.isArray(res.body));
     });
 
-    it('Get Account Transactions - By Pages', async () => {
-        //Get Account
-        const account = await getAccountByEmailAndCurrencySymbol(config.user1Email, config.testCurrency);
+    it('Get Account Transactions - User', async () => {
+        const res = await request(app)
+            .get(`/api/account/${personalAccount.number}/transactions`)
+            .set('Authorization', `Bearer ${user_token}`)
+            .send();
+        
+        assert.equal(res.statusCode, 200);
+        assert.ok(Array.isArray(res.body));
+    });
 
-         // add transactions
-        for (let i = 0; i < 10; i++) {
-            await prisma.transaction.create({
-                data: {
-                    accountId: account.id,
-                    currencyId: account.currencyId,
-                    amount: 100 + i,
-                    description: `Test Transaction ${i + 1}`,
-                    status: "Completed",
-                    transactionType: "Test"
-                }
-            });
-        }
-
-        const page=1;
-        const limit=5;
+    it('Get Account Transactions - Admin By Pages', async () => {
+        const page = 1;
+        const limit = 5;
 
         const res = await request(app)
-            .get(`/api/account/${account.id}/transactions-by-page?page=${page}&limit=${limit}`)
-            .set('Authorization', `Bearer ${user_access_token}`)
+            .get(`/api/account/${personalAccount.number}/transactions-by-page?page=${page}&limit=${limit}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
             .send();
 
+        assert.equal(res.statusCode, 200);
+        assert.ok(Array.isArray(res.body.transactions));
+        assert.ok(res.body.pagination);
+        assert.equal(res.body.pagination.currentPage, page);
+        assert.equal(res.body.pagination.totalCount, limit);
+    });
+
+    it('Get Account Transactions - By Pages', async () => {
+        const page = 1;
+        const limit = 5;
+
+        const res = await request(app)
+            .get(`/api/account/${personalAccount.number}/transactions-by-page?page=${page}&limit=${limit}`)
+            .set('Authorization', `Bearer ${user_token}`)
+            .send();
+        
         assert.equal(res.statusCode, 200);
         assert.ok(Array.isArray(res.body.transactions));
         assert.ok(res.body.pagination);

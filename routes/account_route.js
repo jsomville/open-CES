@@ -19,26 +19,26 @@ router.use(rate_limiter_by_sub);
 //get All account
 router.get('/', authorizeRole("admin"), getAllAccount);
 
-//get account by id
-router.get('/:id', authorizeRole("admin"), validate(accountIdSchema), getAccount);
+//get account by number
+router.get('/:number', authorizeRole("admin"), validate(accountIdSchema), getAccount);
 
 //create account
 router.post('/', authorizeRole("admin"), validate(createAccountSchema), addAccount);
 
-//Modify account
+//Modify account    
 //Account cannot be modified
 
 //delete account
-router.delete('/:id', authorizeRole("admin"), validate(accountIdSchema), deleteAccount);
+router.delete('/:number', authorizeRole("admin"), validate(accountIdSchema), deleteAccount);
 
 //Transfer To
-router.post("/:id/transferTo", authorizeRole("admin", "user"), validate(accountTransferSchema), transferToAccount);
+router.post("/:number/transferTo", authorizeRole("admin", "user"), validate(accountTransferSchema), transferToAccount);
 
 //Transaction from account
-router.get("/:id/transactions", authorizeRole("admin", "user"), validate(accountIdSchema), getTransactions);
+router.get("/:number/transactions", authorizeRole("admin", "user"), validate(accountIdSchema), getTransactions);
 
 //Transaction from account
-router.get("/:id/transactions-by-page", authorizeRole("admin", "user"), validate(accountIdTransactionPageSchema), getTransactionsByPage);
+router.get("/:number/transactions-by-page", authorizeRole("admin", "user"), validate(accountIdTransactionPageSchema), getTransactionsByPage);
 
 //get Account info from email and currency
 router.post('/by-email-and-symbol', authorizeRole("admin", "user"), validate(accountInfoByEmail), getAccountInfoByEmailAndSymbol);

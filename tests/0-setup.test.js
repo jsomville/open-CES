@@ -1,11 +1,13 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
+import argon2 from 'argon2';
 
 import { shutdown } from '../app.js'
 
 import config from "./config.test.js";
-import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { setUserIsActiveByEmail, deleteUserAndAccount, createUserAndAccount } from '../services/user_service.js';
+import { createCurrency, getCurrencyBySymbol } from '../services/currency_service.js';
+import { createUser, setActiveUserById } from '../services/user_service.js';
+import { createPersonnalAccount, createCurrencyMainAccount, getAccountByNumber } from '../services/account_service.js';
 
 //To calculate global test duration
 let test_start_time;
@@ -13,99 +15,231 @@ let test_start_time;
 //This is Global Before hook
 before(async () => {
 
-  //Set testing flag
-  process.env.IS_TESTING = true;
+    //Set testing flag
+    process.env.IS_TESTING = true;
 
-  // Check and Create Test Currency Symbol
-  console.log("Setup - Before");
-  test_start_time = Date.now();
-  const before_start_time = Date.now();
-  let currencyId;
+    // Check and Create Test Currency Symbol
+    console.log("Setup - Before");
+    test_start_time = Date.now();
+    const before_start_time = Date.now();
 
-  try {
-    let currency = await getCurrencyBySymbol(config.testCurrency);
-    if (!currency) {
-      //Create Currency
-      currency = await prisma.currency.create({
-        data: {
-          symbol: config.testCurrency,
-          name: "CurrTest",
-          country: "EU"
+    let currencyId;
+
+    try {
+        let currency = await getCurrencyBySymbol(config.testCurrency);
+        if (currency) {
+            //Delete Transactions
+            await prisma.transaction.deleteMany({
+                where: {
+                    currencyId: currency.id
+                }
+            });
+
+            //Delete Personal Accounts
+            await prisma.personalAccount.deleteMany({
+                where: {
+                    Account: {
+                        currencyId: currency.id
+                    }
+                }
+            });
+
+            //Delete Merchant Accounts
+            await prisma.merchantAccount.deleteMany({
+                where: {
+                    Account: {
+                        currencyId: currency.id
+                    }
+                }
+            });
+
+            //Delete Accounts
+            await prisma.account.deleteMany({
+                where: {
+                    currencyId: currency.id
+                }
+            });
+
+            //Delete users
+            await prisma.user.deleteMany({
+                where: {
+                    OR: [
+                        { email: config.user1Email },
+                        { email: config.user2Email },
+                        { email: config.adminEmail }
+                    ]
+                }
+            });
         }
-      });
+
+        if (!currency) {
+            const currencyData = {
+                symbol: config.testCurrency,
+                name: "Test Currency",
+                country: "EU",
+                accountMax: 10,
+                logoURL: "image.png",
+                webSiteURL: "https://example.org",
+                regionList: '[1000, 2000, 3000, 4000]',
+                newAccountWizardURL: "https:/google.com",
+                topOffWizardURL: "https:/google.com",
+                androidAppURL: "https://google.com",
+                iphoneAppURL: "https://google.com",
+                androidAppLatestVersion: "1.0.0",
+                iphoneAppLatestVersion: "1.0.0",
+            }
+            currency = await createCurrency(currencyData);
+            console.log(" - Currency created: " + currency.symbol);
+        }
+        currencyId = currency.id;
+
+        //Create Main Account for Currency
+        const mainAccount = await createCurrencyMainAccount(currency);
+        console.log(" - Currency main account created: " + mainAccount.number);
     }
-    currencyId = currency.id;
-  }
-  catch (error) {
-    console.log("Setup - Error with Currency")
-    console.log(error);
-  }
+    catch (error) {
+        console.log("Setup - Error with Currency")
+        console.log(error);
+    }
 
-  // Delete user
-  try {
-    await deleteUserAndAccount(config.user1Email);
+    //Create Users
+    try {
+        let user;
+        let account;
+        let userData;
 
-    await deleteUserAndAccount(config.user2Email);
+        userData = {
+            email: config.user1Email,
+            firstname: "John",
+            lastname: "Doe",
+            phone: config.user1Phone,
+            region: "EU",
+            hashedPassword: await argon2.hash(config.user1Password),
+        }
+        user = await createUser(userData.email, userData.phone, userData.hashedPassword, "user", userData.firstname, userData.lastname);
+        console.log(" - User created: " + user.email);
 
-    await deleteUserAndAccount(config.adminEmail);
+        await setActiveUserById(user.id);
+        console.log(" - Active user set: " + user.email);
 
-  }
-  catch (error) {
-    console.log("Setup - Error with Delete User and Account")
-    console.log(error);
-  }
+        account = await createPersonnalAccount(user, config.testCurrency);
+        console.log(" - Account created for user " + user.email + " with account number " + account.number);
 
-  //Create User
-  try {
+        userData = {
+            email: config.user2Email,
+            firstname: "John",
+            lastname: "Doe",
+            phone: config.user2Phone,
+            region: "EU",
+            hashedPassword: await argon2.hash(config.user2Password),
+        }
+        user = await createUser(userData.email, userData.phone, userData.hashedPassword, "user", userData.firstname, userData.lastname);
+        console.log(" - User created: " + user.email);
 
-    await createUserAndAccount(config.user1Email, config.user1Password, config.user1Phone, "user", currencyId);
+        //await setActiveUserById(user.id);
+        //console.log("Active user set: " + user.email);
 
-    await createUserAndAccount(config.user2Email, config.user2Password, config.user2Phone, "user", currencyId);
+        account = await createPersonnalAccount(user, config.testCurrency);
+        console.log(" - Account created for user " + user.email + " with account number " + account.number);
 
-    await createUserAndAccount(config.adminEmail, config.adminPassword, config.adminPhone, "admin", currencyId);
+        userData = {
+            email: config.adminEmail,
+            firstname: "John",
+            lastname: "Doe",
+            phone: config.adminPhone,
+            region: "EU",
+            hashedPassword: await argon2.hash(config.adminPassword),
+        }
+        user = await createUser(userData.email, userData.phone, userData.hashedPassword, "user", userData.firstname, userData.lastname);
+        console.log(" - User created: " + user.email);
 
-  }
-  catch (error) {
-    console.log("Setup - Error create User and Account")
-    console.log(error);
-  }
+        await setActiveUserById(user.id);
+        console.log(" - Active user set: " + user.email);
 
-  //Activate User
-  try {
+        account = await createPersonnalAccount(user, config.testCurrency);
+        console.log(" - Account created for user " + user.email + " with account number " + account.number);
 
-    await setUserIsActiveByEmail(config.user1Email);
+    }
+    catch (error) {
+        console.log("Setup Before", error);
+        throw error;
+    }
 
-    //await setUserIsActiveByEmail(config.user2Email);
-
-    await setUserIsActiveByEmail(config.adminEmail);
-
-  }
-  catch (error) {
-    console.log("Setup - Error create User and Account")
-    console.log(error);
-  }
-
-  // Duration of before Hook
-  const enlapsedTime = Date.now() - before_start_time;
-  console.log(`Setup - Before Completed in ${enlapsedTime} ms`);
+    // Duration of before Hook
+    const enlapsedTime = Date.now() - before_start_time;
+    console.log(` - Setup - Before Completed in ${enlapsedTime} ms`);
+    console.log("");
 });
 
 //This is global after hook
 after(async () => {
-  console.log("Setup - After");
-  const after_start_time = Date.now();
+    console.log("Setup - After");
+    const after_start_time = Date.now();
+    try {
+        let currency = await getCurrencyBySymbol(config.testCurrency);
+        if (currency) {
+            //Delete Transactions
+            await prisma.transaction.deleteMany({
+                where: {
+                    currencyId: currency.id
+                }
+            });
 
-  await deleteUserAndAccount(config.user1Email);
+            //Delete Personal Accounts
+            await prisma.personalAccount.deleteMany({
+                where: {
+                    Account: {
+                        currencyId: currency.id
+                    }
+                }
+            });
 
-  await deleteUserAndAccount(config.user2Email);
+            //Delete Merchant Accounts
+            await prisma.merchantAccount.deleteMany({
+                where: {
+                    Account: {
+                        currencyId: currency.id
+                    }
+                }
+            });
 
-  await deleteUserAndAccount(config.adminEmail);
+            //Delete Accounts
+            await prisma.account.deleteMany({
+                where: {
+                    currencyId: currency.id
+                }
+            });
 
-  const enlapsedTime = Date.now() - after_start_time;
-  console.log(`Setup - After Completed in ${enlapsedTime} ms`);
+            //Delete users
+            await prisma.user.deleteMany({
+                where: {
+                    OR: [
+                        { email: config.user1Email },
+                        { email: config.user2Email },
+                        { email: config.adminEmail }
+                    ]
+                }
+            });
 
-  const totalEnlapsedDuration = Date.now() - test_start_time;
-  console.log(`Test Suite executed in  ${totalEnlapsedDuration} ms`);
+            await prisma.currency.deleteMany({
+                where: {
+                    id: currency.id
+                }
+            });
 
-  shutdown("Test cleanup");
+            console.log(" - Setup - Cleanup after tests completed");
+        }
+    }
+    catch (error) {
+        console.log(" - Setup After", error);
+        throw error;
+    }
+
+    const enlapsedTime = Date.now() - after_start_time;
+    console.log(` - Setup - After Completed in ${enlapsedTime} ms`);
+
+    const totalEnlapsedDuration = Date.now() - test_start_time;
+    console.log(` - Test Suite executed in  ${totalEnlapsedDuration} ms`);
+
+    shutdown("Test cleanup");
 });

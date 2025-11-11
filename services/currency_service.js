@@ -3,8 +3,8 @@ const prisma = new PrismaClient();
 
 import redisHelper from '../utils/redisHelper.js';
 
-import { getAccountCountByCurrencyId, getMerchantAccountCountByCurrencyId } from './account_service.js';
-import { AccountType, getAccountId } from '../utils/accountUtil.js';
+import { getPersonnalAccountCountByCurrencyId, getMerchantAccountCountByCurrencyId } from './account_service.js';
+import { getAccountId } from '../utils/accountUtil.js';
 
 const cached_ttl = 60; //in seconds
 const cached_stats_ttl = 900; //in seconds
@@ -74,7 +74,7 @@ export const getCurrencyListWithStats = async () => {
         const merchantCount = await getMerchantAccountCountByCurrencyId(currency.id);
 
         //Get number of accounts
-        const accountCount = await getAccountCountByCurrencyId(currency.id);
+        const accountCount = await getPersonnalAccountCountByCurrencyId(currency.id);
 
         //Get monthly transaction volume for last 30 days
         const monthlyTransVol = await prisma.transaction.aggregate({
@@ -103,11 +103,14 @@ export const getCurrencyListWithStats = async () => {
 }
 
 export const createCurrency = async (data) => {
-    const newCurrency = await prisma.currency.create({ data });
 
+    //Create Currency in DB
+    const currency = await prisma.currency.create({ data });
+
+    //Update Currency List Cache
     await updateCurrencyListCache();
 
-    return newCurrency;
+    return currency;
 }
 
 export const modifyCurrency = async (id, data) => {
@@ -139,9 +142,9 @@ export const getNextAccountId = async (symbol, accountType) => {
     let startAccountNumber = currency.accountNextNumber;
     let accountExists = false;
     let accountId = "";
-    while(!accountExists){
+    while (!accountExists) {
 
-        startAccountNumber +=1;
+        startAccountNumber += 1;
         accountId = getAccountId(accountType, currency.id, startAccountNumber);
 
         accountExists = await prisma.account.count({
@@ -150,7 +153,7 @@ export const getNextAccountId = async (symbol, accountType) => {
     }
 
     //Update next number in currency
-    await modifyCurrency(currency.id, { accountNextNumber: startAccountNumber});
+    await modifyCurrency(currency.id, { accountNextNumber: startAccountNumber });
 
     return accountId;
 }

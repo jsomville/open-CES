@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { isValidAccountId } from '../utils/accountUtil.js';
+
 export const createCurrencySchema = z.strictObject({
   params: z.strictObject({}).optional(),
   body: z.strictObject({
@@ -16,7 +18,6 @@ export const createCurrencySchema = z.strictObject({
     iphoneAppURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
     androidAppLatestVersion: z.string().max(10).optional().or(z.literal('').transform(() => undefined)),
     iphoneAppLatestVersion: z.string().max(10).optional().or(z.literal('').transform(() => undefined)),
-    accountFormatNumber: z.string().max(50).optional().or(z.literal('').transform(() => undefined)),
   }),
 });
 
@@ -43,7 +44,9 @@ export const currencyIdSchema = z.strictObject({
 export const currencyFundRefundSchema = z.strictObject({
   params: currencyParamSchema,
   body: z.strictObject({
-    account: z.number().int().min(1),
+    number: z.string().refine(isValidAccountId, {
+      message: "Invalid account number format"
+    }),
     amount: z.number().positive(),
   }),
 });

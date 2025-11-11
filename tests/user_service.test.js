@@ -1,34 +1,30 @@
 import assert from 'node:assert';
 import { PrismaClient } from '@prisma/client';
+import argon2 from 'argon2';
 
 import {
+    getUserList,
     createUser,
+    updateUser,
     removeUser,
     getUserByEmail,
     getUserById,
+    getUserByPhone,
+    getLoginUserByEmail,
     setActiveUserById,
-    setUserIsActiveByEmail,
-    deleteUserAndAccount,
-    createUserAndAccount,
+    setUserAdminById,
+    updateLastLogin,
 } from '../services/user_service.js';
-import { getAccountByEmailAndCurrencyId, getUserAccounts, getUserAccountsByEmail} from '../services/account_service.js';
+import { getUserAccounts } from '../services/account_service.js';
+import { getCurrencyBySymbol } from '../services/currency_service.js';
+import config from './config.test.js';
 
 const prisma = new PrismaClient();
 
 describe('Test User_service', () => {
     let currency;
     let user1; // created via addUser
-    let user2Email = 'user_svc2@example.org'; // created via createUserAndAccount
-
-    const currencyPayload = {
-        symbol: 'UTU',
-        name: 'UnitTestUserSvc',
-        country: 'UT',
-        accountMax: 200,
-        regionList: '[1000,2000]',
-        webSiteURL: 'https://example.com',
-        logoURL: 'https://example.com/logo.png',
-    };
+    let user2Email = 'user_svc2@example.org'; 
 
     const user1Payload = {
         email: 'user_svc1@example.org',
@@ -37,13 +33,17 @@ describe('Test User_service', () => {
     };
 
     before(async () => {
-        // ensure clean slate for currency and users
-        await prisma.currency.deleteMany({ where: { OR: [{ symbol: currencyPayload.symbol }, { name: currencyPayload.name }] } });
+        // Use test currency from config
+        currency = await getCurrencyBySymbol(config.testCurrency);
+        if (!currency) {
+            throw new Error(`Test currency ${config.testCurrency} not found. Please ensure database is initialized.`);
+        }
+
+        // ensure clean slate for test users
         await prisma.user.deleteMany({ where: { email: { in: [user1Payload.email, user2Email] } } });
 
-        currency = await prisma.currency.create({ data: currencyPayload });
-
-        user1 = await createUser(user1Payload.email, user1Payload.phone, user1Payload.password);
+        const hashedPassword = await argon2.hash(user1Payload.password);
+        user1 = await createUser(user1Payload.email, user1Payload.phone, hashedPassword, 'user', 'First', 'Last');
     });
 
     after(async () => {
@@ -55,11 +55,6 @@ describe('Test User_service', () => {
         const u2 = await prisma.user.findUnique({ where: { email: user2Email } });
         if (u2) {
             await prisma.user.delete({ where: { id: u2.id } });
-        }
-
-        // delete test currency
-        if (currency) {
-            await prisma.currency.delete({ where: { id: currency.id } });
         }
     });
 
@@ -80,59 +75,88 @@ describe('Test User_service', () => {
         assert.ok(!('passwordHash' in byId));
     });
 
-    it('setActiveUser update flags', async () => {
+    it('setActiveUserById updates isActive flag', async () => {
         await setActiveUserById(user1.id);
 
         const updated = await getUserById(user1.id);
         assert.strictEqual(updated.isActive, true);
     });
 
-    it('setUserIsActiveByEmail returns safe user and sets isActive', async () => {
-        const safe = await setUserIsActiveByEmail(user1Payload.email);
-        assert.ok(safe);
-        assert.strictEqual(safe.isActive, true);
-        assert.ok(!('passwordHash' in safe));
+    it('getUserList returns all users without passwordHash', async () => {
+        const users = await getUserList();
+        assert.ok(Array.isArray(users));
+        assert.ok(users.length > 0);
+        
+        // Check no user has passwordHash
+        users.forEach(user => {
+            assert.ok(!('passwordHash' in user));
+        });
+        
+        // Should find our test user
+        const foundUser = users.find(u => u.email === user1Payload.email);
+        assert.ok(foundUser);
     });
 
-    it('getUserAccounts and getUserAccountsByEmail return empty for user without account', async () => {
+    it('getUserByPhone returns user by phone number', async () => {
+        const user = await getUserByPhone(user1Payload.phone);
+        assert.ok(user);
+        assert.strictEqual(user.email, user1Payload.email);
+        assert.ok(!('passwordHash' in user));
+    });
+
+    it('getUserByPhone returns null for non-existent phone', async () => {
+        const user = await getUserByPhone('9999999999');
+        assert.strictEqual(user, null);
+    });
+
+    it('getLoginUserByEmail returns user WITH passwordHash', async () => {
+        const user = await getLoginUserByEmail(user1Payload.email);
+        assert.ok(user);
+        assert.strictEqual(user.email, user1Payload.email);
+        assert.ok(user.passwordHash); // Should have password hash
+    });
+
+    it('updateUser updates user data', async () => {
+        const updated = await updateUser(user1.id, { 
+            firstname: 'UpdatedFirst',
+            lastname: 'UpdatedLast'
+        });
+        
+        assert.ok(updated);
+        assert.strictEqual(updated.firstname, 'UpdatedFirst');
+        assert.strictEqual(updated.lastname, 'UpdatedLast');
+        assert.ok(!('passwordHash' in updated));
+    });
+
+    it('setUserAdminById changes user role to admin', async () => {
+        await setUserAdminById(user1.id);
+        
+        const updated = await getUserById(user1.id);
+        assert.strictEqual(updated.role, 'admin');
+    });
+
+    it('updateLastLogin sets lastLoginAt timestamp', async () => {
+        const before = await getUserById(user1.id);
+        const beforeTime = before.lastLoginAt;
+        
+        // Wait a bit to ensure different timestamp
+        await new Promise(resolve => setTimeout(resolve, 10));
+        
+        await updateLastLogin(user1.id);
+        
+        const after = await getUserById(user1.id);
+        assert.ok(after.lastLoginAt);
+        
+        // Should be more recent than before
+        if (beforeTime) {
+            assert.ok(new Date(after.lastLoginAt) > new Date(beforeTime));
+        }
+    });
+
+    it('getUserAccounts return empty for user without account', async () => {
         const accountsById = await getUserAccounts(user1.id);
-        const accountsByEmail = await getUserAccountsByEmail(user1Payload.email);
         assert.ok(Array.isArray(accountsById));
-        assert.ok(Array.isArray(accountsByEmail));
         assert.strictEqual(accountsById.length, 0);
-        assert.strictEqual(accountsByEmail.length, 0);
-    });
-
-    it('createUserAndAccount creates user with an account for given currency', async () => {
-        await createUserAndAccount(user2Email, 'Abcd1234!', '1000000012', 'user', currency.id);
-
-        const u2 = await getUserByEmail(user2Email);
-        assert.ok(u2);
-
-        const accountsById = await getUserAccounts(u2.id);
-        assert.strictEqual(accountsById.length, 1);
-        assert.strictEqual(accountsById[0].currencyId, currency.id);
-
-        const accountsByEmail = await getUserAccountsByEmail(user2Email);
-        assert.strictEqual(accountsByEmail.length, 1);
-
-        const accountByEmailAndCurrency = await getAccountByEmailAndCurrencyId(user2Email, currency.id);
-        assert.ok(accountByEmailAndCurrency);
-        assert.strictEqual(accountByEmailAndCurrency.currencyId, currency.id);
-    });
-
-    it('deleteUserAndAccount removes user and their accounts', async () => {
-        // ensure user2 exists
-        const u2 = await getUserByEmail(user2Email);
-        assert.ok(u2);
-
-        await deleteUserAndAccount(user2Email);
-
-        const afterUser = await getUserByEmail(user2Email);
-        assert.strictEqual(afterUser, null);
-
-        const accounts = await getUserAccountsByEmail(user2Email);
-        assert.strictEqual(accounts, null);
     });
 
     it('removeUser deletes user by id', async () => {
@@ -146,8 +170,13 @@ describe('Test User_service', () => {
     it('getters return null when user not found', async () => {
         const byEmail = await getUserByEmail('does-not-exist@example.org');
         const byId = await getUserById(99999999);
+        const byPhone = await getUserByPhone('0000000000');
+        const byLogin = await getLoginUserByEmail('does-not-exist@example.org');
+        
         assert.strictEqual(byEmail, null);
         assert.strictEqual(byId, null);
+        assert.strictEqual(byPhone, null);
+        assert.strictEqual(byLogin, null);
     });
 });
 

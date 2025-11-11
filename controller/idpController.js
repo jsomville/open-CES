@@ -3,7 +3,7 @@ import argon2 from 'argon2';
 
 import { getAccessToken, getRefreshToken } from "../services/auth_service.js";
 import redisHelper from '../utils/redisHelper.js'
-import { getUserByEmail, getLoginUserByEmail, setLastLogin } from "../services/user_service.js";
+import { getUserByEmail, getLoginUserByEmail, updateLastLogin } from "../services/user_service.js";
 
 // @desc Login
 // @toute POST /api/idp/login
@@ -49,7 +49,7 @@ export const login = async (req, res, next) => {
         }
 
         //Update Last Login
-        await setLastLogin(user.id);
+        await updateLastLogin(user.id);
 
         //reset login attempts on successful login
         const attemptsKey = `LoginAttempts:${user.email}`;

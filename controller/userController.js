@@ -1,7 +1,7 @@
 import argon2 from 'argon2';
 
 import { getUserList, createUser, updateUser, removeUser, getUserById, getUserByEmail, getUserByPhone, setUserAdminById, setActiveUserById } from '../services/user_service.js';
-import { getAccountCountByUserId } from '../services/account_service.js';
+import { getUserAccounts } from '../services/account_service.js';
 
 
 // @desc Get users
@@ -163,9 +163,8 @@ export const deleteUser = async (req, res, next) => {
     }
 
     //Get Number of Account
-    const accountCount = await getAccountCountByUserId(userId);
-
-    if (accountCount) {
+    const accountCount = await getUserAccounts(userId);
+    if (accountCount.length > 0) {
       return res.status(409).json({ message: `User is still assigned to an account` })
     }
 

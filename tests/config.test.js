@@ -11,5 +11,5 @@ export default{
     "adminPassword" : "OpenCES1234!",
     "adminPhone" : "+32471041001",
 
-    "testCurrency" : "CES",
+    "testCurrency" : "TCES",
 };

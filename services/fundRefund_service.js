@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
-export const doFundAccount = async (currency, account, amount) => {
+/*export const doFundAccount = async (currency, account, amount) => {
     try {
         const newAccountBalance = Number(account.balance) + Number(amount);
         const newCurrencyBalance = Number(currency.balance) - Number(amount);
@@ -74,5 +74,5 @@ export const doRefundAccount = async (currency, account, amount) => {
         console.error("Error Refund Account Service : " + error.message);
         throw error;
     }
-}
+}*/
 

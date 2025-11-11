@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 import { createUser, getUserByEmail, setActiveUserById} from '../services/user_service.js';
 import { createAccount } from '../services/account_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { doFundAccount } from '../services/fundRefund_service.js';
+import { transferFunds } from '../services/transfer_service.js';
 
 // Create transporter outside for reuse
 const transporter = nodemailer.createTransport({
@@ -96,7 +96,7 @@ export const register = async (req, res, next) => {
     // *****************************
     // Temp fund account
     // *****************************
-    await doFundAccount(currency, account, 10);
+    await transferFunds(currency, account, 10);
 
     // Delete registration after validation
     await deleteUserRegistrationById(registration.id);

@@ -3,9 +3,11 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
 import argon2 from 'argon2';
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient();
 
 import { app } from "../app.js";
-import { setActiveUserById, getUserByEmail, createUser, deleteUserByEmail } from "../services/user_service.js";
+import { setActiveUserById, getUserByEmail, createUser, removeUser } from "../services/user_service.js";
 import redisHelper from '../utils/redisHelper.js';
 
 describe("Login Test", () => {
@@ -41,7 +43,7 @@ describe("Login Test", () => {
       userTemp = await getUserByEmail(okUser.email);
       if (!userTemp) {
         const hashedPassword = await argon2.hash(okUser.password);
-        const user = await createUser(okUser.email, okUser.phone, hashedPassword);
+        const user = await createUser(okUser.email, okUser.phone, hashedPassword, "user", "firstname", "lastname");
 
         await setActiveUserById(user.id);
       }
@@ -50,7 +52,7 @@ describe("Login Test", () => {
       userTemp = await getUserByEmail(okAdmin.email);
       if (!userTemp) {
         const hashedPassword = await argon2.hash(okAdmin.password);
-        const user = await createUser(okAdmin.email, okAdmin.phone, hashedPassword, "admin");
+        const user = await createUser(okAdmin.email, okAdmin.phone, hashedPassword, "admin", "firstname", "lastname");
 
         await setActiveUserById(user.id);
       }
@@ -59,14 +61,14 @@ describe("Login Test", () => {
       userTemp = await getUserByEmail(notValidatedUser.email);
       if (!userTemp) {
         const hashedPassword = await argon2.hash(notValidatedUser.password);
-        await createUser(notValidatedUser.email, notValidatedUser.phone, hashedPassword);
+        await createUser(notValidatedUser.email, notValidatedUser.phone, hashedPassword, "user", "firstname", "lastname");
       }
 
       //Check and create for validated admin
       userTemp = await getUserByEmail(lockedUser.email);
       if (!userTemp) {
         const hashedPassword = await argon2.hash(lockedUser.password);
-        const user = await createUser(lockedUser.email, lockedUser.phone, hashedPassword);
+        const user = await createUser(lockedUser.email, lockedUser.phone, hashedPassword, "user", "firstname", "lastname");
 
         await setActiveUserById(user.id);
       }
@@ -80,10 +82,13 @@ describe("Login Test", () => {
 
   after(async () => {
     try {
-      await deleteUserByEmail(okUser.email);
-      await deleteUserByEmail(okAdmin.email);
-      await deleteUserByEmail(notValidatedUser.email);
-      await deleteUserByEmail(lockedUser.email);
+      await prisma.user.deleteMany({
+        where: {
+          email: {
+            in: [okUser.email, okAdmin.email, notValidatedUser.email, lockedUser.email]
+          }
+        }
+      });
 
       await redisHelper.del(`LoginAttempts:${lockedUser.email}`);
       await redisHelper.del(`Lockout:${lockedUser.email}`);

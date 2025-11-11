@@ -2,11 +2,12 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-import { getUserByEmail, getUserAccountsAndTransactions } from '../services/user_service.js';
+import { getUserByEmail } from '../services/user_service.js';
+import { getUserAccounts } from '../services/account_service.js';
 
 import { getCurrencyById } from '../services/currency_service.js';
 
-import { getLatestTransactionByAccountId } from '../services/account_service.js';
+import { getLatestTransactionByAccountNumber } from '../services/transaction_service.js';
 
 const transactionsCount = 5
 
@@ -14,14 +15,11 @@ const transactionsCount = 5
 // @toute GET /api/user/by-email/:email
 export const getUserDetailByEmail = async (req, res, next) => {
     try {
-        
-       //Check if email is provided
-        if (!req.params.email) {
-            return res.status(422).json({ error: "Email required" });
-        }
+
+        const email = req.validatedParams.email;
 
         //Check if user exists
-        const user = await getUserByEmail(req.params.email);
+        const user = await getUserByEmail(email);
         if (!user) {
             return res.status(404).json({ error: "User not found" })
         }
@@ -31,18 +29,16 @@ export const getUserDetailByEmail = async (req, res, next) => {
             return res.status(403).json({ error: "Forbidden: Insufficient role" })
         }
 
-        const accounts = await prisma.account.findMany({ where: { userId: user.id } });
+        // get User accounts & transactions
+        const accounts = await getUserAccounts(user.id);
         for (const account of accounts) {
-            const latestTransactions = await prisma.transaction.findMany({
-                where: { accountId: account.id },
-                orderBy: { createdAt: 'desc' },
-                take: transactionsCount,
-            });
+            const latestTransactions = await getLatestTransactionByAccountNumber(account.id, transactionsCount);
             if (latestTransactions) {
                 account.latestTransactions = latestTransactions;
             }
         }
 
+        //assemble user detail
         const userDetail = {
             ...user,
             accounts: accounts.map(account => ({
@@ -60,9 +56,9 @@ export const getUserDetailByEmail = async (req, res, next) => {
 
 // @desc Get one user
 // @toute GET /api/user/me
-export const getUserDetail = async (req, res, next) => {
+export const getMe = async (req, res, next) => {
     try {
-        const email = req.user.sub;
+        const email = req.user.sub
 
         //Check if user exists
         const user = await getUserByEmail(email);
@@ -70,29 +66,16 @@ export const getUserDetail = async (req, res, next) => {
             return res.status(404).json({ error: "User not found" })
         }
 
-        // get accounts & transactions
-        const accounts = await prisma.account.findMany({ where: { userId: user.id } });
+        // get User accounts & transactions
+        const accounts = await getUserAccounts(user.id);
         for (const account of accounts) {
-
-            // Add the currency symbol
-            const currency = await getCurrencyById(account.currencyId);
-            if (currency) {
-                account.currencySymbol = currency.symbol;
-            };
-
-            // get the last transactions
-            /*const latestTransactions = await prisma.transaction.findMany({
-                where: { accountId: account.id },
-                orderBy: { createdAt: 'desc' },
-                take: transactionsCount,
-            });*/
-            const latestTransactions = await getLatestTransactionByAccountId(account.id, transactionsCount);
-
+            const latestTransactions = await getLatestTransactionByAccountNumber(account.id, transactionsCount);
             if (latestTransactions) {
                 account.latestTransactions = latestTransactions;
-            };
+            }
         }
 
+        //assemble user detail
         const userDetail = {
             ...user,
             accounts: accounts.map(account => ({

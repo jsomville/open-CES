@@ -9,7 +9,6 @@ export const createUserSchema = z.strictObject({
 
     email: z.string().email(),
     phone: z.string().min(8).max(15),
-    region: z.string().min(2).max(50),
 
     password: passwordSchema,
     role: z.string().min(2).max(50).optional(),
@@ -27,11 +26,24 @@ export const modifyUserSchema = z.strictObject({
     lastname: z.string().min(2).max(50),
 
     phone: z.string().min(8).max(15),
-    region: z.string().min(2).max(50),
   }),
 });
 
 export const userIdSchema = z.strictObject({
   params: userParamSchema,
+  body: z.strictObject({}).optional(),
+});
+
+export const userEmailParamSchema = z.strictObject({
+  email: z.string().email(),
+});
+
+export const userEmailSchema = z.strictObject({
+  params: userEmailParamSchema,
+  body: z.strictObject({}).optional(),
+});
+
+export const emptyUserSchema = z.strictObject({ 
+  params: z.strictObject({}).optional(),
   body: z.strictObject({}).optional(),
 });

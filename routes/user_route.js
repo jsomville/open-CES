@@ -4,10 +4,10 @@ import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
 import { getAllUsers, getUser, addUser, modifyUser, deleteUser, setUserAdmin, setUserActive } from '../controller/userController.js'
-import { getUserDetail, getUserDetailByEmail } from '../controller/userDetailController.js'
+import { getMe, getUserDetailByEmail } from '../controller/userDetailController.js'
 
 import { validate } from '../middleware/validate.js';
-import { createUserSchema, modifyUserSchema, userIdSchema, userParamSchema} from '../schema/user.schema.js'
+import { createUserSchema, modifyUserSchema, userIdSchema, userEmailSchema, emptyUserSchema} from '../schema/user.schema.js'
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
 
 const router = express.Router();
@@ -19,8 +19,8 @@ router.use(rate_limiter_by_sub);
 // get all users
 router.get('/', authorizeRole("admin"), getAllUsers);
 
-// get current user
-router.get('/me', authorizeRole("admin", "user"), getUserDetail);
+// get current user (must be before /:id route)
+router.get('/me', authorizeRole("admin", "user"), validate(emptyUserSchema), getMe);
 
 // get user by ID
 router.get('/:id', authorizeRole("admin"), validate(userIdSchema), getUser);
@@ -41,7 +41,6 @@ router.post('/:id/set-admin', authorizeRole("admin"),  validate(userIdSchema), s
 router.post('/:id/set-active', authorizeRole("admin"), validate(userIdSchema), setUserActive);
 
 // get user by Email
-router.get('/by-email/:email', authorizeRole("admin", "user"), getUserDetailByEmail);
-
+router.get('/by-email/:email', authorizeRole("admin", "user"), validate(userEmailSchema), getUserDetailByEmail);
 
 export default router;

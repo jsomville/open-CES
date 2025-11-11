@@ -1,20 +1,23 @@
 import assert from "node:assert";
 import request from 'supertest';
 
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient();
+
 import { app } from "../app.js";
 import config from "./config.test.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
-
-import { deleteMerchantByName } from "../services/merchant_service.js";
-
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient();
+import { createMerchant, deleteMerchantByName } from "../services/merchant_service.js";
+import { createMerchantAccount } from "../services/account_service.js";
+import { getCurrencyBySymbol } from '../services/currency_service.js'
 
 describe("Merchant Test", () => {
   let admin_access_token;
   let user_access_token;
 
   let new_merchant_id;
+
+  let test_currency
 
   const minimum_merchant_payload = {
     "name": "Test_Merchant1",
@@ -35,6 +38,8 @@ describe("Merchant Test", () => {
     //Get main Testing Tokens
     user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
     admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
+
+    test_currency = await getCurrencyBySymbol(config.testCurrency);
 
   });
 
@@ -632,7 +637,7 @@ describe("Merchant Test", () => {
     assert.strictEqual(res.body.errors.length, 1);
   });
 
-   it('Modify Merchant - latitude string', async () => {
+  it('Modify Merchant - latitude string', async () => {
     const payload = {
       name: "Valid Name",
       region: "EU",
@@ -860,25 +865,23 @@ describe("Merchant Test", () => {
   });
 
   it('Delete Merchant - assigned to account', async () => {
-    // create merchant, currency, user, and account referencing merchant
-    const merch = await prisma.merchant.create({ data: { name: 'AcctAttach', email: 'acct@merch.org', phone: '+32000000000', region: 'EU' } });
-    const cur = await prisma.currency.create({ data: { symbol: 'MRG', name: 'MerchGuard', country: 'EU' } });
-    const usr = await prisma.user.create({
-      data: { firstname: 'A', lastname: 'B', email: 'merchant_attach_user@open-ces.org', phone: '+32479999999', region: 'EU', passwordHash: 'FAKE', role: 'user' }
-    });
-    await prisma.account.create({ data: { userId: usr.id, merchantId: merch.id, currencyId: cur.id, accountType: 1 } });
+    const minimum_merchant_payload = {
+      "name": "Test_Merchant2",
+      "region": "EU",
+    }
+    const merchant = await createMerchant(minimum_merchant_payload);
+    const account = await createMerchantAccount(merchant, test_currency.symbol);
 
     const res = await request(app)
-      .delete(`/api/merchant/${merch.id}`)
+      .delete(`/api/merchant/${merchant.id}`)
       .set('Authorization', `Bearer ${admin_access_token}`);
 
     assert.equal(res.statusCode, 409);
     assert.equal(res.body.message, 'Merchant is still assigned to an account');
 
     // cleanup
-    await prisma.account.deleteMany({ where: { merchantId: merch.id } });
-    await prisma.user.delete({ where: { id: usr.id } });
-    await prisma.currency.delete({ where: { id: cur.id } });
-    await prisma.merchant.delete({ where: { id: merch.id } });
+    await prisma.merchantAccount.deleteMany({ where: { merchantId: merchant.id } });
+    await prisma.account.deleteMany({ where: { number: account.number } });
+    await prisma.merchant.delete({ where: { id: merchant.id } });
   });
 });

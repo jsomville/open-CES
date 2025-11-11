@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountByEmailAndCurrencyId } from '../services/account_service.js';
+import { getUserByEmail } from '../services/user_service.js';
+import { getUserAccounts } from '../services/account_service.js';
 import { getVoucherById } from '../services/voucher_service.js';
 import { getCurrencyById } from '../services/currency_service.js';
 
@@ -139,13 +140,21 @@ export const claimVoucher = async (req, res, next) => {
 
         // Get current user account
         const email = req.user.sub;
-        const account = await getAccountByEmailAndCurrencyId(email, voucher.currencyId);
-        if (!account) {
-            return res.status(404).json({ message: "Account not found" })
+        const user = await getUserByEmail(email);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
         }
 
-        try {
-            const newBalance = account.balance + voucher.amount;
+        const accounts = await getUserAccounts(user.id);
+        if (accounts.length > 0) {
+            // Check if user has an account in this currency
+            const account = accounts.find(account => account.currencyId === currency.id);
+            if (!account) {
+                return res.status(404).json({ message: "Account not found" });
+            }
+
+            //Claim Voucher
+                       const newBalance = account.balance + voucher.amount;
 
             //Make the claim Transaction
             await prisma.$transaction([
@@ -179,11 +188,9 @@ export const claimVoucher = async (req, res, next) => {
 
             return res.status(201).send();
         }
-        catch (error) {
-            console.error(error.message);
-            return res.status(500).json({ message: "Error voucher claim" })
+        else {
+            return res.status(404).json({ message: "No Account found" });
         }
-
     }
     catch (error) {
         console.error(error.message);
@@ -197,7 +204,7 @@ export function getAccountCountByCurrencyId(currencyId) {
             currencyId: currencyId
         }
     });
-}   
+}
 
 export function daysFrom(date, days) {
     const future = new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);

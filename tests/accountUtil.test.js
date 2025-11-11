@@ -3,7 +3,7 @@ import assert from "node:assert";
 import { AccountType, getAccountId, isValidAccountId } from '../utils/accountUtil.js';
 import { randomInt } from 'crypto';
 
-describe("Test Account", () => {
+describe("Test Account Util", () => {
 
     it('Generate valid Account ID', async () => {
 

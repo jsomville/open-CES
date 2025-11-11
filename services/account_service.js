@@ -3,132 +3,194 @@ const prisma = new PrismaClient();
 
 import { getUserByEmail } from './user_service.js';
 import { getCurrencyBySymbol } from './currency_service.js';
+import { getAccountId, AccountType } from '../utils/accountUtil.js';
 
-export const createAccount = async (userId, currencyId, accountType) => {
-  try {
-    const newAccount = await prisma.account.create({
-      data: {
-        userId: userId,
-        currencyId: currencyId,
-        accountType: accountType
-      }
-    });
-    return newAccount;
-  } catch (error) {
-    console.error("Error Create Account Service : " + error.message);
-    return null;
-  }
-}
+export const createAccount = async (symbol, accountType) => {
+    try {
 
-export const getAccountByEmailAndCurrencyId = async (email, currencyId) => {
-  const user = await getUserByEmail(email);
-  if (user) {
-    const account = await getAccountByUserIDAndCurrencyId(user.id, currencyId);
-    return account;
-  }
-  return null;
-}
+        const currency = await getCurrencyBySymbol(symbol);
+        if (!currency) {
+            throw new Error("Currency not found");
+        }
 
-export const getAccountByEmailAndCurrencySymbol = async (email, currencySymbol) => {
-  const user = await getUserByEmail(email);
-  if (user) {
-    const currency = await getCurrencyBySymbol(currencySymbol);
-    if (currency) {
-      const account = await getAccountByUserIDAndCurrencyId(user.id, currency.id);
-      return account;
+        let accountId = currency.accountNextNumber + 1;
+        let accountExists = false;
+        let accountNumber;
+        while (!accountExists) {
+
+            accountNumber = getAccountId(accountType, currency.id, accountId);
+
+            const accountCount = await prisma.account.count({
+                where: { number: accountNumber }
+            });
+
+            if (accountCount === 0) {
+                accountExists = true;
+            }
+            else {
+                accountId += 1;
+            }
+        }
+
+        // Update Currency Next Number
+        await prisma.currency.update({
+            where: { id: currency.id },
+            data: { accountNextNumber: accountId }
+        });
+
+        const account = await prisma.account.create({
+            data: {
+                number: accountNumber,
+                currencyId: currency.id,
+                accountType: accountType
+            }
+        });
+
+        return account;
     }
-  }
-  return null;
+    catch (error) {
+        console.error("Error Create Account Service : " + error.message);
+        throw error
+    }
+}
+export const createPersonnalAccount = async (user, symbol) => {
+    try {
+        const account = await createAccount(symbol, AccountType.PERSONAL);
+
+        // Update Personnal Account Table
+        await prisma.personalAccount.create({
+            data: {
+                userId: user.id,
+                accountNumber: account.number
+            }
+        });
+
+        return account
+    }
+    catch (error) {
+        console.error("Error Create Personal Account Service : " + error.message);
+        throw error
+    }
 }
 
-export const getUserAccountsByEmail = async (email) => {
-  const user = await getUserByEmail(email);
-  if (user) {
-    const accounts = await getUserAccounts(user.id);
-    return accounts;
-  }
-  return null;
-};
+export const createMerchantAccount = async (merchant, symbol) => {
+    try {
+        const account = await createAccount(symbol, AccountType.MERCHANT);
+
+        // Update Merchant Account Table
+        await prisma.merchantAccount.create({
+            data: {
+                merchantId: merchant.id,
+                accountNumber: account.number
+            }
+        });
+
+        return account;
+    }
+    catch (error) {
+        console.error("Error Create Merchant Account Service : " + error.message);
+        throw error
+    }
+}
+
+export const createCurrencyMainAccount = async (currency) => {
+    try {
+        const account = await createAccount(currency.symbol, AccountType.CURRENCY_MAIN);
+
+        //Update currency main account
+        await prisma.currency.update({
+            where: { id: currency.id },
+            data: {
+                mainCurrencyAccountNumber: account.number
+            }
+        });
+        return account;
+    } catch (error) {
+        console.error("Error Create Currency Main Account Service : " + error.message);
+        throw error
+    }
+}
 
 export const getAccountById = async (accountId) => {
-  const account = await prisma.account.findUnique({ where: { id: accountId } });
-  return account;
+    const account = await prisma.account.findUnique({ where: { id: accountId } });
+    return account;
+};
+
+export const getAccountByNumber = async (accountNumber) => {
+    const account = await prisma.account.findUnique({ where: { number: accountNumber } });
+    return account;
 };
 
 export const getUserAccounts = async (userId) => {
-  const accounts = await prisma.account.findMany({ where: { userId: userId } });
-  return accounts;
+    // Get the personnal account numbers
+    const accountIdList = await prisma.personalAccount.findMany({ where: { userId: userId }, select: { accountNumber: true } });
+    const accounts = [];
+
+    // Get The list Of accounts for this user
+    for (const accountId of accountIdList) {
+        const account = await getAccountByNumber(accountId.accountNumber);
+        if (account) {
+            accounts.push(account);
+        }
+    }
+    return accounts;
 };
 
 export const getMerchantAccounts = async (merchantId) => {
-  const accounts = await prisma.account.findMany({ where: { merchantId: merchantId } });
-  return accounts;
+    const accountIdList = await prisma.merchantAccount.findMany({ where: { merchantId: merchantId }, select: { accountNumber: true } });
+    const accounts = [];
+    for (const accountId of accountIdList) {
+        const account = await getAccountByNumber(accountId.accountNumber);
+        if (account) {
+            accounts.push(account);
+        }
+    }
+
+    return accounts;
 };
 
-export const getAccountByUserIDAndCurrencyId = async (userId, currencyId) => {
-  const account = await prisma.account.findFirst({ where: { userId: userId, currencyId: currencyId } });
-  return account;
-}
-
-export function getAccountCountByCurrencyId(currencyId) {
-    return prisma.account.count({
+export const getAccountCountByCurrencyId = async (currencyId) => {
+    return await prisma.account.count({
         where: {
             currencyId: currencyId
         }
     });
 }
 
-export function getMerchantAccountCountByCurrencyId(currencyId) {
-    return prisma.account.count({
+export const getPersonnalAccountCountByCurrencyId = async (currencyId) => {
+    return await prisma.account.count({
         where: {
             currencyId: currencyId,
-            merchantId: {
-                not: null
+            number :{
+                startsWith: AccountType.PERSONAL
             }
         }
     });
 }
 
-export function getAccountCountByUserId(userId) {
-    return prisma.account.count({
+export const getMerchantAccountCountByCurrencyId = async (currencyId) => {
+    return await prisma.account.count({
+        where: {
+            currencyId: currencyId,
+             number :{
+                startsWith: AccountType.MERCHANT
+            }
+        }
+    });
+}
+
+/*export const getAccountCountByUserId = async (userId) => {
+    return await prisma.account.count({
         where: {
             userId: userId
         }
     });
-}
+}*/
 
-export function getTransactionByAccountId(accountId) {
-    return prisma.transaction.findMany({
+export const removeAccount = async (number) => {
+    await prisma.account.delete({
         where: {
-            accountId: accountId
-        },
-        orderBy: {
-            createdAt: 'desc'
+            number: number,
         }
-    });
-}
-
-export function getLatestTransactionByAccountId(accountId, transactionCount) {
-    return prisma.transaction.findMany({
-        where: {
-            accountId: accountId
-        },
-        orderBy: {
-            createdAt: 'desc'
-        },
-        take: transactionCount
-    });
-}
-
-export function getTransactionByAccountIdAndPage(accountId, skip, limit) {
-    return prisma.transaction.findMany({
-        where: {
-            accountId: accountId
-        },
-        orderBy: {
-            createdAt: 'desc'
-        },
-        skip: skip,
-        take: limit
     });
 }
