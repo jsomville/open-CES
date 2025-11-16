@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidAccountId } from '../utils/accountUtil.js';
 
 export const createVoucherSchema = z.strictObject({
   params: z.strictObject({}).optional(),
@@ -23,4 +24,11 @@ export const modifyVoucherSchema = z.strictObject({
 export const voucherIdSchema = z.strictObject({
   params: voucherParamSchema,
   body: z.strictObject({}).optional(),
+});
+
+export const claimVoucherSchema = z.strictObject({
+  params: z.strictObject({}).optional(),
+  body: z.strictObject({
+    code: z.string().min(36).max(36),
+  }),
 });

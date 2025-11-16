@@ -162,7 +162,7 @@ export const getPersonnalAccountCountByCurrencyId = async (currencyId) => {
         where: {
             currencyId: currencyId,
             number :{
-                startsWith: AccountType.PERSONAL
+                startsWith: String(AccountType.PERSONAL)
             }
         }
     });
@@ -173,19 +173,11 @@ export const getMerchantAccountCountByCurrencyId = async (currencyId) => {
         where: {
             currencyId: currencyId,
              number :{
-                startsWith: AccountType.MERCHANT
-            }
+                 startsWith: String(AccountType.MERCHANT)
+             }
         }
     });
 }
-
-/*export const getAccountCountByUserId = async (userId) => {
-    return await prisma.account.count({
-        where: {
-            userId: userId
-        }
-    });
-}*/
 
 export const removeAccount = async (number) => {
     await prisma.account.delete({

@@ -25,6 +25,8 @@ describe("Test Transfer", () => {
     const fundAmount = 2.24;
     const transferAmount = 1.11;
 
+    const otherCurrencySymbol = "CES";
+
 
     before(async () => {
         try {
@@ -187,12 +189,20 @@ describe("Test Transfer", () => {
         assert.equal(res.body.error, "Source account not found");
     });
 
-    it.skip('Transfer - Account not the same currency', async () => {
+    it('Transfer - Account not the same currency', async () => {
         // NOTE: This test requires a second currency to be set up
         // Skipping for now as both test accounts use the same currency (TCES)
 
+        //Get an other account currency
+        const currency = await getCurrencyBySymbol(otherCurrencySymbol);
+        if(!currency) {
+            throw new Error("Other currency not found");
+        }
+        
+        const otherAccountNumber = currency.mainCurrencyAccountNumber;
+
         const payload = {
-            number: "different-currency-account",
+            number: otherAccountNumber,
             amount: transferAmount,
         }
 

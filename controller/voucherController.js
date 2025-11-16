@@ -1,18 +1,19 @@
-import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
+
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 import { getUserByEmail } from '../services/user_service.js';
 import { getUserAccounts } from '../services/account_service.js';
-import { getVoucherById } from '../services/voucher_service.js';
+import { getVouchers, getVoucherById, getVoucherByCode, createVoucher, updateVoucher, claimVoucherService, VoucherStatus } from '../services/voucher_service.js';
 import { getCurrencyById } from '../services/currency_service.js';
 
-const prisma = new PrismaClient();
 
 // @desc Get Vouchers
 // @route GET /api/voucher
 export const getAllVouchers = async (req, res, next) => {
     try {
-        const vouchers = await prisma.voucher.findMany()
+        const vouchers = await getVouchers();
 
         return res.status(200).json(vouchers);
     }
@@ -43,7 +44,7 @@ export const getVoucher = async (req, res, next) => {
 
 // @desc Create a voucher
 // @route POST /api/voucher
-export const createVoucher = async (req, res, next) => {
+export const addVoucher = async (req, res, next) => {
     try {
         const data = req.validatedBody;
 
@@ -60,15 +61,7 @@ export const createVoucher = async (req, res, next) => {
         const expiration = daysFromNow(data.duration);
 
         //Create Voucher
-        const newVoucher = await prisma.voucher.create({
-            data: {
-                code: new_code,
-                currencyId: data.currencyId,
-                amount: data.amount,
-                expiration: expiration,
-                status: "Issued",
-            }
-        })
+        const newVoucher = await createVoucher(new_code, data.amount, data.currencyId, expiration);
 
         return res.status(201).json(newVoucher)
     }
@@ -80,7 +73,7 @@ export const createVoucher = async (req, res, next) => {
 
 // @desc Modify Voucher
 // @route PUT /api/voucher
-export const updateVoucher = async (req, res, next) => {
+export const modifyVoucher = async (req, res, next) => {
     try {
         const data = req.validatedBody;
         const id = req.validatedParams.id;
@@ -91,18 +84,15 @@ export const updateVoucher = async (req, res, next) => {
             return res.status(404).json({ message: "Voucher not found" })
         }
 
+        if (voucher.status !== VoucherStatus.ISSUED) {
+            return res.status(422).json({ message: "Voucher not modifiable" })
+        }
+
         //Calculate the Expiration
         const expiration = daysFrom(voucher.expiration, data.duration);
 
         // Update Expiration date
-        const updatedVoucher = await prisma.voucher.update({
-            data: {
-                expiration: expiration
-            },
-            where: {
-                id: id
-            }
-        })
+        const updatedVoucher = await updateVoucher(id, expiration);
 
         return res.status(201).json(updatedVoucher)
     }
@@ -116,19 +106,16 @@ export const updateVoucher = async (req, res, next) => {
 export const claimVoucher = async (req, res, next) => {
     try {
         // Get Code
-        const code = req.body.code;
-        if (!code) {
-            return res.status(422).json({ message: "Code is mandatory" })
-        }
+        const code = req.validatedBody.code;
 
         // Voucher exists
-        const voucher = await prisma.voucher.findUnique({ where: { code: code } });
+        const voucher = await getVoucherByCode(code);
         if (!voucher) {
             return res.status(404).json({ message: "Voucher not found" })
         }
 
         // Check Voucher status
-        if (voucher.status !== "Issued") {
+        if (voucher.status !== VoucherStatus.ISSUED) {
             return res.status(422).json({ message: "Voucher not available" })
         }
 
@@ -145,66 +132,29 @@ export const claimVoucher = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" })
         }
 
+        //get User Accounts
         const accounts = await getUserAccounts(user.id);
-        if (accounts.length > 0) {
-            // Check if user has an account in this currency
-            const account = accounts.find(account => account.currencyId === currency.id);
-            if (!account) {
-                return res.status(404).json({ message: "Account not found" });
-            }
-
-            //Claim Voucher
-                       const newBalance = account.balance + voucher.amount;
-
-            //Make the claim Transaction
-            await prisma.$transaction([
-                prisma.voucher.update({
-                    data: {
-                        status: "Claimed"
-                    },
-                    where: {
-                        id: voucher.id
-                    }
-                }),
-                prisma.account.update({
-                    data: {
-                        balance: newBalance
-                    },
-                    where: {
-                        id: account.id
-                    }
-                }),
-                prisma.transaction.create({
-                    data: {
-                        accountId: account.id,
-                        amount: voucher.amount,
-                        currencyId: account.currencyId,
-                        transactionType: "Claim Voucher",
-                        description: `Claim Voucher # ${voucher.id}`,
-                        status: "Completed"
-                    }
-                }),
-            ])
-
-            return res.status(201).send();
-        }
-        else {
+        if (accounts.length == 0) {
             return res.status(404).json({ message: "No Account found" });
         }
+
+        // Check if user has an account in this currency
+        const account = accounts.find(account => account.currencyId === voucher.currencyId);
+        if (!account) {
+            return res.status(404).json({ message: "Account not found" });
+        }
+
+        //Make the claim Transaction
+        await claimVoucherService(voucher, account);
+
+        return res.status(201).send();
+
     }
     catch (error) {
-        console.error(error.message);
+        console.error(error);
         return res.status(500).json({ message: "Error claiming voucher" })
     }
 };
-
-export function getAccountCountByCurrencyId(currencyId) {
-    return prisma.account.count({
-        where: {
-            currencyId: currencyId
-        }
-    });
-}
 
 export function daysFrom(date, days) {
     const future = new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);

@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { app } from "../app.js"
 
-xdescribe("Test Main server", () => {
+describe("Test Main server", () => {
 
   // Check server is running
   it('Call root page', async () => {

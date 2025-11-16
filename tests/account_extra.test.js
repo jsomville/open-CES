@@ -43,8 +43,8 @@ describe("Test Account Extra", () => {
                 phone: "5551234567",
                 password: "TestPass123!",
                 role: "user",
-                firstname: "Firstname",
-                lastname: "Lastname"
+                firstname: "Account",
+                lastname: "Extra"
             }
             // Create test user
             const hashedPassword = await argon2.hash(userInfo.password);
