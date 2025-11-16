@@ -3,7 +3,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getCurrency, getCurrenciesDetails, getAllCurrencies, addCurrency, updateCurrency, deleteCurrency, fundAccount, refundAccount } from '../controller/currencyController.js'
+import { getCurrency, getCurrenciesDetails, getAllCurrencies, addCurrency, modifyCurrency, removeCurrency, fundAccount, refundAccount } from '../controller/currencyController.js'
 
 import { validate } from '../middleware/validate.js';
 import { createCurrencySchema, modifyCurrencySchema, currencyIdSchema, currencyFundRefundSchema } from '../schema/currency.schema.js'
@@ -28,10 +28,10 @@ router.get('/:id', authorizeRole("admin"), validate(currencyIdSchema), getCurren
 router.post('/', authorizeRole("admin"), validate(createCurrencySchema), addCurrency);
 
 //modify currency
-router.put('/:id', authorizeRole("admin"), validate(modifyCurrencySchema), updateCurrency);
+router.put('/:id', authorizeRole("admin"), validate(modifyCurrencySchema), modifyCurrency);
 
 //delete currency
-router.delete('/:id', authorizeRole("admin"), validate(currencyIdSchema), deleteCurrency);
+router.delete('/:id', authorizeRole("admin"), validate(currencyIdSchema), removeCurrency);
 
 //Fund account
 router.post('/:id/fundAccount', authorizeRole("admin"), validate(currencyFundRefundSchema), fundAccount);

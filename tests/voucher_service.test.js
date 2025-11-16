@@ -16,7 +16,7 @@ import {
     getVoucherByCode, 
     claimVoucherService 
 } from "../services/voucher_service.js";
-import { getUserByEmail, createUser, removeUser } from "../services/user_service.js";
+import { getUserByEmail, createUser, deleteUser } from "../services/user_service.js";
 import { createPersonnalAccount, getAccountByNumber } from "../services/account_service.js";
 
 describe("Voucher Service Tests", () => {
@@ -49,7 +49,7 @@ describe("Voucher Service Tests", () => {
                     await prisma.personalAccount.deleteMany({ where: { accountNumber: account.number } });
                     await prisma.account.delete({ where: { number: account.number } });
                 }
-                await removeUser(existingUser.id);
+                await deleteUser(existingUser.id);
             }
 
             // Create test user
@@ -96,7 +96,7 @@ describe("Voucher Service Tests", () => {
 
             // Clean up test user
             if (testUser) {
-                await removeUser(testUser.id);
+                await deleteUser(testUser.id);
             }
         } catch (error) {
             console.error("Cleanup Error: " + error.message);

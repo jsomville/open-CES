@@ -113,7 +113,7 @@ export const createCurrency = async (data) => {
     return currency;
 }
 
-export const modifyCurrency = async (id, data) => {
+export const updateCurrency = async (id, data) => {
     const updatedCurrency = await prisma.currency.update({
         where: { id: id },
         data: data
@@ -124,7 +124,7 @@ export const modifyCurrency = async (id, data) => {
     return updatedCurrency;
 }
 
-export const removeCurrency = async (id) => {
+export const deleteCurrency = async (id) => {
     await prisma.currency.delete({
         where: { id: id }
     });

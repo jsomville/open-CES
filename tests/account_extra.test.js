@@ -10,7 +10,7 @@ import { app } from "../app.js";
 import config from "./config.test.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js';
 import { createPersonnalAccount } from '../services/account_service.js';
-import { getUserByEmail, createUser, removeUser } from '../services/user_service.js';
+import { getUserByEmail, createUser, deleteUser } from '../services/user_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
 import { AccountType } from '../utils/accountUtil.js';
 
@@ -36,7 +36,7 @@ describe("Test Account Extra", () => {
 
             testUser = await getUserByEmail(testUserEmail);
             if (testUser) {
-                await removeUser(testUser.id);
+                await deleteUser(testUser.id);
             }
             const userInfo = {
                 email: testUserEmail,
@@ -89,7 +89,7 @@ describe("Test Account Extra", () => {
             await prisma.personalAccount.deleteMany({ where: { Account: { currencyId: test_currency.id } } });
             await prisma.account.deleteMany({ where: { currencyId: test_currency.id, accountType: AccountType.PERSONAL } });
 
-            await removeUser(testUser.id);
+            await deleteUser(testUser.id);
         } catch (error) {
             console.error("Cleanup error:", error);
         }

@@ -1,5 +1,5 @@
-import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, getSafeCurrencyList, createCurrency, modifyCurrency, removeCurrency } from '../services/currency_service.js';
-import { getAccountById, getAccountByNumber, getAccountCountByCurrencyId } from '../services/account_service.js';
+import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, getSafeCurrencyList, createCurrency, updateCurrency, deleteCurrency } from '../services/currency_service.js';
+import { getAccountByNumber, getAccountCountByCurrencyId } from '../services/account_service.js';
 import { transferFunds } from '../services/transfer_service.js';
 import { createCurrencyMainAccount } from '../services/account_service.js';
 
@@ -87,7 +87,7 @@ export const getCurrency = async (req, res, next) => {
 
 // @desc Modify Currencies
 // @route PUT /api/currency/id
-export const updateCurrency = async (req, res, next) => {
+export const modifyCurrency = async (req, res, next) => {
     try {
         const data = req.validatedBody;
         const id = req.validatedParams.id;
@@ -98,7 +98,7 @@ export const updateCurrency = async (req, res, next) => {
             return res.status(404).json({ message: "Currency not found" })
         }
 
-        const updatedCurrency = await modifyCurrency(id, data);
+        const updatedCurrency = await updateCurrency(id, data);
 
         return res.status(201).json(updatedCurrency)
     }
@@ -110,7 +110,7 @@ export const updateCurrency = async (req, res, next) => {
 
 // @desc Delete Currencies
 // @route DELETE /api/currency/id
-export const deleteCurrency = async (req, res, next) => {
+export const removeCurrency = async (req, res, next) => {
     try {
         const currencyId = req.validatedParams.id;
 
@@ -143,7 +143,7 @@ export const deleteCurrency = async (req, res, next) => {
         }
 
         // Delete Currency
-        await removeCurrency(currencyId);
+        await deleteCurrency(currencyId);
 
         return res.status(204).send()
     }

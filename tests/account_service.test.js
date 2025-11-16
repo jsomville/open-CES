@@ -12,10 +12,10 @@ import {
     getAccountByNumber,
     getUserAccounts,
     getMerchantAccounts,
-    removeAccount
+    deleteAccount
 } from '../services/account_service.js';
 
-import { getUserByEmail, createUser, removeUser } from '../services/user_service.js';
+import { getUserByEmail, createUser, deleteUser } from '../services/user_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
 import { AccountType } from '../utils/accountUtil.js';
 import argon2 from 'argon2';
@@ -33,7 +33,7 @@ describe("Account Service Tests", () => {
         try {
             testUser = await getUserByEmail(testUserEmail);
             if (testUser) {
-                await removeUser(testUser.id);
+                await deleteUser(testUser.id);
             }
             const userInfo = {
                 email: testUserEmail,
@@ -69,17 +69,17 @@ describe("Account Service Tests", () => {
             // Cleanup
             if (testPersonalAccount) {
                 await prisma.personalAccount.deleteMany({ where: { accountNumber: testPersonalAccount.number } });
-                await removeAccount(testPersonalAccount.number);
+                await deleteAccount(testPersonalAccount.number);
             }
 
             if (testMerchantAccount) {
                 await prisma.merchantAccount.deleteMany({ where: { accountNumber: testMerchantAccount.number } });
-                await removeAccount(testMerchantAccount.number);
+                await deleteAccount(testMerchantAccount.number);
             }
 
             await prisma.merchant.delete({ where: { id: testMerchant.id } });
 
-            await removeUser(testUser.id);
+            await deleteUser(testUser.id);
         } catch (error) {
             console.error("Cleanup error:", error);
         }
@@ -94,7 +94,7 @@ describe("Account Service Tests", () => {
         assert.equal(account.accountType, AccountType.PERSONAL);
 
         // Cleanup
-        await removeAccount(account.number);
+        await deleteAccount(account.number);
     });
 
 
@@ -148,7 +148,7 @@ describe("Account Service Tests", () => {
         assert.equal(updatedCurrency.mainCurrencyAccountNumber, mainAccount.number);
 
         // Cleanup
-        await removeAccount(mainAccount.number);
+        await deleteAccount(mainAccount.number);
         await prisma.currency.delete({ where: { id: tempCurrency.id } });
     });
 
@@ -205,7 +205,7 @@ describe("Account Service Tests", () => {
     it("should delete an account", async () => {
         const tempAccount = await createAccount(testCurrency.symbol, AccountType.PERSONAL);
 
-        await removeAccount(tempAccount.number);
+        await deleteAccount(tempAccount.number);
 
         const deletedAccount = await getAccountByNumber(tempAccount.number);
         assert.equal(deletedAccount, null);

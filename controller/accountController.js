@@ -1,19 +1,15 @@
-import { PrismaClient } from '@prisma/client'
 import { getUserByEmail, getUserById, getUserByPhone } from '../services/user_service.js';
-import { getCurrencyById, getCurrencyBySymbol } from '../services/currency_service.js';
-import { createPersonnalAccount, removeAccount, getAccountById, getAccountByNumber, getUserAccounts } from '../services/account_service.js';
+import { getCurrencyBySymbol } from '../services/currency_service.js';
+import { getAccounts, createPersonnalAccount, deleteAccount, getAccountByNumber, getUserAccounts } from '../services/account_service.js';
 import { getTransactionByAccountNumber, getTransactionByAccountNumberAndPage } from '../services/transaction_service.js';
 import { transferFunds } from '../services/transfer_service.js';
 import { AccountType } from '../utils/accountUtil.js';
-import { getUser } from './userController.js';
-
-const prisma = new PrismaClient();
 
 // @desc Get Account
 // @route GET /api/account
 export const getAllAccount = async (req, res, next) => {
     try {
-        const accounts = await prisma.account.findMany()
+        const accounts = await getAccounts();
         return res.status(200).json(accounts);
     }
     catch (error) {
@@ -27,7 +23,7 @@ export const getAllAccount = async (req, res, next) => {
 export const getAccount = async (req, res, next) => {
     try {
         const number = req.validatedParams.number;
-        const account = await prisma.account.findUnique({ where: { number: number } })
+        const account = await getAccountByNumber(number);
         if (!account) {
             return res.status(404).json({ message: "Account not found" })
         }
@@ -92,12 +88,12 @@ export const addAccount = async (req, res, next) => {
 
 // @desc Delete a Account
 // @route DELETE /api/account/id
-export const deleteAccount = async (req, res, next) => {
+export const removeAccount = async (req, res, next) => {
     try {
         const number = req.validatedParams.number;
 
         // Account exists
-        const account = await prisma.account.findUnique({ where: { number: number } })
+        const account = await getAccountByNumber(number);
         if (!account) {
             return res.status(404).json({ message: "Account not found" })
         }
@@ -108,7 +104,7 @@ export const deleteAccount = async (req, res, next) => {
         }
 
         //Delete account
-        await removeAccount(number);
+        await deleteAccount(number);
 
         return res.status(204).send()
     }

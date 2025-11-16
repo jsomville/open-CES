@@ -7,7 +7,7 @@ import { shutdown } from '../app.js'
 import config from "./config.test.js";
 import { createCurrency, getCurrencyBySymbol } from '../services/currency_service.js';
 import { createUser, setActiveUserById } from '../services/user_service.js';
-import { createPersonnalAccount, createCurrencyMainAccount, getAccountByNumber } from '../services/account_service.js';
+import { createPersonnalAccount, createCurrencyMainAccount } from '../services/account_service.js';
 
 //To calculate global test duration
 let test_start_time;

@@ -4,7 +4,7 @@ import request from 'supertest';
 import { app } from "../app.js"
 import config from "./config.test.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
-import { getUserByEmail, removeUser } from "../services/user_service.js";
+import { getUserByEmail, deleteUser } from "../services/user_service.js";
 
 
 describe("Test User", () => {
@@ -29,14 +29,14 @@ describe("Test User", () => {
 
         const user = await getUserByEmail(user_payload.email);
         if (user) {
-            await removeUser(user.id)
+            await deleteUser(user.id)
         }
     });
 
     after(async () => {
         const user = await getUserByEmail(user_payload.email);
         if (user) {
-            await removeUser(user.id)
+            await deleteUser(user.id)
         }
     })
 

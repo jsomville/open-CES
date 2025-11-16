@@ -6,7 +6,7 @@ import {
     getUserList,
     createUser,
     updateUser,
-    removeUser,
+    deleteUser,
     getUserByEmail,
     getUserById,
     getUserByPhone,
@@ -159,10 +159,10 @@ describe('Test User_service', () => {
         assert.strictEqual(accountsById.length, 0);
     });
 
-    it('removeUser deletes user by id', async () => {
+    it('deleteUser deletes user by id', async () => {
         const before = await getUserByEmail(user1Payload.email);
         assert.ok(before);
-        await removeUser(before.id);
+        await deleteUser(before.id);
         const after = await getUserByEmail(user1Payload.email);
         assert.strictEqual(after, null);
     });

@@ -3,7 +3,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js'
 import { authorizeRole } from '../middleware/authorizeRole.js'
 
-import { getAllUsers, getUser, addUser, modifyUser, deleteUser, setUserAdmin, setUserActive } from '../controller/userController.js'
+import { getAllUsers, getUser, addUser, modifyUser, removeUser, setUserAdmin, setUserActive } from '../controller/userController.js'
 import { getMe, getUserDetailByEmail } from '../controller/userDetailController.js'
 
 import { validate } from '../middleware/validate.js';
@@ -32,7 +32,7 @@ router.post('/', authorizeRole("admin"), validate(createUserSchema), addUser);
 router.put('/:id', authorizeRole("user", "admin"), validate(modifyUserSchema), modifyUser);
 
 // delete user
-router.delete('/:id', authorizeRole("admin"), validate(userIdSchema), deleteUser);
+router.delete('/:id', authorizeRole("admin"), validate(userIdSchema), removeUser);
 
 //set admin
 router.post('/:id/set-admin', authorizeRole("admin"),  validate(userIdSchema), setUserAdmin);

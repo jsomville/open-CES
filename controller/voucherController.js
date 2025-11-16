@@ -1,8 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
-
 import { getUserByEmail } from '../services/user_service.js';
 import { getUserAccounts } from '../services/account_service.js';
 import { getVouchers, getVoucherById, getVoucherByCode, createVoucher, updateVoucher, claimVoucherService, VoucherStatus } from '../services/voucher_service.js';

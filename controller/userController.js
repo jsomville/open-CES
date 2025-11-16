@@ -1,6 +1,6 @@
 import argon2 from 'argon2';
 
-import { getUserList, createUser, updateUser, removeUser, getUserById, getUserByEmail, getUserByPhone, setUserAdminById, setActiveUserById } from '../services/user_service.js';
+import { getUserList, createUser, updateUser, deleteUser, getUserById, getUserByEmail, getUserByPhone, setUserAdminById, setActiveUserById } from '../services/user_service.js';
 import { getUserAccounts } from '../services/account_service.js';
 
 
@@ -153,7 +153,7 @@ export const setUserActive = async (req, res, next) => {
 
 // @desc Delete a User
 // @route DELETE /api/user
-export const deleteUser = async (req, res, next) => {
+export const removeUser = async (req, res, next) => {
   try {
     const userId = req.validatedParams.id;
 
@@ -169,7 +169,7 @@ export const deleteUser = async (req, res, next) => {
     }
 
     //Delete user
-    await removeUser(userId);
+    await deleteUser(userId);
 
     return res.status(204).send()
   }

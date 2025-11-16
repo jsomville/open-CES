@@ -41,7 +41,7 @@ export const updateUser = async (id, data) => {
   return safeUser;
 }
 
-export const removeUser = async (id) => {
+export const deleteUser = async (id) => {
   await prisma.user.delete({
     where: { id: id }
   });

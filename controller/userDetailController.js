@@ -1,11 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
 import { getUserByEmail } from '../services/user_service.js';
 import { getUserAccounts } from '../services/account_service.js';
-
-import { getCurrencyById } from '../services/currency_service.js';
 
 import { getLatestTransactionByAccountNumber } from '../services/transaction_service.js';
 

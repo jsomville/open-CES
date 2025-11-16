@@ -7,7 +7,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
 import { app } from "../app.js";
-import { setActiveUserById, getUserByEmail, createUser, removeUser } from "../services/user_service.js";
+import { setActiveUserById, getUserByEmail, createUser } from "../services/user_service.js";
 import redisHelper from '../utils/redisHelper.js';
 
 describe("Login Test", () => {

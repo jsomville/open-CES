@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
-import { getUserByEmail } from './user_service.js';
 import { getCurrencyBySymbol } from './currency_service.js';
 import { getAccountId, AccountType } from '../utils/accountUtil.js';
 
@@ -111,6 +110,11 @@ export const createCurrencyMainAccount = async (currency) => {
     }
 }
 
+export const getAccounts = async () => {
+    const accounts = await prisma.account.findMany();
+    return accounts;
+};
+
 export const getAccountById = async (accountId) => {
     const account = await prisma.account.findUnique({ where: { id: accountId } });
     return account;
@@ -179,7 +183,7 @@ export const getMerchantAccountCountByCurrencyId = async (currencyId) => {
     });
 }
 
-export const removeAccount = async (number) => {
+export const deleteAccount = async (number) => {
     await prisma.account.delete({
         where: {
             number: number,

@@ -6,9 +6,9 @@ const prisma = new PrismaClient();
 
 import { app } from "../app.js";
 import config from "./config.test.js";
-import { createUser, getUserByEmail, removeUser } from "../services/user_service.js";
-import { getAccessTokenByEmailAndRole, getAccessToken } from "../services/auth_service.js";
-import { createPersonnalAccount, getAccountByNumber, getUserAccounts, removeAccount } from "../services/account_service.js";
+import { createUser, getUserByEmail, deleteUser } from "../services/user_service.js";
+import { getAccessToken } from "../services/auth_service.js";
+import { createPersonnalAccount, getAccountByNumber, getUserAccounts, deleteAccount } from "../services/account_service.js";
 import { getCurrencyBySymbol } from "../services/currency_service.js";
 
 describe("Test Transfer", () => {
@@ -43,9 +43,9 @@ describe("Test Transfer", () => {
                 for (const account of accounts) {
                     await prisma.transaction.deleteMany({ where: { OR: [{ fromAccountId: account.id }, { toAccountId: account.id }] } });
                     await prisma.personalAccount.deleteMany({ where: { accountNumber: account.number } });
-                    await removeAccount(account.number);
+                    await deleteAccount(account.number);
                 }
-                await removeUser(existingUser1.id);
+                await deleteUser(existingUser1.id);
             }
 
             let existingUser2 = await getUserByEmail(user2Email);
@@ -54,9 +54,9 @@ describe("Test Transfer", () => {
                 for (const account of accounts) {
                     await prisma.transaction.deleteMany({ where: { OR: [{ fromAccountId: account.id }, { toAccountId: account.id }] } });
                     await prisma.personalAccount.deleteMany({ where: { accountNumber: account.number } });
-                    await removeAccount(account.number);
+                    await deleteAccount(account.number);
                 }
-                await removeUser(existingUser2.id);
+                await deleteUser(existingUser2.id);
             }
 
             // Create test users
@@ -90,18 +90,18 @@ describe("Test Transfer", () => {
             1
             await prisma.transaction.deleteMany({ where: { accountNumber: account1.number } });
             await prisma.personalAccount.deleteMany({ where: { accountNumber: account1.number } });
-            await removeAccount(account1.number);
+            await deleteAccount(account1.number);
 
-            await removeUser(user1.id);
+            await deleteUser(user1.id);
 
 
             // Clean up user2
 
             await prisma.transaction.deleteMany({ where: { accountNumber: account2.number } });
             await prisma.personalAccount.deleteMany({ where: { accountNumber: account2.number } });
-            await removeAccount(account2.number);
+            await deleteAccount(account2.number);
 
-            await removeUser(user2.id);
+            await deleteUser(user2.id);
 
         } catch (error) {
             console.log("Cleanup Error:", error.message);

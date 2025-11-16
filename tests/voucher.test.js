@@ -13,7 +13,7 @@ import { getCurrencyBySymbol } from "../services/currency_service.js";
 import { daysFrom, daysFromNow } from "../controller/voucherController.js";
 import { VoucherStatus, createVoucher, getVoucherByCode, claimVoucherService } from "../services/voucher_service.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
-import { getUserByEmail, createUser, removeUser } from "../services/user_service.js";
+import { getUserByEmail, createUser, deleteUser } from "../services/user_service.js";
 import { getAccountByNumber, createPersonnalAccount } from "../services/account_service.js";
 import { AccountType } from '../utils/accountUtil.js';
 
@@ -40,7 +40,7 @@ describe("Voucher Test", () => {
 
             testUser = await getUserByEmail(testUserEmail);
             if (testUser) {
-                await removeUser(testUser.id);
+                await deleteUser(testUser.id);
             }
             const userInfo = {
                 email: testUserEmail,
@@ -84,7 +84,7 @@ describe("Voucher Test", () => {
             await prisma.personalAccount.deleteMany({ where: { Account: { currencyId: currency.id } } });
             await prisma.account.deleteMany({ where: { currencyId: currency.id, accountType: AccountType.PERSONAL } });
 
-            await removeUser(testUser.id);
+            await deleteUser(testUser.id);
 
         } catch (error) {
             console.error("Error deleting vouchers:", error);

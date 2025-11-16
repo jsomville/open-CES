@@ -6,9 +6,9 @@ import config from "./config.test.js";
 
 import { getLatestTransactionByAccountNumber, getTransactionByAccountNumber } from '../services/transaction_service.js';
 
-import { getUserByEmail, createUser, removeUser } from '../services/user_service.js';
+import { getUserByEmail, createUser, deleteUser } from '../services/user_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { createPersonnalAccount, removeAccount } from '../services/account_service.js';
+import { createPersonnalAccount, deleteAccount } from '../services/account_service.js';
 
 
 describe("Transaction Service Tests", () => {
@@ -22,7 +22,7 @@ describe("Transaction Service Tests", () => {
         try {
             user = await getUserByEmail(userEmail);
             if (user) {
-                await removeUser(user.id);
+                await deleteUser(user.id);
             }
 
             const userData = {
@@ -54,10 +54,10 @@ describe("Transaction Service Tests", () => {
             // Cleanup
             if (account) {
                 await prisma.personalAccount.deleteMany({ where: { accountNumber: account.number } });
-                await removeAccount(account.number);
+                await deleteAccount(account.number);
             }
 
-            await removeUser(user.id);
+            await deleteUser(user.id);
         } catch (error) {
             console.error("Cleanup Error: " + error.message);
         }
