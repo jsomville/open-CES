@@ -2,6 +2,7 @@ import { getUserByEmail } from '../services/user_service.js';
 import { getUserAccounts } from '../services/account_service.js';
 
 import { getLatestTransactionByAccountNumber } from '../services/transaction_service.js';
+import { getUserAccountsAndTransactions } from '../services/userAccount_service.js';
 
 const transactionsCount = 5
 
@@ -63,7 +64,7 @@ export const getMe = async (req, res, next) => {
         // get User accounts & transactions
         const accounts = await getUserAccounts(user.id);
         for (const account of accounts) {
-            const latestTransactions = await getLatestTransactionByAccountNumber(account.id, transactionsCount);
+            const latestTransactions = await getLatestTransactionByAccountNumber(account.number, transactionsCount);
             if (latestTransactions) {
                 account.latestTransactions = latestTransactions;
             }
