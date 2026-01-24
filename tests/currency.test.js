@@ -151,6 +151,15 @@ describe("Test Currency", () => {
             .set('Authorization', `Bearer ${admin_access_token}`);
 
         assert.equal(res.statusCode, 200);
+         if (Array.isArray(res.body) && res.body.length) {
+            const item = res.body[0];
+            assert.ok(!('balance' in item));
+            assert.ok(!('accountMax' in item));
+            assert.ok(!('createdAt' in item));
+            assert.ok(!('updatedAt' in item));
+            assert.ok(!('activeAccount' in item));
+            assert.ok(!('accountNextNumber' in item));
+        }
     });
 
     it('List currencies details- User', async () => {

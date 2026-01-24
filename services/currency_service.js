@@ -102,6 +102,15 @@ export const getCurrencyListWithStats = async () => {
     return currencyListWithStats;
 }
 
+export const getSimpleCurrencyList = async () => {
+    const currencyList = await getCurrencyList();
+
+    // Return only id, name, symbol
+    const simpleCurrencyList = currencyList.map(({id, accountMax, createdAt, updatedAt, webSiteURL, topOffWizardURL, accountNextNumber, mainCurrencyAccountNumber, ...currencies }) => currencies );
+
+    return simpleCurrencyList;
+}
+
 export const createCurrency = async (data) => {
 
     //Create Currency in DB
