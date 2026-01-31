@@ -61,6 +61,9 @@ export const addUser = async (req, res, next) => {
 
     const user = await createUser(data.email, data.phone, hashedPassword, role, data.firstname, data.lastname, data.region);
 
+    //Activate user
+    await setActiveUserById(user.id);
+
     return res.status(201).json(user)
   }
   catch (error) {
