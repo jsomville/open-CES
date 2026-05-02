@@ -12,7 +12,7 @@ const logger = (req, res, next) => {
         console.log(`${req.method} ${req.protocol}://${req.get('host')}${req.originalUrl}`);
         console.log(`  url           : ${req.originalUrl}`);
         console.log(`  status code   : ${res.statusCode}`);
-        console.log(`  response rime : ${responseTime}`);
+        console.log(`  response time : ${responseTime}`);
       }
     }
   })

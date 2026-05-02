@@ -12,7 +12,9 @@ import {
     getAccountByNumber,
     getUserAccounts,
     getMerchantAccounts,
-    deleteAccount
+    deleteAccount,
+    getPersonnalAccountCountByCurrencyId,
+    getMerchantAccountCountByCurrencyId
 } from '../services/account_service.js';
 
 import { getUserByEmail, createUser, deleteUser } from '../services/user_service.js';
@@ -209,6 +211,32 @@ describe("Account Service Tests", () => {
 
         const deletedAccount = await getAccountByNumber(tempAccount.number);
         assert.equal(deletedAccount, null);
+    });
+
+    it(" get getPersonnalAccountCountByCurrencyId", async () => {
+        const countBefore = await getPersonnalAccountCountByCurrencyId(testCurrency.id);
+
+        const tempAccount = await createAccount(testCurrency.symbol, AccountType.PERSONAL);
+
+        const countAfter = await getPersonnalAccountCountByCurrencyId(testCurrency.id);
+
+        assert.equal(countAfter, countBefore + 1);
+
+        // Cleanup
+        await deleteAccount(tempAccount.number);
+    });
+
+    it(" get getMerchantAccountCountByCurrencyId", async () => {
+        const countBefore = await getMerchantAccountCountByCurrencyId(testCurrency.id);
+
+        const tempAccount = await createAccount(testCurrency.symbol, AccountType.MERCHANT);
+
+        const countAfter = await getMerchantAccountCountByCurrencyId(testCurrency.id);
+
+        assert.equal(countAfter, countBefore + 1);
+
+        // Cleanup
+        await deleteAccount(tempAccount.number);
     });
 
 });

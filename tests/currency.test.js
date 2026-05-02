@@ -588,16 +588,31 @@ describe("Test Currency", () => {
         assert.equal(res.body.message, 'Currency not found');
     });
 
-    it('Modify Currency - invalid URL formats', async () => {
+    it('Modify Currency - invalid logo url formats', async () => {
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
             .set('Authorization', `Bearer ${admin_access_token}`)
-            .send({ country: 'BE', logoURL: 'x', webSiteURL: 'y' });
+            .send({ logoURL: 'x'});
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, 'Validation failed');
         assert.ok(res.body.errors);
     });
+
+    it('Modify Currency - invalid webSite url formats', async () => {
+        const res = await request(app)
+            .put(`/api/currency/${new_currency_id}`)
+            .set('Authorization', `Bearer ${admin_access_token}`)
+            .send({ webSiteURL: 'y' });
+
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, 'Validation failed');
+        assert.ok(res.body.errors);
+    });
+
+
+
+    //add other tests
 
     it('Modify Currency - User', async () => {
         const res = await request(app)
@@ -608,7 +623,8 @@ describe("Test Currency", () => {
         assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
-    it('Modify Currency - No Payload', async () => {
+    it.skip('Modify Currency - No Payload', async () => {
+        //Was put in skip because now all parameters are optional
         const res = await request(app)
             .put(`/api/currency/${new_currency_id}`)
             .set('Authorization', `Bearer ${admin_access_token}`);
@@ -617,27 +633,9 @@ describe("Test Currency", () => {
         assert.equal(res.body.message, "Validation failed");
     });
 
-    it('Modify Currency - No Country', async () => {
-        const payload = {
-            //"country": "BE",
-            "accountMax": 120
-        };
-
-        const res = await request(app)
-            .put(`/api/currency/${new_currency_id}`)
-            .set('Authorization', `Bearer ${admin_access_token}`)
-            .send(payload)
-
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
-    });
-
     it('Modify Currency - Country too short', async () => {
         const payload = {
             "country": "B",
-            "accountMax": 120
         };
 
         const res = await request(app)
@@ -654,7 +652,6 @@ describe("Test Currency", () => {
     it('Modify Currency - Country too long', async () => {
         const payload = {
             "country": "Belgium",
-            "accountMax": 120,
         };
 
         const res = await request(app)
@@ -670,8 +667,6 @@ describe("Test Currency", () => {
 
     it('Modify Currency - Other field', async () => {
         const payload = {
-            "country": "BE",
-            "accountMax": 120,
             "balance": 123,
         };
 

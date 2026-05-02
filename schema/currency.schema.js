@@ -28,7 +28,7 @@ const currencyParamSchema = z.strictObject({
 export const modifyCurrencySchema = z.strictObject({
   params: currencyParamSchema,
   body: z.strictObject({
-    country: z.string().min(2).max(5),
+    country: z.string().min(2).max(5).optional(),
     accountMax: z.number().int().min(100).optional(),
     regionList: z.string().min(0).max(1024).optional(),
     logoURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
