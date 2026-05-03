@@ -1,3 +1,6 @@
+
+console.log("Starting the server...")
+
 import { app } from './app.js'
 
 //Server Configurations

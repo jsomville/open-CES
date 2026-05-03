@@ -3,6 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors'
 
+console.log("Starting the app...")
+
 //Import Middleware
 import logger from './middleware/logger.js';
 import errorHanlder from './middleware/error.js';
