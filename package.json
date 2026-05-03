@@ -10,8 +10,7 @@
   "scripts": {
     "start": "node server",
     "dev": "node --watch --env-file=.env server",
-    "test": "cross-env NODE_ENV=test mocha --timeout 10000 tests/*.js",
-    "init": "node prisma/initdb.js"
+    "test": "cross-env NODE_ENV=test mocha --timeout 10000 tests/*.js"
   },
   "repository": {
     "type": "git",
@@ -32,6 +31,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^8.0.7",
+    "prisma": "^7.8.0",
     "redis": "^5.12.1",
     "uuid": "^14.0.0",
     "zod": "^4.4.2"
@@ -39,7 +39,6 @@
   "devDependencies": {
     "cross-env": "^10.1.0",
     "mocha": "^11.7.5",
-    "prisma": "^7.8.0",
     "supertest": "^7.2.2"
   }
 }
