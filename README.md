@@ -74,3 +74,14 @@ Run prisma command to generate the database
 
 Run prisma command : npx prisma migrate dev --name [name]
 
+# To check dependencies
+
+Install : 
+   ```bash
+   npm install -g npm-check-updates
+   ```
+
+   Run:
+   ```bash
+   ncu
+   ```
