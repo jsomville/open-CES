@@ -8,7 +8,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "start": "node server",
+    "start": "node test",
     "dev": "node --watch --env-file=.env server",
     "test": "cross-env NODE_ENV=test mocha --timeout 10000 tests/*.js"
   },
