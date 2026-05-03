@@ -2,13 +2,13 @@
   "name": "open-lces",
   "version": "1.0.3",
   "description": "This application exposes web api to manage a local currency exchange system. This solution manages multiple currencies, users, accounts, vouchers and perform operations like top-off and transfer to/from accounts.",
-  "main": "test.js",
+  "main": "server.js",
   "type": "module",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "start": "node test --omit=dev",
+    "start": "node server --omit=dev",
     "dev": "node --watch --env-file=.env server",
     "test": "cross-env NODE_ENV=test mocha --timeout 10000 tests/*.js"
   },
