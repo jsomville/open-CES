@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient();
+import { prisma } from '../utils/prisma.js';
 
 import { getCurrencyBySymbol } from './currency_service.js';
 import { getAccountId, AccountType } from '../utils/accountUtil.js';

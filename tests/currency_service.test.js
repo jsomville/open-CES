@@ -1,9 +1,7 @@
 import assert from 'node:assert';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../utils/prisma.js';
 
 import { getCurrencyBySymbol, getCurrencyByName, getCurrencyById } from '../services/currency_service.js';
-
-const prisma = new PrismaClient();
 
 describe('Test Currency_service', () => {
     let created;

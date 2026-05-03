@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../utils/prisma.js';
 import argon2 from 'argon2';
 
 import {
@@ -18,8 +18,6 @@ import {
 import { getUserAccounts } from '../services/account_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
 import config from './config.test.js';
-
-const prisma = new PrismaClient();
 
 describe('Test User_service', () => {
     let currency;

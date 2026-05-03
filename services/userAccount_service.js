@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient();
+import { prisma } from '../utils/prisma.js';
 
 export const getUserAccountsAndTransactions = async (userId, transactionsCount) => {
   const accounts = await prisma.account.findMany({ where: { userId: userId } });

@@ -4,8 +4,7 @@ import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from '../utils/prisma.js';
 
 import { app } from "../app.js";
 import config from "./config.test.js";

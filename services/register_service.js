@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '../utils/prisma.js';
 import argon2 from 'argon2';
-
-const prisma = new PrismaClient()
 
 export const addUserRegistration = async (email, phone, password, firstname, lastname, region, code, symbol) => {
   

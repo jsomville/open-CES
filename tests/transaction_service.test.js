@@ -1,6 +1,5 @@
 import assert from "node:assert";
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from '../utils/prisma.js';
 
 import config from "./config.test.js";
 

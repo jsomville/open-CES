@@ -3,8 +3,7 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
 import argon2 from 'argon2';
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient();
+import { prisma } from '../utils/prisma.js';
 
 import { app } from "../app.js";
 import { setActiveUserById, getUserByEmail, createUser } from "../services/user_service.js";

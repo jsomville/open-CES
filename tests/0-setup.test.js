@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient();
+import { prisma } from '../utils/prisma.js';
+
 import argon2 from 'argon2';
 
 import { shutdown } from '../app.js'
