@@ -7,7 +7,7 @@ export const registerSchema = z.strictObject({
     firstname: z.string().min(2).max(50),
     lastname: z.string().min(2).max(50),
 
-    email: z.string().email(),
+    email: z.email(),
     phone: z.string().min(8).max(15),
     region: z.string().min(2).max(50),
 

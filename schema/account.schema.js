@@ -7,7 +7,7 @@ export const createAccountSchema = z.strictObject({
         ownerId: z.number().min(1),
         symbol: z.string().min(1).max(6),
         accountType: z.number().refine(isValidAccountType, {
-            message: `Account type must be one of: ${Object.entries(AccountType).map(([k, v]) => `${k}=${v}`).join(', ')}`
+            error: `Account type must be one of: ${Object.entries(AccountType).map(([k, v]) => `${k}=${v}`).join(', ')}`
         }),
     })
 
@@ -16,7 +16,7 @@ export const createAccountSchema = z.strictObject({
 export const accountParamSchema = z.strictObject({
     //id: z.coerce.number().int().positive(),
     number: z.string().refine(isValidAccountId, {
-        message: "Invalid account number format"
+        error: "Invalid account number format"
     }),
 });
 
@@ -47,7 +47,7 @@ export const accountTransferSchema = z.strictObject({
 export const accountInfoByEmail = z.strictObject({
     params: z.strictObject({}).optional(),
     body: z.strictObject({
-        email: z.string().email(),
+        email: z.email(),
         symbol: z.string().min(1).max(6),
     })
 });

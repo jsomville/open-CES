@@ -10,12 +10,12 @@ export const createCurrencySchema = z.strictObject({
     country: z.string().min(2).max(5),
     accountMax: z.number().int().min(100).optional(),
     regionList: z.string().min(0).max(1024).optional(),
-    logoURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-    webSiteURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-    newAccountWizardURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-    topOffWizardURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-    androidAppURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-    iphoneAppURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    logoURL: z.url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    webSiteURL: z.url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    newAccountWizardURL: z.url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    topOffWizardURL: z.url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    androidAppURL: z.url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    iphoneAppURL: z.url().max(1024).optional().or(z.literal('').transform(() => undefined)),
     androidAppLatestVersion: z.string().max(10).optional().or(z.literal('').transform(() => undefined)),
     iphoneAppLatestVersion: z.string().max(10).optional().or(z.literal('').transform(() => undefined)),
   }),
@@ -31,8 +31,8 @@ export const modifyCurrencySchema = z.strictObject({
     country: z.string().min(2).max(5).optional(),
     accountMax: z.number().int().min(100).optional(),
     regionList: z.string().min(0).max(1024).optional(),
-    logoURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
-    webSiteURL: z.string().url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    logoURL: z.url().max(1024).optional().or(z.literal('').transform(() => undefined)),
+    webSiteURL: z.url().max(1024).optional().or(z.literal('').transform(() => undefined)),
   })
 });
 
@@ -45,7 +45,7 @@ export const currencyFundRefundSchema = z.strictObject({
   params: currencyParamSchema,
   body: z.strictObject({
     number: z.string().refine(isValidAccountId, {
-      message: "Invalid account number format"
+      error: "Invalid account number format"
     }),
     amount: z.number().positive(),
   }),

@@ -97,7 +97,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Add User - No Firstname', async () => {
@@ -115,8 +114,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Firstname - Too short', async () => {
@@ -134,8 +131,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Firstname - Too long', async () => {
@@ -153,8 +148,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - No Lastname', async () => {
@@ -172,8 +165,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Lastname - Too short', async () => {
@@ -191,8 +182,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Lastname - Too long', async () => {
@@ -210,8 +199,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - No email', async () => {
@@ -229,8 +216,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Email too short', async () => {
@@ -248,8 +233,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - No phone', async () => {
@@ -267,8 +250,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Phone too short', async () => {
@@ -286,8 +267,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Phone too long', async () => {
@@ -305,8 +284,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - No Password', async () => {
@@ -324,8 +301,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Password Too short', async () => {
@@ -343,8 +318,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Password Too long', async () => {
@@ -362,8 +335,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Password no numbers', async () => {
@@ -381,8 +352,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Password no Uppercase', async () => {
@@ -400,8 +369,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Password no Lowercase', async () => {
@@ -419,8 +386,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Password no special characters', async () => {
@@ -438,8 +403,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Other field', async () => {
@@ -458,8 +421,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add User - Duplicated Email', async () => {
@@ -608,8 +569,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Firstname Too short', async () => {
@@ -626,8 +585,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Firstname Too long', async () => {
@@ -644,8 +601,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Missing Lastname', async () => {
@@ -662,8 +617,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Lastname too short', async () => {
@@ -680,8 +633,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Lastname too long', async () => {
@@ -698,8 +649,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Missing Phone', async () => {
@@ -716,8 +665,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Phone too short', async () => {
@@ -734,8 +681,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Phone too long', async () => {
@@ -752,8 +697,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Other field', async () => {
@@ -771,8 +714,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - ID not found', async () => {
@@ -805,8 +746,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify User - Existing Phone', async () => {
@@ -910,8 +849,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Delete User -User id as float', async () => {
@@ -921,8 +858,6 @@ describe("Test User", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
 });

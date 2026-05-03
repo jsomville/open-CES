@@ -26,14 +26,14 @@
   "homepage": "https://github.com/jsomville/open-CES#readme",
   "dependencies": {
     "@prisma/client": "^6.19.3",
-    "argon2": "^0.43.1",
+    "argon2": "^0.44.0",
     "cors": "^2.8.6",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
-    "nodemailer": "^7.0.10",
+    "nodemailer": "^8.0.7",
     "redis": "^5.12.1",
-    "uuid": "^11.1.0",
-    "zod": "^3.25.76"
+    "uuid": "^14.0.0",
+    "zod": "^4.4.2"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",

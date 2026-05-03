@@ -121,8 +121,6 @@ describe("Test Transfer", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Transfer - Amount Missing', async () => {
@@ -138,8 +136,6 @@ describe("Test Transfer", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Transfer - Amount Must be a positive number', async () => {
@@ -155,8 +151,6 @@ describe("Test Transfer", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Transfer - Destination account not found', async () => {

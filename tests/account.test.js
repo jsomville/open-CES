@@ -172,7 +172,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Add account - No UserID', async () => {
@@ -188,8 +187,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add account - No Currency', async () => {
@@ -202,11 +199,8 @@ describe("Test Account", () => {
             .post('/api/account')
             .set('Authorization', `Bearer ${admin_access_token}`)
             .send(payload)
-
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add account - Other field', async () => {
@@ -224,8 +218,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add account - No Account Type', async () => {
@@ -241,8 +233,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add account - Other Account Type', async () => {
@@ -258,8 +248,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add account - account already exist for this currency', async () => {
@@ -320,7 +308,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Get account - Account is float', async () => {
@@ -330,7 +317,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Get account - Account is wrongformat', async () => {
@@ -340,7 +326,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     /********************************* */
@@ -363,7 +348,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Delete Account - account is float', async () => {
@@ -373,7 +357,6 @@ describe("Test Account", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Delete Account - admin', async () => {

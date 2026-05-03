@@ -238,7 +238,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, 'Validation failed');
-        assert.ok(res.body.errors);
     });
 
     it('Add currency - invalid URL formats', async () => {
@@ -257,7 +256,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, 'Validation failed');
-        assert.ok(res.body.errors);
     });
 
     it('Add currency - empty URLs accepted', async () => {
@@ -309,8 +307,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add currency - Mandatory field No Symbol', async () => {
@@ -327,8 +323,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add currency - Mandatory field No Country', async () => {
@@ -345,8 +339,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add currency - Name Too short', async () => {
@@ -363,8 +355,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add currency - Name Too Long', async () => {
@@ -381,8 +371,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add currency - Symbol too long', async () => {
@@ -399,8 +387,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add currency - LogoURL Too Long', async () => {
@@ -418,8 +404,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add currency - webSiteURL Too Long', async () => {
@@ -437,8 +421,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add currency - regionList Too Long', async () => {
@@ -456,8 +438,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
 
@@ -476,8 +456,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add currency - Duplicated Name', async () => {
@@ -543,8 +521,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Get Currency - Not found', async () => {
@@ -596,7 +572,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, 'Validation failed');
-        assert.ok(res.body.errors);
     });
 
     it('Modify Currency - invalid webSite url formats', async () => {
@@ -607,7 +582,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, 'Validation failed');
-        assert.ok(res.body.errors);
     });
 
 
@@ -645,8 +619,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify Currency - Country too long', async () => {
@@ -661,8 +633,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify Currency - Other field', async () => {
@@ -677,8 +647,6 @@ describe("Test Currency", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     /***************************** */

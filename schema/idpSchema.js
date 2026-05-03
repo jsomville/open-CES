@@ -4,7 +4,7 @@ import { passwordSchema } from './password.schema.js';
 export const loginSchema = z.strictObject({
   params: z.strictObject({}).optional(),
   body: z.strictObject({
-    username: z.string().email(),
+    username: z.email(),
     password: passwordSchema,
   }),
 });

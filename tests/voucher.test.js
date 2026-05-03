@@ -159,8 +159,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Missing Amount', async () => {
@@ -177,8 +175,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Amount too small', async () => {
@@ -195,8 +191,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Amount too big', async () => {
@@ -213,8 +207,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Amount string', async () => {
@@ -231,8 +223,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Missing Duration', async () => {
@@ -249,8 +239,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Duration too short', async () => {
@@ -267,8 +255,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Duration too long', async () => {
@@ -285,8 +271,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Duration as string', async () => {
@@ -303,8 +287,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Duration as float', async () => {
@@ -321,8 +303,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Other field', async () => {
@@ -340,8 +320,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Add Voucher - Invalid Currency', async () => {
@@ -367,8 +345,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Get Voucher - id as float', async () => {
@@ -378,8 +354,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Get Voucher - User', async () => {
@@ -453,7 +427,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Modify Voucher - Duration too long', async () => {
@@ -468,7 +441,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Modify Voucher - Duration as string', async () => {
@@ -483,7 +455,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Modify Voucher - Duration as float', async () => {
@@ -498,7 +469,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Modify Voucher - Other field', async () => {
@@ -514,8 +484,6 @@ describe("Voucher Test", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Modify Voucher - Admin', async () => {

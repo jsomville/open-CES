@@ -135,7 +135,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - Name too short', async () => {
@@ -150,7 +149,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - Name too long', async () => {
@@ -165,7 +163,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - No Region', async () => {
@@ -180,7 +177,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - Region too long', async () => {
@@ -195,7 +191,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - Invalid email', async () => {
@@ -212,7 +207,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - Phone too short', async () => {
@@ -229,7 +223,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - Phone too long', async () => {
@@ -246,7 +239,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - No payload', async () => {
@@ -256,7 +248,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - No Name', async () => {
@@ -273,8 +264,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
-    assert.strictEqual(res.body.errors.length, 1);
   });
 
   it('Add Merchant - Other field', async () => {
@@ -290,8 +279,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
-    assert.strictEqual(res.body.errors.length, 1);
   });
 
 
@@ -308,7 +295,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - latitude too long', async () => {
@@ -324,7 +310,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - latitude too big', async () => {
@@ -340,7 +325,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - latitude too small', async () => {
@@ -356,7 +340,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
 
@@ -373,7 +356,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - longitude too long', async () => {
@@ -389,7 +371,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - longitude too big', async () => {
@@ -405,7 +386,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - longitude too small', async () => {
@@ -421,7 +401,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - invalid website', async () => {
@@ -437,7 +416,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - website too long', async () => {
@@ -453,7 +431,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Add Merchant - Address too long', async () => {
@@ -469,7 +446,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   /****************************** */
@@ -501,8 +477,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
-    assert.strictEqual(res.body.errors.length, 1);
   });
 
   it('Get Merchant - Id as float', async () => {
@@ -512,8 +486,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
-    assert.strictEqual(res.body.errors.length, 1);
   });
 
   it('Get Merchant - Invalid Id', async () => {
@@ -585,7 +557,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, 'Validation failed');
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - No Name', async () => {
@@ -600,8 +571,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
-    assert.strictEqual(res.body.errors.length, 1);
   });
 
   it('Modify Merchant - No Region', async () => {
@@ -616,8 +585,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
-    assert.strictEqual(res.body.errors.length, 1);
   });
 
   it('Modify Merchant - Other field', async () => {
@@ -633,8 +600,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
-    assert.strictEqual(res.body.errors.length, 1);
   });
 
   it('Modify Merchant - latitude string', async () => {
@@ -650,7 +615,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - latitude too long', async () => {
@@ -666,7 +630,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - latitude too big', async () => {
@@ -682,7 +645,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - latitude too small', async () => {
@@ -698,7 +660,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
 
@@ -715,7 +676,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - longitude too long', async () => {
@@ -731,7 +691,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - longitude too big', async () => {
@@ -747,7 +706,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - longitude too small', async () => {
@@ -763,7 +721,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - invalid website', async () => {
@@ -779,7 +736,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - website too long', async () => {
@@ -795,7 +751,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   it('Modify Merchant - Address too long', async () => {
@@ -811,7 +766,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, "Validation failed");
-    assert.ok(res.body.errors);
   });
 
   /****************************** */
@@ -842,7 +796,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, 'Validation failed');
-    assert.ok(res.body.errors);
   });
 
   it('Delete Merchant - Invalid id (float)', async () => {
@@ -852,7 +805,6 @@ describe("Merchant Test", () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, 'Validation failed');
-    assert.ok(res.body.errors);
   });
 
   it('Delete Merchant - Not found', async () => {

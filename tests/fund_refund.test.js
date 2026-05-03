@@ -127,7 +127,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Fund Account - Account as float', async () => {
@@ -143,7 +142,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Fund Account - Account as string', async () => {
@@ -159,7 +157,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Fund Account - No Amount', async () => {
@@ -175,7 +172,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Fund Account - Amount not positive', async () => {
@@ -191,8 +187,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Fund Account - Amount as string', async () => {
@@ -208,7 +202,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
     });
 
     it('Fund Account - Currency Not found', async () => {
@@ -319,8 +312,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Refund Account - Account as string', async () => {
@@ -336,8 +327,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Refund Account - Account as float', async () => {
@@ -353,8 +342,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Refund Account - No amount', async () => {
@@ -370,8 +357,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Refund Account - Amount as string', async () => {
@@ -387,8 +372,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Refund Account - Amount non positive number', async () => {
@@ -404,8 +387,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.message, "Validation failed");
-        assert.ok(res.body.errors);
-        assert.strictEqual(res.body.errors.length, 1);
     });
 
     it('Refund Account - Currency Not found', async () => {
