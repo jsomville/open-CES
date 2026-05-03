@@ -4,3 +4,4 @@ docs/.$model.drawio.bkp
 prisma/migrations/*
 .vscode/
 docs/bruno/environments/*
+generated/*
