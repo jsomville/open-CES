@@ -81,3 +81,8 @@ Run prisma command : npx prisma migrate dev --name [name]
    ```bash
    npm outdated
    ```
+
+   to update to a version
+   ```bash
+   npm install package@version
+   ```
