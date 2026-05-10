@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import request from 'supertest';
 
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";
@@ -9,7 +9,7 @@ import { getCurrencyBySymbol } from '../services/currency_service.js'
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
 import { createUser } from '../services/user_service.js';
 import { createAccount } from '../services/account_service.js';
-import { AccountType } from "../utils/accountUtil.js";
+import { AccountType } from "../utils/accountUtil.ts";
 
 describe("Test Account", () => {
 

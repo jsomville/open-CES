@@ -1,4 +1,4 @@
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 export const transferFunds = async (type, sourceAccount, destinationAccount, amount, descriptionFrom, descriptionTo) => {
   try {

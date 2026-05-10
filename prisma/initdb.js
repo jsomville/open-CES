@@ -1,12 +1,12 @@
 import argon2 from 'argon2';
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import { createCurrency, getCurrencyBySymbol } from '../services/currency_service.js';
 import { createPersonnalAccount, createCurrencyMainAccount, getAccountByNumber} from '../services/account_service.js';
 import { createUser, setActiveUserById } from '../services/user_service.js'
 import { transferFunds } from '../services/transfer_service.js';
 
-import { connectRedis, redisClient } from '../utils/redisClient.js';
+import { connectRedis, redisClient } from '../utils/redisClient.ts';
 
 async function createAdminUser() {
     const password = "OpenCES2025!";

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { isValidAccountId } from '../utils/accountUtil.js';
+import { isValidAccountId } from '../utils/accountUtil.ts';
 
 export const createCurrencySchema = z.strictObject({
   params: z.strictObject({}).optional(),

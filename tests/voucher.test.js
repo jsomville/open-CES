@@ -4,7 +4,7 @@ import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";
@@ -14,7 +14,7 @@ import { VoucherStatus, createVoucher, getVoucherByCode, claimVoucherService } f
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
 import { getUserByEmail, createUser, deleteUser } from "../services/user_service.js";
 import { getAccountByNumber, createPersonnalAccount } from "../services/account_service.js";
-import { AccountType } from '../utils/accountUtil.js';
+import { AccountType } from '../utils/accountUtil.ts';
 
 describe("Voucher Test", () => {
     let admin_access_token;

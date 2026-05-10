@@ -1,4 +1,4 @@
-/*import { createClient } from 'redis';
+import { createClient } from 'redis';
 
 const redisClient = createClient({
   url: process.env.REDIS_URL,
@@ -15,4 +15,4 @@ async function connectRedis() {
   }
 }
 
-export { redisClient, connectRedis };*/
+export { redisClient, connectRedis };

@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { v4 as uuidv4 } from 'uuid';
 
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import config from "./config.test.js";
 import { getCurrencyBySymbol } from "../services/currency_service.js";

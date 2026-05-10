@@ -1,6 +1,6 @@
 import assert from 'node:assert';
-import RedisHelper from '../utils/redisHelper.js';
-import { redisClient } from '../utils/redisClient.js';
+import RedisHelper from '../utils/redisHelper.ts';
+import { redisClient } from '../utils/redisClient.ts';
 
 describe('RedisHelper', () => {
     let originalSet;

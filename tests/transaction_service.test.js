@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import config from "./config.test.js";
 

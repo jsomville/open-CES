@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import argon2 from 'argon2';
 
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";
@@ -11,7 +11,7 @@ import { getAccessTokenByEmailAndRole } from '../services/auth_service.js';
 import { createPersonnalAccount } from '../services/account_service.js';
 import { getUserByEmail, createUser, deleteUser } from '../services/user_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { AccountType } from '../utils/accountUtil.js';
+import { AccountType } from '../utils/accountUtil.ts';
 
 describe("Test Account Extra", () => {
     let admin_access_token;

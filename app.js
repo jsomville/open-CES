@@ -11,7 +11,7 @@ import errorHanlder from './middleware/error.js';
 import notFoundHandler from './middleware/notFound.js';
 import requestDuration from './middleware/requestDuration.js'
 
-import { connectRedis, redisClient } from './utils/redisClient.js';
+import { connectRedis, redisClient } from './utils/redisClient.ts';
 
 //Routes
 import home_route from './routes/home_route.js';

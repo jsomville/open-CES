@@ -1,6 +1,6 @@
 import assert from "node:assert";
 
-import { AccountType, getAccountId, isValidAccountId } from '../utils/accountUtil.js';
+import { AccountType, getAccountId, isValidAccountId } from '../utils/accountUtil.ts';
 import { randomInt } from 'crypto';
 
 describe("Test Account Util", () => {

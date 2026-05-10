@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import { getCurrencyBySymbol, getCurrencyByName, getCurrencyById } from '../services/currency_service.js';
 

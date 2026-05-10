@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import argon2 from 'argon2';
 
 import { getAccessToken, getRefreshToken } from "../services/auth_service.js";
-import redisHelper from '../utils/redisHelper.js'
+import redisHelper from '../utils/redisHelper.ts'
 import { getUserByEmail, getLoginUserByEmail, updateLastLogin } from "../services/user_service.js";
 
 // @desc Login

@@ -1,4 +1,4 @@
-import redisHelper from '../utils/redisHelper.js'
+import redisHelper from '../utils/redisHelper.ts'
 
 const windowsMS = 60000; // in ms
 const limit = 15; // number of requests

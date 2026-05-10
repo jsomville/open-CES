@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import request from 'supertest';
 
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";

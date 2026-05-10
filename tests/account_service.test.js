@@ -1,6 +1,6 @@
 import assert from "node:assert";
 
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import config from "./config.test.js";
 import {
@@ -19,7 +19,7 @@ import {
 
 import { getUserByEmail, createUser, deleteUser } from '../services/user_service.js';
 import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { AccountType } from '../utils/accountUtil.js';
+import { AccountType } from '../utils/accountUtil.ts';
 import argon2 from 'argon2';
 
 describe("Account Service Tests", () => {

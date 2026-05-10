@@ -3,11 +3,11 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
 import argon2 from 'argon2';
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import { setActiveUserById, getUserByEmail, createUser } from "../services/user_service.js";
-import redisHelper from '../utils/redisHelper.js';
+import redisHelper from '../utils/redisHelper.ts';
 
 describe("Login Test", () => {
   const okUser = {

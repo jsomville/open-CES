@@ -1,9 +1,9 @@
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
-import redisHelper from '../utils/redisHelper.js';
+import redisHelper from '../utils/redisHelper.ts';
 
 import { getPersonnalAccountCountByCurrencyId, getMerchantAccountCountByCurrencyId } from './account_service.js';
-import { getAccountId } from '../utils/accountUtil.js';
+import { getAccountId } from '../utils/accountUtil.ts';
 
 const cached_ttl = 60; //in seconds
 const cached_stats_ttl = 900; //in seconds

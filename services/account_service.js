@@ -1,7 +1,7 @@
-import { prisma } from '../utils/prisma.js';
+import { prisma } from '../utils/prisma.ts';
 
 import { getCurrencyBySymbol } from './currency_service.js';
-import { getAccountId, AccountType } from '../utils/accountUtil.js';
+import { getAccountId, AccountType } from '../utils/accountUtil.ts';
 
 export const createAccount = async (symbol, accountType) => {
     try {

@@ -1,6 +1,6 @@
-import { prisma } from '../utils/prisma.js';
+/*import { prisma } from '../utils/prisma.ts';
 
-/*export const doFundAccount = async (currency, account, amount) => {
+export const doFundAccount = async (currency, account, amount) => {
     try {
         const newAccountBalance = Number(account.balance) + Number(amount);
         const newCurrencyBalance = Number(currency.balance) - Number(amount);

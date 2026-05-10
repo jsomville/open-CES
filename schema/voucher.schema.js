@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isValidAccountId } from '../utils/accountUtil.js';
+import { isValidAccountId } from '../utils/accountUtil.ts';
 
 export const createVoucherSchema = z.strictObject({
   params: z.strictObject({}).optional(),
