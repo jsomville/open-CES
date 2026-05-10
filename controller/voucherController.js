@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { getUserByEmail } from '../services/user_service.js';
-import { getUserAccounts } from '../services/account_service.js';
-import { getVouchers, getVoucherById, getVoucherByCode, createVoucher, updateVoucher, claimVoucherService, VoucherStatus } from '../services/voucher_service.js';
-import { getCurrencyById } from '../services/currency_service.js';
+import { getUserByEmail } from '../services/user_service.ts';
+import { getUserAccounts } from '../services/account_service.ts';
+import { getVouchers, getVoucherById, getVoucherByCode, createVoucher, updateVoucher, claimVoucherService, VoucherStatus } from '../services/voucher_service.ts';
+import { getCurrencyById } from '../services/currency_service.ts';
 
 
 // @desc Get Vouchers

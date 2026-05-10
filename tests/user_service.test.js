@@ -14,9 +14,9 @@ import {
     setActiveUserById,
     setUserAdminById,
     updateLastLogin,
-} from '../services/user_service.js';
-import { getUserAccounts } from '../services/account_service.js';
-import { getCurrencyBySymbol } from '../services/currency_service.js';
+} from '../services/user_service.ts';
+import { getUserAccounts } from '../services/account_service.ts';
+import { getCurrencyBySymbol } from '../services/currency_service.ts';
 import config from './config.test.js';
 
 describe('Test User_service', () => {

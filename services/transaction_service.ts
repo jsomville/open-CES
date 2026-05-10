@@ -1,6 +1,6 @@
-/*import { prisma } from '../utils/prisma.ts';
+import { prisma } from '../utils/prisma.ts';
 
-export const getTransactionByAccountNumber = async (number) => {
+export const getTransactionByAccountNumber = async (number: string) => {
     return await prisma.transaction.findMany({
         where: {
             accountNumber: number
@@ -11,7 +11,7 @@ export const getTransactionByAccountNumber = async (number) => {
     });
 }
 
-export const getLatestTransactionByAccountNumber = async (number, transactionCount) => {
+export const getLatestTransactionByAccountNumber = async (number: string, transactionCount: number) => {
     return await prisma.transaction.findMany({
         where: {
             accountNumber: number
@@ -23,7 +23,7 @@ export const getLatestTransactionByAccountNumber = async (number, transactionCou
     });
 }
 
-export const getTransactionByAccountNumberAndPage = async (number, skip, limit) => {
+export const getTransactionByAccountNumberAndPage = async (number: string, skip: number, limit: number) => {
     return await prisma.transaction.findMany({
         where: {
             accountNumber: number
@@ -34,4 +34,4 @@ export const getTransactionByAccountNumberAndPage = async (number, skip, limit) 
         skip: skip,
         take: limit
     });
-}*/
+}

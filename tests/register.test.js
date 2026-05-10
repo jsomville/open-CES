@@ -3,8 +3,8 @@ import request from 'supertest';
 
 import { app } from "../app.js"
 
-import { getCurrencyBySymbol } from "../services/currency_service.js";
-import { deleteUserRegistrationByEmail, addUserRegistration } from "../services/register_service.js";
+import { getCurrencyBySymbol } from "../services/currency_service.ts";
+import { deleteUserRegistrationByEmail, addUserRegistration } from "../services/register_service.ts";
 
 import config from "./config.test.js";
 

@@ -6,23 +6,23 @@ import cors from 'cors'
 console.log("Starting the app...")
 
 //Import Middleware
-import logger from './middleware/logger.js';
-import errorHanlder from './middleware/error.js';
-import notFoundHandler from './middleware/notFound.js';
-import requestDuration from './middleware/requestDuration.js'
+import logger from './middleware/logger.ts';
+import errorHanlder from './middleware/error.ts';
+import notFoundHandler from './middleware/notFound.ts';
+import requestDuration from './middleware/requestDuration.ts'
 
 import { connectRedis, redisClient } from './utils/redisClient.ts';
 
 //Routes
-import home_route from './routes/home_route.js';
-import idp_route from './routes/idp_route.js';
-import user_route from './routes/user_route.js';
-import currency_route from './routes/currency_route.js'
-import account_route from './routes/account_route.js'
-import merchant_route from './routes/merchant_route.js'
-import voucher_route from './routes/voucher_route.js'
-import register_route from './routes/register_route.js'
-import about_route from './routes/about_route.js'
+import home_route from './routes/home_route.ts';
+import idp_route from './routes/idp_route.ts';
+import user_route from './routes/user_route.ts';
+import currency_route from './routes/currency_route.ts'
+import account_route from './routes/account_route.ts'
+import merchant_route from './routes/merchant_route.ts'
+import voucher_route from './routes/voucher_route.ts'
+import register_route from './routes/register_route.ts'
+import about_route from './routes/about_route.ts'
 
 //get Dfunctions to deal with static files
 const __filename = fileURLToPath(import.meta.url);

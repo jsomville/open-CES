@@ -6,7 +6,7 @@ import argon2 from 'argon2';
 import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
-import { setActiveUserById, getUserByEmail, createUser } from "../services/user_service.js";
+import { setActiveUserById, getUserByEmail, createUser } from "../services/user_service.ts";
 import redisHelper from '../utils/redisHelper.ts';
 
 describe("Login Test", () => {

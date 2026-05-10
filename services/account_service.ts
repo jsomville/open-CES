@@ -1,9 +1,9 @@
-/*import { prisma } from '../utils/prisma.ts';
+import { prisma } from '../utils/prisma.ts';
 
 import { getCurrencyBySymbol } from './currency_service.ts';
 import { getAccountId, AccountType } from '../utils/accountUtil.ts';
 
-export const createAccount = async (symbol, accountType) => {
+export const createAccount = async (symbol: string, accountType: number) => {
     try {
 
         const currency = await getCurrencyBySymbol(symbol);
@@ -13,7 +13,8 @@ export const createAccount = async (symbol, accountType) => {
 
         let accountId = currency.accountNextNumber + 1;
         let accountExists = false;
-        let accountNumber;
+        let accountNumber: string = "";
+
         while (!accountExists) {
 
             accountNumber = getAccountId(accountType, currency.id, accountId);
@@ -46,12 +47,12 @@ export const createAccount = async (symbol, accountType) => {
 
         return account;
     }
-    catch (error) {
+    catch (error : any) {
         console.error("Error Create Account Service : " + error.message);
         throw error
     }
 }
-export const createPersonnalAccount = async (user, symbol) => {
+export const createPersonnalAccount = async (user: any, symbol: string) => {
     try {
         const account = await createAccount(symbol, AccountType.PERSONAL);
 
@@ -65,13 +66,13 @@ export const createPersonnalAccount = async (user, symbol) => {
 
         return account
     }
-    catch (error) {
+    catch (error : any) {
         console.error("Error Create Personal Account Service : " + error.message);
         throw error
     }
 }
 
-export const createMerchantAccount = async (merchant, symbol) => {
+export const createMerchantAccount = async (merchant: any, symbol: string) => {
     try {
         const account = await createAccount(symbol, AccountType.MERCHANT);
 
@@ -85,13 +86,13 @@ export const createMerchantAccount = async (merchant, symbol) => {
 
         return account;
     }
-    catch (error) {
+    catch (error : any) {
         console.error("Error Create Merchant Account Service : " + error.message);
         throw error
     }
 }
 
-export const createCurrencyMainAccount = async (currency) => {
+export const createCurrencyMainAccount = async (currency: any) => {
     try {
         const account = await createAccount(currency.symbol, AccountType.CURRENCY_MAIN);
 
@@ -103,7 +104,7 @@ export const createCurrencyMainAccount = async (currency) => {
             }
         });
         return account;
-    } catch (error) {
+    } catch (error : any) {
         console.error("Error Create Currency Main Account Service : " + error.message);
         throw error
     }
@@ -114,17 +115,17 @@ export const getAccounts = async () => {
     return accounts;
 };
 
-export const getAccountById = async (accountId) => {
+export const getAccountById = async (accountId: number) => {
     const account = await prisma.account.findUnique({ where: { id: accountId } });
     return account;
 };
 
-export const getAccountByNumber = async (accountNumber) => {
+export const getAccountByNumber = async (accountNumber: string) => {
     const account = await prisma.account.findUnique({ where: { number: accountNumber } });
     return account;
 };
 
-export const getUserAccounts = async (userId) => {
+export const getUserAccounts = async (userId: number) => {
     // Get the personnal account numbers
     const accountIdList = await prisma.personalAccount.findMany({ where: { userId: userId }, select: { accountNumber: true } });
     const accounts = [];
@@ -139,7 +140,7 @@ export const getUserAccounts = async (userId) => {
     return accounts;
 };
 
-export const getMerchantAccounts = async (merchantId) => {
+export const getMerchantAccounts = async (merchantId: number) => {
     const accountIdList = await prisma.merchantAccount.findMany({ where: { merchantId: merchantId }, select: { accountNumber: true } });
     const accounts = [];
     for (const accountId of accountIdList) {
@@ -152,7 +153,7 @@ export const getMerchantAccounts = async (merchantId) => {
     return accounts;
 };
 
-export const getAccountCountByCurrencyId = async (currencyId) => {
+export const getAccountCountByCurrencyId = async (currencyId: number) => {
     return await prisma.account.count({
         where: {
             currencyId: currencyId
@@ -160,7 +161,7 @@ export const getAccountCountByCurrencyId = async (currencyId) => {
     });
 }
 
-export const getPersonnalAccountCountByCurrencyId = async (currencyId) => {
+export const getPersonnalAccountCountByCurrencyId = async (currencyId: number) => {
     return await prisma.account.count({
         where: {
             currencyId: currencyId,
@@ -171,7 +172,7 @@ export const getPersonnalAccountCountByCurrencyId = async (currencyId) => {
     });
 }
 
-export const getMerchantAccountCountByCurrencyId = async (currencyId) => {
+export const getMerchantAccountCountByCurrencyId = async (currencyId: number) => {
     return await prisma.account.count({
         where: {
             currencyId: currencyId,
@@ -182,10 +183,10 @@ export const getMerchantAccountCountByCurrencyId = async (currencyId) => {
     });
 }
 
-export const deleteAccount = async (number) => {
+export const deleteAccount = async (number: string) => {
     await prisma.account.delete({
         where: {
             number: number,
         }
     });
-}*/
+}

@@ -1,6 +1,6 @@
-/*import { prisma } from '../utils/prisma.ts';
+import { prisma } from '../utils/prisma.ts';
 
-export const transferFunds = async (type, sourceAccount, destinationAccount, amount, descriptionFrom, descriptionTo) => {
+export const transferFunds = async (type : string, sourceAccount: any, destinationAccount: any, amount: number, descriptionFrom: string, descriptionTo: string) => {
   try {
     const newSourceBalance = (Number(sourceAccount.balance) - Number(amount)).toFixed(2);
     const newDestinationBalance = (Number(destinationAccount.balance) + Number(amount)).toFixed(2);
@@ -44,8 +44,8 @@ export const transferFunds = async (type, sourceAccount, destinationAccount, amo
     ]);
     return true;
 
-  } catch (error) {
+  } catch (error : any) {
     console.error("Error Transfer Funds : " + error.message);
     return false;
   }
-}*/
+}

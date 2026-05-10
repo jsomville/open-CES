@@ -1,7 +1,7 @@
 import argon2 from 'argon2';
 
-import { getUserList, createUser, updateUser, deleteUser, getUserById, getUserByEmail, getUserByPhone, setUserAdminById, setActiveUserById } from '../services/user_service.js';
-import { getUserAccounts } from '../services/account_service.js';
+import { getUserList, createUser, updateUser, deleteUser, getUserById, getUserByEmail, getUserByPhone, setUserAdminById, setActiveUserById } from '../services/user_service.ts';
+import { getUserAccounts } from '../services/account_service.ts';
 
 
 // @desc Get users

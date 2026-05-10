@@ -1,7 +1,8 @@
-import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, getSafeCurrencyList, createCurrency, updateCurrency, deleteCurrency } from '../services/currency_service.js';
-import { getAccountByNumber, getAccountCountByCurrencyId } from '../services/account_service.js';
-import { transferFunds } from '../services/transfer_service.js';
-import { createCurrencyMainAccount } from '../services/account_service.js';
+import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, getSafeCurrencyList, createCurrency, updateCurrency, deleteCurrency } from '../services/currency_service.ts';
+import { getAccountByNumber, getAccountCountByCurrencyId, createCurrencyMainAccount } from '../services/account_service.ts';
+
+import { transferFunds } from '../services/transfer_service.ts';
+
 
 // @desc Get Currencies
 // @route GET /api/currency

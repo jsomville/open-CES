@@ -1,8 +1,8 @@
-import { getUserByEmail, getUserById, getUserByPhone } from '../services/user_service.js';
-import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { getAccounts, createPersonnalAccount, deleteAccount, getAccountByNumber, getUserAccounts } from '../services/account_service.js';
-import { getTransactionByAccountNumber, getTransactionByAccountNumberAndPage } from '../services/transaction_service.js';
-import { transferFunds } from '../services/transfer_service.js';
+import { getUserByEmail, getUserById, getUserByPhone } from '../services/user_service.ts';
+import { getCurrencyBySymbol } from '../services/currency_service.ts';
+import { getAccounts, createPersonnalAccount, deleteAccount, getAccountByNumber, getUserAccounts } from '../services/account_service.ts';
+import { getTransactionByAccountNumber, getTransactionByAccountNumberAndPage } from '../services/transaction_service.ts';
+import { transferFunds } from '../services/transfer_service.ts';
 import { AccountType } from '../utils/accountUtil.ts';
 
 // @desc Get Account

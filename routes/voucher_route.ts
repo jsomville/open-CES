@@ -1,12 +1,12 @@
 import express from 'express';
 
-import { getAllVouchers, getVoucher, addVoucher, modifyVoucher, claimVoucher } from '../controller/voucherController.js'
-import { authenticateToken } from '../middleware/auth.js'
-import { authorizeRole } from '../middleware/authorizeRole.js'
-
+import { authenticateToken } from '../middleware/auth.ts'
+import { authorizeRole } from '../middleware/authorizeRole.ts'
+import { rate_limiter_by_sub } from "../middleware/rate-limiter.ts";
 import { validate } from '../middleware/validate.js';
-import { createVoucherSchema, modifyVoucherSchema, voucherIdSchema, claimVoucherSchema } from '../schema/voucher.schema.js'
-import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
+
+import { getAllVouchers, getVoucher, addVoucher, modifyVoucher, claimVoucher } from '../controller/voucherController.js'
+import { createVoucherSchema, modifyVoucherSchema, voucherIdSchema, claimVoucherSchema } from '../schema/voucher.schema.ts'
 
 const router = express.Router();
 

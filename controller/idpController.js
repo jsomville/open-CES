@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import argon2 from 'argon2';
 
-import { getAccessToken, getRefreshToken } from "../services/auth_service.js";
+import { getAccessToken, getRefreshToken } from "../services/auth_service.ts";
 import redisHelper from '../utils/redisHelper.ts'
-import { getUserByEmail, getLoginUserByEmail, updateLastLogin } from "../services/user_service.js";
+import { getUserByEmail, getLoginUserByEmail, updateLastLogin } from "../services/user_service.ts";
 
 // @desc Login
 // @toute POST /api/idp/login

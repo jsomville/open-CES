@@ -1,4 +1,4 @@
-/*import { prisma } from '../utils/prisma.ts';
+import { prisma } from '../utils/prisma.ts';
 
 import redisHelper from '../utils/redisHelper.ts';
 
@@ -8,22 +8,22 @@ import { getAccountId } from '../utils/accountUtil.ts';
 const cached_ttl = 60; //in seconds
 const cached_stats_ttl = 900; //in seconds
 
-export const getCurrencyBySymbol = async (symbol) => {
+export const getCurrencyBySymbol = async (symbol : string) => {
     const currency = await prisma.currency.findUnique({ where: { symbol: symbol } })
     return currency;
 }
 
-export const getCurrencyByName = async (name) => {
+export const getCurrencyByName = async (name: string) => {
     const currency = await prisma.currency.findUnique({ where: { name: name } })
     return currency;
 }
 
-export const getCurrencyById = async (id) => {
+export const getCurrencyById = async (id: number) => {
     const currency = await prisma.currency.findUnique({ where: { id: id } })
     return currency;
 }
 
-export const setCurrencyInCache = async (currencyList) => {
+export const setCurrencyInCache = async (currencyList: any[]) => {
 
     await redisHelper.set("currencyList", JSON.stringify(currencyList), cached_ttl);
 }
@@ -53,7 +53,7 @@ export const getSafeCurrencyList = async () => {
     const currencyList = await getCurrencyList();
 
     // Remove unwanted fields in list of Currencies
-    const safeCurrency = currencyList.map(({ balance, accountMax, createdAt, updatedAt, activeAccount, accountNextNumber, ...currencies }) => currencies);
+    const safeCurrency = currencyList.map(({ balance, accountMax, createdAt, updatedAt, activeAccount, accountNextNumber, ...currencies }: any) => currencies);
 
     return safeCurrency;
 }
@@ -68,7 +68,7 @@ export const getCurrencyListWithStats = async () => {
     const currencyList = await getCurrencyList();
 
     // For each currency, get stats
-    const currencyListWithStats = await Promise.all(currencyList.map(async (currency) => {
+    const currencyListWithStats = await Promise.all(currencyList.map(async (currency : any) => {
         //Get number of merchants
         const merchantCount = await getMerchantAccountCountByCurrencyId(currency.id);
 
@@ -105,12 +105,12 @@ export const getSimpleCurrencyList = async () => {
     const currencyList = await getCurrencyList();
 
     // Return only id, name, symbol
-    const simpleCurrencyList = currencyList.map(({id, accountMax, createdAt, updatedAt, webSiteURL, topOffWizardURL, accountNextNumber, mainCurrencyAccountNumber, ...currencies }) => currencies );
+    const simpleCurrencyList = currencyList.map(({id, accountMax, createdAt, updatedAt, webSiteURL, topOffWizardURL, accountNextNumber, mainCurrencyAccountNumber, ...currencies }: any) => currencies );
 
     return simpleCurrencyList;
 }
 
-export const createCurrency = async (data) => {
+export const createCurrency = async (data: any) => {
 
     //Create Currency in DB
     const currency = await prisma.currency.create({ data });
@@ -121,7 +121,7 @@ export const createCurrency = async (data) => {
     return currency;
 }
 
-export const updateCurrency = async (id, data) => {
+export const updateCurrency = async (id: number, data: any) => {
     const updatedCurrency = await prisma.currency.update({
         where: { id: id },
         data: data
@@ -132,7 +132,7 @@ export const updateCurrency = async (id, data) => {
     return updatedCurrency;
 }
 
-export const deleteCurrency = async (id) => {
+export const deleteCurrency = async (id: number) => {
     await prisma.currency.delete({
         where: { id: id }
     });
@@ -140,7 +140,7 @@ export const deleteCurrency = async (id) => {
     await updateCurrencyListCache();
 }
 
-export const getNextAccountId = async (symbol, accountType) => {
+export const getNextAccountId = async (symbol: string, accountType: number) => {
 
     const currency = await getCurrencyBySymbol(symbol);
     if (!currency) {
@@ -148,20 +148,20 @@ export const getNextAccountId = async (symbol, accountType) => {
     }
 
     let startAccountNumber = currency.accountNextNumber;
-    let accountExists = false;
-    let accountId = "";
+    let accountExists : boolean = false;
+    let accountId : string = "";
     while (!accountExists) {
 
         startAccountNumber += 1;
         accountId = getAccountId(accountType, currency.id, startAccountNumber);
 
         accountExists = await prisma.account.count({
-            where: { accountId: accountId }
-        });
+            where: { number: accountId }
+        }) > 0;
     }
 
     //Update next number in currency
-    await modifyCurrency(currency.id, { accountNextNumber: startAccountNumber });
+    await updateCurrency(currency.id, { accountNextNumber: startAccountNumber });
 
     return accountId;
-}*/
+}

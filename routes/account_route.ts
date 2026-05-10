@@ -1,14 +1,12 @@
 import express from 'express';
 
-import { authenticateToken } from '../middleware/auth.js'
-import { authorizeRole } from '../middleware/authorizeRole.js'
-
+import { authenticateToken } from '../middleware/auth.ts'
+import { authorizeRole } from '../middleware/authorizeRole.ts'
+import { rate_limiter_by_sub } from "../middleware/rate-limiter.ts";
 import { validate } from '../middleware/validate.js';
 
 import { getAllAccount, getAccount, addAccount, removeAccount, transferToAccount, getTransactions, getTransactionsByPage, getAccountInfoByEmailAndSymbol, getAccountInfoByPhoneAndSymbol } from '../controller/accountController.js'
-import { createAccountSchema, accountIdSchema, accountTransferSchema, accountInfoByEmail, accountInfoByPhone, accountIdTransactionPageSchema} from '../schema/account.schema.js'
-
-import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
+import { createAccountSchema, accountIdSchema, accountTransferSchema, accountInfoByEmail, accountInfoByPhone, accountIdTransactionPageSchema} from '../schema/account.schema.ts'
 
 const router = express.Router();
 

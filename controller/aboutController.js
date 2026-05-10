@@ -1,4 +1,4 @@
-import { getSimpleCurrencyList } from '../services/currency_service.js';
+import { getSimpleCurrencyList } from '../services/currency_service.ts';
 
 export const getMobileAppVersion = async (req, res, next) => {
   try {

@@ -5,10 +5,10 @@ import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";
-import { createUser, getUserByEmail, deleteUser } from "../services/user_service.js";
-import { getAccessToken } from "../services/auth_service.js";
-import { createPersonnalAccount, getAccountByNumber, getUserAccounts, deleteAccount } from "../services/account_service.js";
-import { getCurrencyBySymbol } from "../services/currency_service.js";
+import { createUser, getUserByEmail, deleteUser } from "../services/user_service.ts";
+import { getAccessToken } from "../services/auth_service.ts";
+import { createPersonnalAccount, getAccountByNumber, getUserAccounts, deleteAccount } from "../services/account_service.ts";
+import { getCurrencyBySymbol } from "../services/currency_service.ts";
 
 describe("Test Transfer", () => {
     let user1Token;

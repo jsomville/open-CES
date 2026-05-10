@@ -5,7 +5,7 @@ const router = express.Router();
 import { readFile } from 'fs/promises';
 const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url)));
 
-import { getCurrencyListWithStats } from '../services/currency_service.js';
+import { getCurrencyListWithStats } from '../services/currency_service.ts';
 
 const home_template = (currencyList) => {
     const currencyRows = currencyList.map(currency => `

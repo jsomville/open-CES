@@ -5,11 +5,11 @@ import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";
-import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { getAccessTokenByEmailAndRole } from "../services/auth_service.js";
-import { createUser } from "../services/user_service.js";
-import { createPersonnalAccount, getAccountByNumber } from "../services/account_service.js";
-import { createCurrencyMainAccount } from "../services/account_service.js";
+import { getCurrencyBySymbol } from '../services/currency_service.ts';
+import { getAccessTokenByEmailAndRole } from "../services/auth_service.ts";
+import { createUser } from "../services/user_service.ts";
+import { createPersonnalAccount, getAccountByNumber } from "../services/account_service.ts";
+import { createCurrencyMainAccount } from "../services/account_service.ts";
 
 describe("Test Fund / Refund", () => {
     let admin_access_token;

@@ -5,9 +5,9 @@ import argon2 from 'argon2';
 import { shutdown } from '../app.js'
 
 import config from "./config.test.js";
-import { createCurrency, getCurrencyBySymbol } from '../services/currency_service.js';
-import { createUser, setActiveUserById } from '../services/user_service.js';
-import { createPersonnalAccount, createCurrencyMainAccount } from '../services/account_service.js';
+import { createCurrency, getCurrencyBySymbol } from '../services/currency_service.ts';
+import { createUser, setActiveUserById } from '../services/user_service.ts';
+import { createPersonnalAccount, createCurrencyMainAccount } from '../services/account_service.ts';
 
 //To calculate global test duration
 let test_start_time;

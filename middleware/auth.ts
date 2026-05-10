@@ -1,7 +1,17 @@
-// middleware/auth.js
+import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
 
-export function authenticateToken(req, res, next) {
+declare global {
+  namespace Express {
+    interface Request {
+      decodedToken?: JwtPayload | string;
+      user?: JwtPayload | string;
+    }
+  }
+}
+
+export function authenticateToken(req: Request, res: Response, next: NextFunction) {
 
   const authh = req.headers.authorization
   if (!authh) {
@@ -27,8 +37,12 @@ export function authenticateToken(req, res, next) {
 
     const JWT_SECRET = process.env.JWT_ACCESS_SECRET_KEY || 'your-very-secret-key';
 
-    const decoded  = jwt.verify(token[1], JWT_SECRET);
-    
+    const decoded = jwt.verify(token[1], JWT_SECRET);
+
+    if (typeof decoded === 'string') {
+      return res.status(422).json({ error: "Invalid Token" });
+    }
+
      // Decode ISS
     if (!decoded.iss) {
       return res.status(422).json({ error: "Invalid Refresh Token" });

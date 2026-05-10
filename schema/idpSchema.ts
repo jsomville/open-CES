@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { passwordSchema } from './password.schema.js';
+import { passwordSchema } from './password.schema.ts';
 
 export const loginSchema = z.strictObject({
   params: z.strictObject({}).optional(),

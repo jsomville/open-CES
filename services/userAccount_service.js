@@ -1,4 +1,4 @@
-import { prisma } from '../utils/prisma.ts';
+/*import { prisma } from '../utils/prisma.ts';
 
 export const getUserAccountsAndTransactions = async (userId, transactionsCount) => {
   const accounts = await prisma.account.findMany({ where: { userId: userId } });
@@ -15,4 +15,4 @@ export const getUserAccountsAndTransactions = async (userId, transactionsCount) 
     }
   }
   return accounts;
-}
+}*/

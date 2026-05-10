@@ -1,12 +1,12 @@
 import express from 'express';
 
-import { rate_limiter_by_ip } from "../middleware/rate-limiter.js";
+import { rate_limiter_by_ip } from "../middleware/rate-limiter.ts";
 
 import { validate } from '../middleware/validate.js';
 
 import { register, validateRegistration } from '../controller/registerController.js';
 
-import { registerSchema, registerValidationSchema} from '../schema/registerSchema.js';
+import { registerSchema, registerValidationSchema} from '../schema/registerSchema.ts';
 
 const router = express.Router();
 

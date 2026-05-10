@@ -1,8 +1,7 @@
-import { getUserByEmail } from '../services/user_service.js';
-import { getUserAccounts } from '../services/account_service.js';
+import { getUserByEmail } from '../services/user_service.ts';
+import { getUserAccounts } from '../services/account_service.ts';
 
-import { getLatestTransactionByAccountNumber } from '../services/transaction_service.js';
-import { getUserAccountsAndTransactions } from '../services/userAccount_service.js';
+import { getLatestTransactionByAccountNumber } from '../services/transaction_service.ts';
 
 const transactionsCount = 5
 

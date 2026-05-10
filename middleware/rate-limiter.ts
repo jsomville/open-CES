@@ -1,10 +1,13 @@
+import type { NextFunction, Request, Response } from 'express';
+
 import redisHelper from '../utils/redisHelper.ts'
 
 const windowsMS = 60000; // in ms
 const limit = 15; // number of requests
 
-const asyncHandler = fn => (req, res, next) =>
-  Promise.resolve(fn(req, res, next)).catch(next);
+const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) => 
+  (req: Request, res: Response, next: NextFunction) =>
+    Promise.resolve(fn(req, res, next)).catch(next);
 
 export const rate_limiter_by_sub = asyncHandler(async (req, res, next) => {
   if (!req.user || !req.user.sub) return next();
@@ -16,12 +19,8 @@ export const rate_limiter_by_sub = asyncHandler(async (req, res, next) => {
 
     // check limit & send error
     if (remaining <= 0) {
-      //Add retry After header
-      const retryAfter = Math.ceil((callsHistory[0] + windowsMS - now) / 1000);
-      res.set('Retry-After', Math.max(retryAfter, 1));
-
       //Send error
-      const error = new Error('Too many requests');
+      const error = new Error('Too many requests') as any;
       error.status = 429;
       next(error);
     }
@@ -43,7 +42,7 @@ export const rate_limiter_by_ip = asyncHandler(async (req, res, next) => {
 
     // check limit & send error
     if (remaining <= 0) {
-      const error = new Error('Too many requests');
+      const error = new Error('Too many requests') as any;
       error.status = 429;
       next(error);
     }
@@ -56,11 +55,11 @@ export const rate_limiter_by_ip = asyncHandler(async (req, res, next) => {
   }
 });
 
-async function rate_limiter_by_key(key, res) {
+async function rate_limiter_by_key(key: string, res: Response) {
   const now = Date.now();
 
   const raw = await redisHelper.get(key);
-  let callsHistory = raw ? JSON.parse(raw) : [];
+  let callsHistory: number[] = raw ? JSON.parse(raw) : [];
 
   if (callsHistory) {
     // remove expired timestamps
@@ -80,8 +79,8 @@ async function rate_limiter_by_key(key, res) {
   const remaining = Math.max(limit - callsHistory.length, 0);
 
   // Update response header for remaining rate limit
-  res.set('X-RateLimit-Remaining', remaining);
-  res.set('X-RateLimit-Limit', limit);
+  res.set('X-RateLimit-Remaining', remaining.toString());
+  res.set('X-RateLimit-Limit', limit.toString());
 
   return remaining;
 };

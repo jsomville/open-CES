@@ -1,5 +1,5 @@
-import { getMerchantList, getMerchantById, createMerchant, updateMerchant, deleteMerchant} from '../services/merchant_service.js'
-import { getMerchantAccounts } from '../services/account_service.js'
+import { getMerchantList, getMerchantById, createMerchant, updateMerchant, deleteMerchant} from '../services/merchant_service.ts'
+import { getMerchantAccounts } from '../services/account_service.ts'
 
 // @desc Get Merchants
 // @route GET /api/merchant

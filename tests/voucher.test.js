@@ -8,12 +8,12 @@ import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";
-import { getCurrencyBySymbol } from "../services/currency_service.js";
+import { getCurrencyBySymbol } from "../services/currency_service.ts";
 import { daysFrom, daysFromNow } from "../controller/voucherController.js";
-import { VoucherStatus, createVoucher, getVoucherByCode, claimVoucherService } from "../services/voucher_service.js";
-import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
-import { getUserByEmail, createUser, deleteUser } from "../services/user_service.js";
-import { getAccountByNumber, createPersonnalAccount } from "../services/account_service.js";
+import { VoucherStatus, createVoucher, getVoucherByCode, claimVoucherService } from "../services/voucher_service.ts";
+import { getAccessTokenByEmailAndRole } from '../services/auth_service.ts'
+import { getUserByEmail, createUser, deleteUser } from "../services/user_service.ts";
+import { getAccountByNumber, createPersonnalAccount } from "../services/account_service.ts";
 import { AccountType } from '../utils/accountUtil.ts';
 
 describe("Voucher Test", () => {

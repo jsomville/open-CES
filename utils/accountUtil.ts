@@ -16,7 +16,7 @@ export const isValidAccountType = (value: number): boolean => {
     return Object.values(AccountType).includes(value as any);
 };
 
-export const getAccountId = (accountType : keyof typeof AccountType, currencyNumber: number, accountNumber: number) => {
+export const getAccountId = (accountType : number, currencyNumber: number, accountNumber: number) => {
     // 000-0000-00000
     // XXX-XXXX-00000 --> auto increment currency number
     // XXX-0000-XXXXX --> auto increment account number

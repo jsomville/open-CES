@@ -1,13 +1,14 @@
 import express from 'express';
 
-import { authenticateToken } from '../middleware/auth.js'
-import { authorizeRole } from '../middleware/authorizeRole.js'
+import { authenticateToken } from '../middleware/auth.ts'
+import { authorizeRole } from '../middleware/authorizeRole.ts'
+import { rate_limiter_by_sub } from "../middleware/rate-limiter.ts";
+import { validate } from '../middleware/validate.js';
 
 import { getAllMerchant, getMerchant, addMerchant, modifyMerchant, removeMerchant } from '../controller/merchantController.js'
 
-import { validate } from '../middleware/validate.js';
-import { createMerchantSchema, modifyMerchantSchema, merchantIdSchema } from '../schema/merchant.schema.js'
-import { rate_limiter_by_sub } from "../middleware/rate-limiter.js";
+import { createMerchantSchema, modifyMerchantSchema, merchantIdSchema } from '../schema/merchant.schema.ts'
+
 
 const router = express.Router();
 

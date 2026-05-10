@@ -15,10 +15,10 @@ import {
     deleteAccount,
     getPersonnalAccountCountByCurrencyId,
     getMerchantAccountCountByCurrencyId
-} from '../services/account_service.js';
+} from '../services/account_service.ts';
 
-import { getUserByEmail, createUser, deleteUser } from '../services/user_service.js';
-import { getCurrencyBySymbol } from '../services/currency_service.js';
+import { getUserByEmail, createUser, deleteUser } from '../services/user_service.ts';
+import { getCurrencyBySymbol } from '../services/currency_service.ts';
 import { AccountType } from '../utils/accountUtil.ts';
 import argon2 from 'argon2';
 

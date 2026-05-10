@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '../utils/prisma.ts';
 
 import config from "./config.test.js";
-import { getCurrencyBySymbol } from "../services/currency_service.js";
+import { getCurrencyBySymbol } from "../services/currency_service.ts";
 import { daysFromNow } from "../controller/voucherController.js";
 import { 
     VoucherStatus, 
@@ -14,9 +14,9 @@ import {
     getVoucherById, 
     getVoucherByCode, 
     claimVoucherService 
-} from "../services/voucher_service.js";
-import { getUserByEmail, createUser, deleteUser } from "../services/user_service.js";
-import { createPersonnalAccount, getAccountByNumber } from "../services/account_service.js";
+} from "../services/voucher_service.ts";
+import { getUserByEmail, createUser, deleteUser } from "../services/user_service.ts";
+import { createPersonnalAccount, getAccountByNumber } from "../services/account_service.ts";
 
 describe("Voucher Service Tests", () => {
     let currency;

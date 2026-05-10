@@ -1,11 +1,11 @@
-/*import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import jwt from "jsonwebtoken";
 
 //Generate Access Token
-export function getAccessToken(user) {
+export function getAccessToken(user : any) {
 
     const now = Math.floor(Date.now() / 1000);
-    const exp = now + parseInt(process.env.ACCESS_TOKEN_DURATION);
+    const exp = now + parseInt(process.env.ACCESS_TOKEN_DURATION || "0");
 
     // JWT Access Token
     const token = jwt.sign({
@@ -22,9 +22,9 @@ export function getAccessToken(user) {
     return token;
 }
 
-export function getAccessTokenByEmailAndRole(email, role) {
+export function getAccessTokenByEmailAndRole(email: string, role: string) {
     const now = Math.floor(Date.now() / 1000);
-    const exp = now + parseInt(process.env.ACCESS_TOKEN_DURATION);
+    const exp = now + parseInt(process.env.ACCESS_TOKEN_DURATION || "0");
 
     // JWT Access Token
     const token = jwt.sign({
@@ -40,9 +40,9 @@ export function getAccessTokenByEmailAndRole(email, role) {
     return token;
 }
 
-export function getRefreshToken(user) {
+export function getRefreshToken(user : any) {
     const now = Math.floor(Date.now() / 1000);
-    const exp = now + parseInt(process.env.REFRESH_TOKEN_DURATION);
+    const exp = now + parseInt(process.env.REFRESH_TOKEN_DURATION || "0");
 
     const token = jwt.sign({
         sub: user.email,
@@ -54,4 +54,4 @@ export function getRefreshToken(user) {
         issuer: process.env.TRUSTED_ISSUER
     });
     return token;
-}*/
+}

@@ -5,10 +5,10 @@ import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";
-import { getAccessTokenByEmailAndRole } from '../services/auth_service.js'
-import { createMerchant, deleteMerchantByName } from "../services/merchant_service.js";
-import { createMerchantAccount } from "../services/account_service.js";
-import { getCurrencyBySymbol } from '../services/currency_service.js'
+import { getAccessTokenByEmailAndRole } from '../services/auth_service.ts'
+import { createMerchant, deleteMerchantByName } from "../services/merchant_service.ts";
+import { createMerchantAccount } from "../services/account_service.ts";
+import { getCurrencyBySymbol } from '../services/currency_service.ts'
 
 describe("Merchant Test", () => {
   let admin_access_token;

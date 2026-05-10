@@ -15,7 +15,7 @@ describe('Test auth middleware', () => {
         secret = 'test-secret-key';
         process.env.JWT_ACCESS_SECRET_KEY = secret;
 
-        ({ authenticateToken } = await import('../middleware/auth.js'));
+        ({ authenticateToken } = await import('../middleware/auth.ts'));
 
         app = express();
         app.get('/protected', authenticateToken, (req, res) => {

@@ -3,11 +3,11 @@ import { prisma } from '../utils/prisma.ts';
 
 import config from "./config.test.js";
 
-import { getLatestTransactionByAccountNumber, getTransactionByAccountNumber } from '../services/transaction_service.js';
+import { getLatestTransactionByAccountNumber, getTransactionByAccountNumber } from '../services/transaction_service.ts';
 
-import { getUserByEmail, createUser, deleteUser } from '../services/user_service.js';
-import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { createPersonnalAccount, deleteAccount } from '../services/account_service.js';
+import { getUserByEmail, createUser, deleteUser } from '../services/user_service.ts';
+import { getCurrencyBySymbol } from '../services/currency_service.ts';
+import { createPersonnalAccount, deleteAccount } from '../services/account_service.ts';
 
 
 describe("Transaction Service Tests", () => {

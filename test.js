@@ -20,7 +20,7 @@ for (const [name] of Object.entries(allDeps)) {
 
 
 import { prisma } from './utils/prisma.ts';
-import { getCurrencyBySymbol } from './services/currency_service.js';
+import { getCurrencyBySymbol } from './services/currency_service.ts';
 
 console.log("After import");
 

@@ -1,10 +1,10 @@
 
-import { addUserRegistration, getUserRegistrationByEmail, getUserRegistrationByCode, deleteUserRegistrationById} from '../services/register_service.js';
+import { addUserRegistration, getUserRegistrationByEmail, getUserRegistrationByCode, deleteUserRegistrationById} from '../services/register_service.ts';
 import nodemailer from 'nodemailer';
-import { createUser, getUserByEmail, setActiveUserById} from '../services/user_service.js';
-import { createAccount } from '../services/account_service.js';
-import { getCurrencyBySymbol } from '../services/currency_service.js';
-import { transferFunds } from '../services/transfer_service.js';
+import { createUser, getUserByEmail, setActiveUserById} from '../services/user_service.ts';
+import { createAccount } from '../services/account_service.ts';
+import { getCurrencyBySymbol } from '../services/currency_service.ts';
+import { transferFunds } from '../services/transfer_service.ts';
 
 // Create transporter outside for reuse
 const transporter = nodemailer.createTransport({
