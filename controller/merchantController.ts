@@ -1,15 +1,18 @@
+import '../types/express.d.ts';
+import type { NextFunction, Request, Response } from 'express';
+
 import { getMerchantList, getMerchantById, createMerchant, updateMerchant, deleteMerchant} from '../services/merchant_service.ts'
 import { getMerchantAccounts } from '../services/account_service.ts'
 
 // @desc Get Merchants
 // @route GET /api/merchant
-export const getAllMerchant = async (req, res, next) => {
+export const getAllMerchant = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const merchants = await getMerchantList();
 
     return res.status(200).json(merchants);
   }
-  catch (error) {
+  catch (error: unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error obtaining merchants" })
   }
@@ -17,9 +20,9 @@ export const getAllMerchant = async (req, res, next) => {
 
 // @desc Get one merchant
 // @route GET /api/merchant/:id
-export const getMerchant = async (req, res, next) => {
+export const getMerchant = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.validatedParams.id;
+    const id = req.validatedParams.id as number;
 
     const merchant = await getMerchantById(id);
     if (!merchant) {
@@ -28,7 +31,7 @@ export const getMerchant = async (req, res, next) => {
 
     return res.status(200).json(merchant);
   }
-  catch (error) {
+  catch (error: unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error obtaining merchant" })
   }
@@ -37,7 +40,7 @@ export const getMerchant = async (req, res, next) => {
 
 // @desc Create a Merchant
 // @route POST /api/merchant
-export const addMerchant = async (req, res, next) => {
+export const addMerchant = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = req.validatedBody;
 
@@ -45,7 +48,7 @@ export const addMerchant = async (req, res, next) => {
 
     return res.status(201).json(newMerchant)
   }
-  catch (error) {
+  catch (error: unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error adding merchant" })
   }
@@ -53,11 +56,11 @@ export const addMerchant = async (req, res, next) => {
 
 // @desc Modify Merchant
 // @route PUT /api/merchant
-export const modifyMerchant = async (req, res, next) => {
+export const modifyMerchant = async (req: Request, res: Response, next: NextFunction) => {
   try {
 
     const data = req.validatedBody;
-    const id = req.validatedParams.id;
+    const id = req.validatedParams.id as number;
 
     //Merchant exists
     const merchant = await getMerchantById(id);
@@ -69,7 +72,7 @@ export const modifyMerchant = async (req, res, next) => {
 
     return res.status(201).json(updatedMerchant)
   }
-  catch (error) {
+  catch (error: unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error modifying merchant" })
   }
@@ -77,9 +80,9 @@ export const modifyMerchant = async (req, res, next) => {
 
 // @desc Delete a Merchant
 // @route DELETE /api/merchant
-export const removeMerchant = async (req, res, next) => {
+export const removeMerchant = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.validatedParams.id;
+    const id = req.validatedParams.id as number;
 
     // Merchant exists
     const merchant = await getMerchantById(id);
@@ -98,7 +101,7 @@ export const removeMerchant = async (req, res, next) => {
 
     return res.status(204).send();
   }
-  catch (error) {
+  catch (error: unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error deleting merchant" });
   }

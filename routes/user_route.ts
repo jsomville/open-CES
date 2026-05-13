@@ -2,12 +2,11 @@ import express from 'express';
 
 import { authenticateToken } from '../middleware/auth.ts'
 import { authorizeRole } from '../middleware/authorizeRole.ts'
-import { validate } from '../middleware/validate.js';
+import { validate } from '../middleware/validate.ts';
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.ts";
 
-import { getAllUsers, getUser, addUser, modifyUser, removeUser, setUserAdmin, setUserActive } from '../controller/userController.js'
-import { getMe, getUserDetailByEmail } from '../controller/userDetailController.js'
-
+import { getAllUsers, getUser, addUser, modifyUser, removeUser, setUserAdmin, setUserActive } from '../controller/userController.ts'
+import { getMe, getUserDetailByEmail } from '../controller/userDetailController.ts'
 
 import { createUserSchema, modifyUserSchema, userIdSchema, userEmailSchema, emptyUserSchema} from '../schema/user.schema.ts'
 

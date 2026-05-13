@@ -3,9 +3,9 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.ts'
 import { authorizeRole } from '../middleware/authorizeRole.ts'
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.ts";
-import { validate } from '../middleware/validate.js';
+import { validate } from '../middleware/validate.ts';
 
-import { getAllVouchers, getVoucher, addVoucher, modifyVoucher, claimVoucher } from '../controller/voucherController.js'
+import { getAllVouchers, getVoucher, addVoucher, modifyVoucher, claimVoucher } from '../controller/voucherController.ts'
 import { createVoucherSchema, modifyVoucherSchema, voucherIdSchema, claimVoucherSchema } from '../schema/voucher.schema.ts'
 
 const router = express.Router();

@@ -1,13 +1,16 @@
 
+import '../types/express.d.ts';
+import type { NextFunction, Request, Response } from 'express';
+
 import { addUserRegistration, getUserRegistrationByEmail, getUserRegistrationByCode, deleteUserRegistrationById} from '../services/register_service.ts';
-import nodemailer from 'nodemailer';
+//import nodemailer from 'nodemailer';
 import { createUser, getUserByEmail, setActiveUserById} from '../services/user_service.ts';
 import { createAccount } from '../services/account_service.ts';
 import { getCurrencyBySymbol } from '../services/currency_service.ts';
 import { transferFunds } from '../services/transfer_service.ts';
 
 // Create transporter outside for reuse
-const transporter = nodemailer.createTransport({
+/*const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
   secure: true,
@@ -15,9 +18,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PWD
   }
-});
+});*/
 
-const sendValidationEmail = async (toEmail, code) => {
+const sendValidationEmail = async (toEmail: string, code: string) => {
 
   const header = '<H1>Welcome to Zinne Brussels</H1></br>';
   const welcome = `<p>Your confirmation code is <b>${code}</b></p>/br>`;
@@ -25,19 +28,27 @@ const sendValidationEmail = async (toEmail, code) => {
 
   const msg = header + welcome + thankYou;
 
-  await transporter.sendMail({
+  /*await transporter.sendMail({
     from: '"No-Reply" <no-reply@zinne.brussels>',
     to: toEmail,
     subject: `Your Email Confirmation Code is ${code}`,
     text: "Your Email confirmation code is " + code,
     html: msg
 
-  });
+  });*/
 }
 
-export const register = async (req, res, next) => {
+export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = req.validatedBody;
+    const data = req.validatedBody as {
+      email: string;
+      phone: string;
+      password: string;
+      firstname: string;
+      lastname: string;
+      region: string;
+      symbol: string;
+    };
 
     // Check if registration already exists
     const existingUser = await getUserRegistrationByEmail(data.email);
@@ -78,40 +89,41 @@ export const register = async (req, res, next) => {
 
     //TEMP BECAUSE MAIL DOSENT WORK
      // Create User
-    const newUser = await createUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
+    /*const newUser = await createUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
     if (!newUser) {
       return res.status(500).json({ message: "Error creating user" });
-    }
+    }*/
 
     // Activate User
-    await setActiveUserById(newUser.id);
+    //await setActiveUserById(newUser.id);
 
     //Create Account
-    const accountType = 1; // TO FIX
-    const account = await createAccount(newUser.id, currency.id, accountType);
+    /*const accountType : number = 1; // TO FIX
+    const userId :number = newUser.id;
+    const account = await createAccount(userId, accountType);
     if (!account) {
       return res.status(500).json({ message: "Error creating account" });
-    }
+    }*/
 
     // *****************************
     // Temp fund account
     // *****************************
-    await transferFunds(currency, account, 10);
+    //await transferFunds(currency, account, 10);
 
     // Delete registration after validation
     await deleteUserRegistrationById(registration.id);
 
     return res.status(200).json({ message: "Registration successful, check your email for the confirmation code" });
   }
-  catch (error) {
-    console.error(error.message);
+  catch (error : unknown) {
+    console.error(error);
     return res.status(500).json({ message: "Error registering user" })
   }
 }
 
-export const validateRegistration = async (req, res, next) => {
+export const validateRegistration = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const code = req.validatedParams.code;
+    const code = req.validatedParams.code as string;
 
     const registration = await getUserRegistrationByCode(code);
     if (!registration) {
@@ -125,28 +137,28 @@ export const validateRegistration = async (req, res, next) => {
     }
 
     // Create User
-    const newUser = await addUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
+    /*const newUser = await createUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
     if (!newUser) {
       return res.status(500).json({ message: "Error creating user" });
-    }
+    }*/
 
     // Activate User
-    await setActiveUserById(newUser.id);
+    //await setActiveUserById(newUser.id);
 
     //Create Account
-    const accountType = 1; // TO FIX
-    const account = await createAccount(newUser.id, currency.id, accountType);
+    const accountType : number = 1; // TO FIX
+    /*const account = await createAccount(newUser.id, currency.id, accountType);
     if (!account) {
       return res.status(500).json({ message: "Error creating account" });
-    }
+    }*/
 
     // Delete registration after validation
     await deleteUserRegistrationById(registration.id);
 
     return res.status(200).json({ message: "Registration validated successfully" })
   }
-  catch (error) {
-    console.error(error.message);
+  catch (error : unknown) {
+    console.error(error);
     return res.status(500).json({ message: "Error validating registration" })
   }
 }

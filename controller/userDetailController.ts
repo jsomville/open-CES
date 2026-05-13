@@ -1,3 +1,6 @@
+import '../types/express.d.ts';
+import type { NextFunction, Request, Response } from 'express';
+
 import { getUserByEmail } from '../services/user_service.ts';
 import { getUserAccounts } from '../services/account_service.ts';
 
@@ -6,11 +9,11 @@ import { getLatestTransactionByAccountNumber } from '../services/transaction_ser
 const transactionsCount = 5
 
 // @desc Get one user
-// @toute GET /api/user/by-email/:email
-export const getUserDetailByEmail = async (req, res, next) => {
+// @route GET /api/user/by-email/:email
+export const getUserDetailByEmail = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const email = req.validatedParams.email;
+        const email = req.validatedParams.email as string;
 
         //Check if user exists
         const user = await getUserByEmail(email);
@@ -25,32 +28,33 @@ export const getUserDetailByEmail = async (req, res, next) => {
 
         // get User accounts & transactions
         const accounts = await getUserAccounts(user.id);
-        for (const account of accounts) {
-            const latestTransactions = await getLatestTransactionByAccountNumber(account.id, transactionsCount);
-            if (latestTransactions) {
-                account.latestTransactions = latestTransactions;
-            }
-        }
+        const accountsWithTransactions = await Promise.all(
+            accounts.map(async (account) => {
+                const latestTransactions = await getLatestTransactionByAccountNumber(account.number, transactionsCount);
+                return {
+                    ...account,
+                    ...(latestTransactions && { latestTransactions })
+                };
+            })
+        );
 
         //assemble user detail
         const userDetail = {
             ...user,
-            accounts: accounts.map(account => ({
-                ...account,
-            }))
+            accounts: accountsWithTransactions
         }
 
         return res.status(200).json(userDetail);
     }
-    catch (error) {
+    catch (error : unknown) {
         console.error(error)
-        return res.status(500).json({ error: error.message })
+        return res.status(500).json({ error: (error as Error).message })
     }
 };
 
 // @desc Get one user
 // @toute GET /api/user/me
-export const getMe = async (req, res, next) => {
+export const getMe = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const email = req.user.sub
 
@@ -62,25 +66,26 @@ export const getMe = async (req, res, next) => {
 
         // get User accounts & transactions
         const accounts = await getUserAccounts(user.id);
-        for (const account of accounts) {
-            const latestTransactions = await getLatestTransactionByAccountNumber(account.number, transactionsCount);
-            if (latestTransactions) {
-                account.latestTransactions = latestTransactions;
-            }
-        }
+        const accountsWithTransactions = await Promise.all(
+            accounts.map(async (account) => {
+                const latestTransactions = await getLatestTransactionByAccountNumber(account.number, transactionsCount);
+                return {
+                    ...account,
+                    ...(latestTransactions && { latestTransactions })
+                };
+            })
+        );
 
         //assemble user detail
         const userDetail = {
             ...user,
-            accounts: accounts.map(account => ({
-                ...account,
-            }))
+            accounts: accountsWithTransactions
         }
 
         return res.status(200).json(userDetail);
     }
-    catch (error) {
+    catch (error : unknown) {
         console.error(error)
-        return res.status(500).json({ error: error.message })
+        return res.status(500).json({ error: (error as Error).message })
     }
 };

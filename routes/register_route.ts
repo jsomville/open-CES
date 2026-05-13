@@ -2,9 +2,9 @@ import express from 'express';
 
 import { rate_limiter_by_ip } from "../middleware/rate-limiter.ts";
 
-import { validate } from '../middleware/validate.js';
+import { validate } from '../middleware/validate.ts';
 
-import { register, validateRegistration } from '../controller/registerController.js';
+import { register, validateRegistration } from '../controller/registerController.ts';
 
 import { registerSchema, registerValidationSchema} from '../schema/registerSchema.ts';
 

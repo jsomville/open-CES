@@ -1,3 +1,6 @@
+import '../types/express.d.ts';
+import type { NextFunction, Request, Response } from 'express';
+
 import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, getSafeCurrencyList, createCurrency, updateCurrency, deleteCurrency } from '../services/currency_service.ts';
 import { getAccountByNumber, getAccountCountByCurrencyId, createCurrencyMainAccount } from '../services/account_service.ts';
 
@@ -6,37 +9,37 @@ import { transferFunds } from '../services/transfer_service.ts';
 
 // @desc Get Currencies
 // @route GET /api/currency
-export const getAllCurrencies = async (req, res, next) => {
+export const getAllCurrencies = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const safeCurrency = await getSafeCurrencyList();
 
         return res.status(200).json(safeCurrency)
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error((error as Error).message);
         return res.status(500).json({ message: "Error obtaining currencies" })
     }
 }
 
 // @desc Get Currencies
 // @route GET /api/currency
-export const getCurrenciesDetails = async (req, res, next) => {
+export const getCurrenciesDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const safeCurrency = await getSafeCurrencyList();
 
         return res.status(200).json(safeCurrency)
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error((error as Error).message);
         return res.status(500).json({ message: "Error obtaining currencies" })
     }
 }
 
 // @desc Create Currency
 // @route POST /api/currency
-export const addCurrency = async (req, res, next) => {
+export const addCurrency = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = req.validatedBody;
+        const data = req.validatedBody as { name: string; symbol: string; };
 
         //Check if Name is unique
         let currency;
@@ -60,17 +63,17 @@ export const addCurrency = async (req, res, next) => {
 
         return res.status(201).json(newCurrency)
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error((error as Error).message);
         return res.status(500).json({ message: "Error creating currency" })
     }
 }
 
 // @desc Get Currency
 // @route GET /api/currency
-export const getCurrency = async (req, res, next) => {
+export const getCurrency = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = req.validatedParams.id;
+        const id = req.validatedParams.id as number;
 
         //Currency exists
         const currency = await getCurrencyById(id);
@@ -80,18 +83,18 @@ export const getCurrency = async (req, res, next) => {
 
         return res.status(200).json(currency)
     }
-    catch (error) {
-        console.error(error);
+    catch (error : unknown) {
+        console.error((error as Error).message);
         return res.status(500).json({ message: "Error obtaining currency" })
     }
 }
 
 // @desc Modify Currencies
 // @route PUT /api/currency/id
-export const modifyCurrency = async (req, res, next) => {
+export const modifyCurrency = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = req.validatedBody;
-        const id = req.validatedParams.id;
+        const data = req.validatedBody as { name: string; symbol: string; };
+        const id = req.validatedParams.id as number;
 
         //Check if Currency exists
         const currency = await getCurrencyById(id);
@@ -103,17 +106,17 @@ export const modifyCurrency = async (req, res, next) => {
 
         return res.status(201).json(updatedCurrency)
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error((error as Error).message);
         return res.status(500).json({ message: "Error updating currency" })
     }
 }
 
 // @desc Delete Currencies
 // @route DELETE /api/currency/id
-export const removeCurrency = async (req, res, next) => {
+export const removeCurrency = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const currencyId = req.validatedParams.id;
+        const currencyId = req.validatedParams.id as number;
 
         //Currency exists
         const currency = await getCurrencyById(currencyId);
@@ -148,18 +151,18 @@ export const removeCurrency = async (req, res, next) => {
 
         return res.status(204).send()
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error((error as Error).message);
         return res.status(500).json({ message: "Error deleting currency" })
     }
 }
 //@desc Fund account
 //@route POST /api/currency/id/fundAccount
-export const fundAccount = async (req, res, next) => {
+export const fundAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const currencyId = req.validatedParams.id;
-        const number = req.validatedBody.number;
-        const amount = req.validatedBody.amount;
+        const currencyId = req.validatedParams.id as number;
+        const number = req.validatedBody.number as string;
+        const amount = req.validatedBody.amount as number;
 
         //Currency exists
         const currency = await getCurrencyById(currencyId);
@@ -191,27 +194,27 @@ export const fundAccount = async (req, res, next) => {
             await transferFunds(transferType, fromAccount, toAccount, amount, descriptionFrom, descriptionTo);
 
         }
-        catch (error) {
-            console.error(error.message);
+        catch (error : unknown) {
+            console.error((error as Error).message);
             return res.status(500).json({ message: "Fund Account Failed" })
         }
 
         return res.status(201).send()
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error((error as Error).message);
         return res.status(500).json({ message: "Error Funding the account" })
     }
 }
 
 //@desc Refund account
 //@route POST /api/currency/id/refundAccount
-export const refundAccount = async (req, res, next) => {
+export const refundAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
         //Account is mandatory
-        const currencyId = req.validatedParams.id;
-        const accountNumber = req.validatedBody.number;
-        const amount = req.validatedBody.amount;
+        const currencyId = req.validatedParams.id as number;
+        const accountNumber = req.validatedBody.number as string;
+        const amount = req.validatedBody.amount as number;
 
         //Currency exists
         const currency = await getCurrencyById(currencyId);
@@ -226,7 +229,7 @@ export const refundAccount = async (req, res, next) => {
         }
 
         //Amount is below of equal account balance
-        if (fromAccount.balance < amount) {
+        if (fromAccount.balance.lt(amount)) {
             return res.status(400).json({ error: "Insufficient funds" })
         }
 
@@ -247,15 +250,15 @@ export const refundAccount = async (req, res, next) => {
             const descriptionFrom = `Refund to account ${toAccount.number}`;
             await transferFunds(transferType, fromAccount, toAccount, amount, descriptionFrom, descriptionTo);
         }
-        catch (error) {
-            console.error(error.message);
-            return res.status(500).json({ message: "Fund Account Failed" })
+        catch (error : unknown) {
+            console.error((error as Error).message);
+            return res.status(500).json({ message: "Refund Account Failed" })
         }
 
         return res.status(201).send()
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error((error as Error).message);
         return res.status(500).json({ message: "Error refunding the account" })
     }
 }

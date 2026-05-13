@@ -5,7 +5,7 @@ import { prisma } from '../utils/prisma.ts';
 
 import config from "./config.test.js";
 import { getCurrencyBySymbol } from "../services/currency_service.ts";
-import { daysFromNow } from "../controller/voucherController.js";
+import { daysFromNow } from "../controller/voucherController.ts";
 import { 
     VoucherStatus, 
     getVouchers, 

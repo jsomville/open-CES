@@ -2,7 +2,7 @@ import express from 'express';
 
 import { rate_limiter_by_ip } from "../middleware/rate-limiter.ts";
 
-import { getMobileAppVersion, getCurrencies } from '../controller/aboutController.js';
+import { getMobileAppVersion, getCurrencies } from '../controller/aboutController.ts';
 
 const router = express.Router();
 

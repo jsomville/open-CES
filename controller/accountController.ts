@@ -1,3 +1,6 @@
+import '../types/express.d.ts';
+import type { NextFunction, Request, Response } from 'express';
+
 import { getUserByEmail, getUserById, getUserByPhone } from '../services/user_service.ts';
 import { getCurrencyBySymbol } from '../services/currency_service.ts';
 import { getAccounts, createPersonnalAccount, deleteAccount, getAccountByNumber, getUserAccounts } from '../services/account_service.ts';
@@ -7,22 +10,25 @@ import { AccountType } from '../utils/accountUtil.ts';
 
 // @desc Get Account
 // @route GET /api/account
-export const getAllAccount = async (req, res, next) => {
+export const getAllAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const accounts = await getAccounts();
+
         return res.status(200).json(accounts);
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
         return res.status(500).json({ message: "Error obtaining accounts" })
     }
 }
 
 // @desc Get one account
 // @toute GET /api/account:id
-export const getAccount = async (req, res, next) => {
+export const getAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const number = req.validatedParams.number;
+        const number = req.validatedParams.number as string;
         const account = await getAccountByNumber(number);
         if (!account) {
             return res.status(404).json({ message: "Account not found" })
@@ -30,32 +36,42 @@ export const getAccount = async (req, res, next) => {
 
         return res.status(200).json(account);
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
         return res.status(500).json({ message: "Error obtaining account" });
     }
 };
 
 // @desc Create Account
 // @route POST /api/account
-export const addAccount = async (req, res, next) => {
+export const addAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = req.validatedBody;
+        const data = req.validatedBody as {
+            accountType: number;
+            symbol: string;
+            ownerId?: number;
+            merchantEmail?: string;
+        };
 
         // Check account type
-        if (data.accountType !== AccountType.PERSONAL && data.accountType !== AccountType.BUSINESS) {
+        if (data.accountType !== AccountType.PERSONAL && data.accountType !== AccountType.MERCHANT) {
             return res.status(409).json({ message: "Invalid account type" })
         }
 
         //Currency exists
-        const currency = await getCurrencyBySymbol(data.symbol);
+        const currency = await getCurrencyBySymbol(data.symbol as string);
         if (!currency) {
             return res.status(404).json({ message: "Currency not found" })
         }
 
         // Additional checks for Personal accounts
         if (data.accountType == AccountType.PERSONAL) {
-            const user = await getUserById(data.ownerId);
+            if (!data.ownerId) {
+                return res.status(400).json({ message: "ownerId is required for personal accounts" })
+            }
+            const user = await getUserById(data.ownerId as number);
             if (!user) {
                 return res.status(404).json({ message: "User not found" })
             }
@@ -75,22 +91,24 @@ export const addAccount = async (req, res, next) => {
 
             return res.status(201).json(newAccount)
         }
-        else if (data.accountType == AccountType.BUSINESS) {
+        else if (data.accountType == AccountType.MERCHANT) {
             //TODO Merchant
-            throw new Error("Business account not yet implemented");
+            throw new Error("Merchant account not yet implemented");
         }
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
         return res.status(500).json({ message: "Error creating account" });
     }
 };
 
 // @desc Delete a Account
 // @route DELETE /api/account/id
-export const removeAccount = async (req, res, next) => {
+export const removeAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const number = req.validatedParams.number;
+        const number = req.validatedParams.number as string;
 
         // Account exists
         const account = await getAccountByNumber(number);
@@ -99,7 +117,7 @@ export const removeAccount = async (req, res, next) => {
         }
 
         //Balance at zero
-        if (account.balance > 0) {
+        if (account.balance.gt(0)) {
             return res.status(409).json({ message: "Balance must be zero" })
         }
 
@@ -108,20 +126,22 @@ export const removeAccount = async (req, res, next) => {
 
         return res.status(204).send()
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
         return res.status(500).json({ error: "Error deleting account" })
     }
 };
 
 // @desc Transfer to an Account
 // @route POST /api/account/number/transfer
-export const transferToAccount = async (req, res, next) => {
+export const transferToAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const sourceAccountNumber = req.validatedParams.number;
-        const destinationAccountNumber = req.validatedBody.number;
-        const amount = req.validatedBody.amount;
+        const sourceAccountNumber = req.validatedParams.number as string;
+        const destinationAccountNumber = req.validatedBody.number as string;
+        const amount = req.validatedBody.amount as number;
 
         // Source account exists
         const sourceAccount = await getAccountByNumber(sourceAccountNumber);
@@ -180,13 +200,17 @@ export const transferToAccount = async (req, res, next) => {
 
             return res.status(201).send()
         }
-        catch (error) {
-            console.error(error.message);
+        catch (error : unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+            }
             return res.status(500).json({ message: "Transfer Failed" })
         }
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
         return res.status(500).json({ message: "Error Transfering from account" })
     }
 
@@ -194,9 +218,9 @@ export const transferToAccount = async (req, res, next) => {
 
 // @desc Transfer to an Account
 // @route POST /api/account/id/transactions
-export const getTransactions = async (req, res, next) => {
+export const getTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const accountNumber = req.validatedParams.number;
+        const accountNumber = req.validatedParams.number as string;
 
         // Source account exists
         const account = await getAccountByNumber(accountNumber);
@@ -225,21 +249,24 @@ export const getTransactions = async (req, res, next) => {
 
         return res.status(200).json(transactions);
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
         return res.status(500).json({ message: "Error getting transactions from account" })
     }
 };
 
 // @desc Transfer to an Account
 // @route POST /api/account/number/transactions
-export const getTransactionsByPage = async (req, res, next) => {
+export const getTransactionsByPage = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const accountNumber = req.validatedParams.number;
+        const accountNumber = req.validatedParams.number as string;
 
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
         const skip = (page - 1) * limit;
+
 
         // Source account exists
         const account = await getAccountByNumber(accountNumber);
@@ -247,9 +274,12 @@ export const getTransactionsByPage = async (req, res, next) => {
             return res.status(404).json({ error: "Source account not found" })
         }
 
-        if (req.user.role !== "admin") {
+        const role = req.user.role;
+        const email = req.user.sub;
+
+        if (role !== "admin") {
             // Check if its own account
-            const user = await getUserByEmail(req.user.sub);
+            const user = await getUserByEmail(email);
             if (!user) {
                 return res.status(404).json({ error: "User not found" });
             }
@@ -277,18 +307,20 @@ export const getTransactionsByPage = async (req, res, next) => {
 
         return res.status(200).json({ transactions, pagination });
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
         return res.status(500).json({ message: "Error getting transactions from account" })
     }
 };
 
 // get Account info from email and currency
 // @route GET /api/account/by-email-and-symbol
-export const getAccountInfoByEmailAndSymbol = async (req, res, next) => {
+export const getAccountInfoByEmailAndSymbol = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const email = req.validatedBody.email;
-        const symbol = req.validatedBody.symbol;
+        const email = req.validatedBody.email as string;
+        const symbol = req.validatedBody.symbol as string;
 
         const user = await getUserByEmail(email);
         if (!user) {
@@ -322,18 +354,20 @@ export const getAccountInfoByEmailAndSymbol = async (req, res, next) => {
         }
 
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
         return res.status(500).json({ message: "Error obtaining account info" });
     }
 };
 
 // get Account info from email and currency
 // @route GET /api/account/by-email-and-symbol
-export const getAccountInfoByPhoneAndSymbol = async (req, res, next) => {
+export const getAccountInfoByPhoneAndSymbol = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const phone = req.validatedBody.phone;
-        const symbol = req.validatedBody.symbol;
+        const phone = req.validatedBody.phone as string;
+        const symbol = req.validatedBody.symbol as string;
 
         const user = await getUserByPhone(phone);
         if (!user) {
@@ -366,8 +400,10 @@ export const getAccountInfoByPhoneAndSymbol = async (req, res, next) => {
             return res.status(404).json({ message: "No Account found" });
         }
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
         return res.status(500).json({ message: "Error obtaining account info" });
     }
 };

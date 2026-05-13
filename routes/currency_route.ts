@@ -2,10 +2,10 @@ import express from 'express';
 
 import { authenticateToken } from '../middleware/auth.ts'
 import { authorizeRole } from '../middleware/authorizeRole.ts'
-import { validate } from '../middleware/validate.js';
+import { validate } from '../middleware/validate.ts';
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.ts";
 
-import { getCurrency, getCurrenciesDetails, getAllCurrencies, addCurrency, modifyCurrency, removeCurrency, fundAccount, refundAccount } from '../controller/currencyController.js'
+import { getCurrency, getCurrenciesDetails, getAllCurrencies, addCurrency, modifyCurrency, removeCurrency, fundAccount, refundAccount } from '../controller/currencyController.ts'
 
 import { createCurrencySchema, modifyCurrencySchema, currencyIdSchema, currencyFundRefundSchema } from '../schema/currency.schema.ts'
 

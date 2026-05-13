@@ -1,10 +1,10 @@
 import express from 'express';
 
-import { login, refresh, logout } from '../controller/idpController.js';
+import { login, refresh, logout } from '../controller/idpController.ts';
 import { rate_limiter_by_ip } from "../middleware/rate-limiter.ts";
 import { authenticateToken } from '../middleware/auth.ts';
 
-import { validate } from '../middleware/validate.js';
+import { validate } from '../middleware/validate.ts';
 import { loginSchema, emptyApiSchema, refreshApiSchema} from '../schema/idpSchema.ts';
 
 const router = express.Router();

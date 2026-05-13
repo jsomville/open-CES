@@ -246,7 +246,7 @@ describe("Login Test", () => {
     assert.equal(res.body.error, "User is not active");
   });
 
-  it('account locked after too many failed login attempts', async () => {
+  it('Login - account locked after too many failed login attempts', async () => {
     const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS) || 5;
 
     const username = lockedUser.email;

@@ -1,3 +1,5 @@
+import '../types/express.d.ts'; 
+import type { NextFunction, Request, Response } from 'express';
 import argon2 from 'argon2';
 
 import { getUserList, createUser, updateUser, deleteUser, getUserById, getUserByEmail, getUserByPhone, setUserAdminById, setActiveUserById } from '../services/user_service.ts';
@@ -6,12 +8,12 @@ import { getUserAccounts } from '../services/account_service.ts';
 
 // @desc Get users
 // @route GET /api/user
-export const getAllUsers = async (req, res, next) => {
+export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await getUserList()
 
     return res.status(200).json(users);
-  }
+  } 
   catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Error obtaining users" })
@@ -20,9 +22,9 @@ export const getAllUsers = async (req, res, next) => {
 
 // @desc Get one user
 // @route GET /api/user/:id
-export const getUser = async (req, res, next) => {
+export const getUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.validatedParams.id;
+    const userId = req.validatedParams.id as number;
 
     const user = await getUserById(userId);
     if (!user) {
@@ -39,10 +41,10 @@ export const getUser = async (req, res, next) => {
 
 // @desc Create a User
 // @route POST /api/user
-export const addUser = async (req, res, next) => {
+export const addUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
 
-    const data = req.validatedBody;
+    const data = req.validatedBody as { email: string; phone: string; password: string; firstname: string; lastname: string};
 
     //Check email is unique
     const user_email = await getUserByEmail(data.email);
@@ -59,14 +61,14 @@ export const addUser = async (req, res, next) => {
     const role = "user";
     const hashedPassword = await argon2.hash(data.password);
 
-    const user = await createUser(data.email, data.phone, hashedPassword, role, data.firstname, data.lastname, data.region);
+    const user = await createUser(data.email, data.phone, hashedPassword, role, data.firstname, data.lastname);
 
     //Activate user
     await setActiveUserById(user.id);
 
     return res.status(201).json(user)
   }
-  catch (error) {
+  catch (error : unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error adding user" })
   }
@@ -74,10 +76,10 @@ export const addUser = async (req, res, next) => {
 
 // @desc Modify User
 // @route PUT /api/user
-export const modifyUser = async (req, res, next) => {
+export const modifyUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = req.validatedBody;
-    const id = req.validatedParams.id;
+    const data = req.validatedBody as { email?: string; phone?: string; password?: string; firstname?: string; lastname?: string };
+    const id = req.validatedParams.id as number;
 
     // User exists
     const user = await getUserById(id);
@@ -93,16 +95,18 @@ export const modifyUser = async (req, res, next) => {
     }
 
     //Check phone is unique and not self
-    const userByPhone = await getUserByPhone(data.phone);
-    if (userByPhone && userByPhone.id != id) {
-      return res.status(409).json({ message: "Phone already used" })
+    if (data.phone) {
+      const userByPhone = await getUserByPhone(data.phone);
+      if (userByPhone && userByPhone.id != id) {
+        return res.status(409).json({ message: "Phone already used" })
+      }
     }
 
     const updatedUser = await updateUser(id, data);
 
     return res.status(201).json(updatedUser)
   }
-  catch (error) {
+  catch (error: unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error modifying user" })
   }
@@ -110,10 +114,10 @@ export const modifyUser = async (req, res, next) => {
 
 // @desc set user admin
 // @route PUT /api/user/id/set-admin
-export const setUserAdmin = async (req, res, next) => {
+export const setUserAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
 
-    const userId = req.validatedParams.id;
+    const userId = req.validatedParams.id as number;
 
     // User exists
     const user = await getUserById(userId);
@@ -125,7 +129,7 @@ export const setUserAdmin = async (req, res, next) => {
 
     return res.status(204).send()
   }
-  catch (error) {
+  catch (error: unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error setting user admin" })
   }
@@ -133,10 +137,10 @@ export const setUserAdmin = async (req, res, next) => {
 
 // @desc Set user active
 // @route PUT /api/user/:id/set-active
-export const setUserActive = async (req, res, next) => {
+export const setUserActive = async (req: Request, res: Response, next: NextFunction) => {
   try {
 
-    const userId = req.validatedParams.id;
+    const userId = req.validatedParams.id as number;
 
     //User exists
     const user = await getUserById(userId);
@@ -148,7 +152,7 @@ export const setUserActive = async (req, res, next) => {
 
     return res.status(204).send()
   }
-  catch (error) {
+  catch (error : unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error activating user" })
   }
@@ -156,9 +160,9 @@ export const setUserActive = async (req, res, next) => {
 
 // @desc Delete a User
 // @route DELETE /api/user
-export const removeUser = async (req, res, next) => {
+export const removeUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.validatedParams.id;
+    const userId = req.validatedParams.id as number;
 
     const user = await getUserById(userId);
     if (!user) {
@@ -176,7 +180,7 @@ export const removeUser = async (req, res, next) => {
 
     return res.status(204).send()
   }
-  catch (error) {
+  catch (error: unknown) {
     console.error(error);
     return res.status(500).json({ message: "Error deleting user" })
   }

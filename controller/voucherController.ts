@@ -1,3 +1,5 @@
+import '../types/express.d.ts';
+import type { NextFunction, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getUserByEmail } from '../services/user_service.ts';
@@ -8,23 +10,23 @@ import { getCurrencyById } from '../services/currency_service.ts';
 
 // @desc Get Vouchers
 // @route GET /api/voucher
-export const getAllVouchers = async (req, res, next) => {
+export const getAllVouchers = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const vouchers = await getVouchers();
 
         return res.status(200).json(vouchers);
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error(error);
         return res.status(500).json({ message: "Error obtaining vouchers" })
     }
 }
 
 // @desc Get one voucher
-// @toute GET /api/voucher:id
-export const getVoucher = async (req, res, next) => {
+// @route GET /api/voucher/:id
+export const getVoucher = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = req.validatedParams.id;
+        const id = req.validatedParams.id as number;
 
         const voucher = await getVoucherById(id);
         if (!voucher) {
@@ -33,17 +35,17 @@ export const getVoucher = async (req, res, next) => {
 
         return res.status(200).json(voucher);
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error(error);
         return res.status(500).json({ message: "Error obtaining voucher" })
     }
 };
 
 // @desc Create a voucher
 // @route POST /api/voucher
-export const addVoucher = async (req, res, next) => {
+export const addVoucher = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = req.validatedBody;
+        const data = req.validatedBody as { amount: number; currencyId: number; duration: number};
 
         //Currency exists
         const currency = await getCurrencyById(data.currencyId);
@@ -62,18 +64,18 @@ export const addVoucher = async (req, res, next) => {
 
         return res.status(201).json(newVoucher)
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error(error);
         return res.status(500).json({ message: "Error creating voucher" })
     }
 };
 
 // @desc Modify Voucher
 // @route PUT /api/voucher
-export const modifyVoucher = async (req, res, next) => {
+export const modifyVoucher = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = req.validatedBody;
-        const id = req.validatedParams.id;
+        const data = req.validatedBody as { duration: number };
+        const id = req.validatedParams.id as number;
 
         // Voucher exists
         const voucher = await getVoucherById(id);
@@ -93,17 +95,17 @@ export const modifyVoucher = async (req, res, next) => {
 
         return res.status(201).json(updatedVoucher)
     }
-    catch (error) {
-        console.error(error.message);
+    catch (error : unknown) {
+        console.error(error);
         return res.status(500).json({ message: "Error updating voucher" })
     }
 };
 // @desc Claim Voucher
 // @route PUT /api/voucher/claim
-export const claimVoucher = async (req, res, next) => {
+export const claimVoucher = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Get Code
-        const code = req.validatedBody.code;
+        const code = req.validatedBody.code as string;
 
         // Voucher exists
         const voucher = await getVoucherByCode(code);
@@ -147,18 +149,18 @@ export const claimVoucher = async (req, res, next) => {
         return res.status(201).send();
 
     }
-    catch (error) {
+    catch (error : unknown) {
         console.error(error);
         return res.status(500).json({ message: "Error claiming voucher" })
     }
 };
 
-export function daysFrom(date, days) {
+export function daysFrom(date: Date, days: number): Date {
     const future = new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
     return future;
 }
 
-export function daysFromNow(days) {
+export function daysFromNow(days: number): Date {
     const now = new Date();
     const future = daysFrom(now, days);
     return future;
