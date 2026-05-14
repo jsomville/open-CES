@@ -37,9 +37,14 @@ describe("Account Service Tests", () => {
             // Cleanup
             const currency = await getCurrencyBySymbol(config.testCurrencyForAccountSymbol);
             if (currency) {
-                await deleteAccount(currency.mainCurrencyAccountNumber);
-                await deleteAccount(currency.reconversionAccountNumber);
-
+                if (currency.mainCurrencyAccountNumber) {
+                    console.log("Deleting main currency account for cleanup:", currency.mainCurrencyAccountNumber);
+                    await deleteAccount(currency.mainCurrencyAccountNumber);
+                }
+                if (currency.reconversionAccountNumber) {
+                    console.log("Deleting reconversion account for cleanup:", currency.reconversionAccountNumber);
+                    await deleteAccount(currency.reconversionAccountNumber);
+                }   
                 await prisma.currency.delete({ where: { symbol: config.testCurrencyForAccountSymbol } });
             }
 
