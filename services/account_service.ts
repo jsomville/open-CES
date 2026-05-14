@@ -94,16 +94,18 @@ export const createMerchantAccount = async (merchant: any, symbol: string) => {
 
 export const createCurrencyMainAccount = async (currency: any) => {
     try {
-        const account = await createAccount(currency.symbol, AccountType.CURRENCY_MAIN);
+        // Create Currency Accounts
+        const mainAccount = await createAccount(currency.symbol, AccountType.CURRENCY_MAIN);
+        const reconversionAccount = await createAccount(currency.symbol, AccountType.CURRENCY_MAIN);
 
         //Update currency main account
         await prisma.currency.update({
             where: { id: currency.id },
             data: {
-                mainCurrencyAccountNumber: account.number
+                mainCurrencyAccountNumber: mainAccount.number,
+                reconversionAccountNumber: reconversionAccount.number
             }
         });
-        return account;
     } catch (error : any) {
         console.error("Error Create Currency Main Account Service : " + error.message);
         throw error

@@ -693,7 +693,7 @@ describe("Test Currency", () => {
     });
 
     it('Delete Currency - Referenced by accounts', async () => {
-        const currency = await prisma.currency.create({
+        let currency = await prisma.currency.create({
             data: {
                 symbol: testingCurrencyDelete,
                 name: 'ToDelete',
@@ -701,7 +701,8 @@ describe("Test Currency", () => {
             }
         });
 
-        const mainAccount = await createCurrencyMainAccount(currency);
+        await createCurrencyMainAccount(currency);
+        
         const res = await request(app)
             .delete(`/api/currency/${currency.id}`)
             .set('Authorization', `Bearer ${admin_access_token}`);
@@ -709,7 +710,10 @@ describe("Test Currency", () => {
         assert.equal(res.statusCode, 409);
         assert.ok(res.body.message.includes('Currency id is being used in'));
 
-        await prisma.account.delete({ where: { number: mainAccount.number } });
+        currency = await getCurrencyBySymbol(testingCurrencyDelete);
+
+        await prisma.account.delete({ where: { number: currency.mainCurrencyAccountNumber } });
+        await prisma.account.delete({ where: { number: currency.reconversionAccountNumber } });
 
         await prisma.currency.deleteMany({
             where: {
@@ -719,7 +723,7 @@ describe("Test Currency", () => {
     });
 
     it('Delete Currency - Balance not zero', async () => {
-        const currency = await prisma.currency.create({
+        let currency = await prisma.currency.create({
             data: {
                 symbol: testingCurrencyDelete,
                 name: 'ToDelete',
@@ -727,9 +731,12 @@ describe("Test Currency", () => {
             }
         });
 
-        const mainAccount = await createCurrencyMainAccount(currency);
+        await createCurrencyMainAccount(currency);
+
+        currency = await getCurrencyBySymbol(testingCurrencyDelete);
+
         await prisma.account.update({
-            where: { number: mainAccount.number },
+            where: { number: currency.mainCurrencyAccountNumber },
             data: { balance: 100 },
         });
 
@@ -741,14 +748,13 @@ describe("Test Currency", () => {
         assert.equal(res.body.message, 'Balance must be zero');
 
         // cleanup
-        await prisma.account.delete({ where: { number: mainAccount.number } });
+        await prisma.account.delete({ where: { number: currency.mainCurrencyAccountNumber } });
+        await prisma.account.delete({ where: { number: currency.reconversionAccountNumber } });
         await prisma.currency.deleteMany({
             where: {
                 symbol: testingCurrencyDelete
             }
         });
     });
-
-
 });
 

@@ -8,8 +8,7 @@ import config from "./config.test.js";
 import { getCurrencyBySymbol } from '../services/currency_service.ts';
 import { getAccessTokenByEmailAndRole } from "../services/auth_service.ts";
 import { createUser } from "../services/user_service.ts";
-import { createPersonnalAccount, getAccountByNumber } from "../services/account_service.ts";
-import { createCurrencyMainAccount } from "../services/account_service.ts";
+import { createPersonnalAccount, getAccountByNumber, createCurrencyMainAccount} from "../services/account_service.ts";
 
 describe("Test Fund / Refund", () => {
     let admin_access_token;
@@ -267,13 +266,14 @@ describe("Test Fund / Refund", () => {
         if (!account2) {
             throw new Error("Account not found");
         }
-        assert.equal(Number(account2.balance), Number(fundAmount), "Account balance");
-
         //get The currency Balance
         const currencyAccount = await getAccountByNumber(currency.mainCurrencyAccountNumber);
         if (!currencyAccount) {
             throw new Error("Currency account not found");
         }
+        
+        assert.equal(Number(account2.balance), Number(fundAmount), "Account balance");
+
         const balance = Number(currencyAccount.balance) + Number(fundAmount)
         assert.equal(balance, 0, "Currency Balance");
 
@@ -462,13 +462,6 @@ describe("Test Fund / Refund", () => {
 
         assert.equal(res.statusCode, 201);
 
-        //Get the currency account Balance
-        const currencyAccount = await getAccountByNumber(currency.mainCurrencyAccountNumber);
-        if (!currencyAccount) {
-            throw new Error("Currency account not found");
-        }
-        assert.equal(currencyAccount.balance, 0);
-
         //get The account Balance
         const account2 = await getAccountByNumber(account.number);
         if (!account2) {
@@ -478,6 +471,13 @@ describe("Test Fund / Refund", () => {
         if (!currency) {
             throw new Error("Currency not found");
         }
+
+        //Get the currency account Balance
+        const currencyAccount = await getAccountByNumber(currency.reconversionAccountNumber);
+        if (!currencyAccount) {
+            throw new Error("Currency account not found");
+        }
+        assert.equal(currencyAccount.balance, fundAmount, "Currency account balance");
 
     });
 

@@ -33,6 +33,17 @@ describe("Account Service Tests", () => {
 
     before(async () => {
         try {
+
+            // Cleanup
+            const currency = await getCurrencyBySymbol(config.testCurrencyForAccountSymbol);
+            if (currency) {
+                await deleteAccount(currency.mainCurrencyAccountNumber);
+                await deleteAccount(currency.reconversionAccountNumber);
+
+                await prisma.currency.delete({ where: { symbol: config.testCurrencyForAccountSymbol } });
+            }
+
+
             testUser = await getUserByEmail(testUserEmail);
             if (testUser) {
                 await deleteUser(testUser.id);
@@ -132,26 +143,27 @@ describe("Account Service Tests", () => {
 
     it("should create a currency main account", async () => {
         // Create a test currency
+    
         const tempCurrency = await prisma.currency.create({
             data: {
-                symbol: "TSM",
+                symbol: config.testCurrencyForAccountSymbol,
                 name: "TestServiceMain",
                 country: "US"
             }
         });
 
-        const mainAccount = await createCurrencyMainAccount(tempCurrency);
-
-        assert.ok(mainAccount);
-        assert.equal(mainAccount.accountType, AccountType.CURRENCY_MAIN);
+        await createCurrencyMainAccount(tempCurrency);
 
         // Check currency was updated
-        const updatedCurrency = await getCurrencyBySymbol("TSM");
-        assert.equal(updatedCurrency.mainCurrencyAccountNumber, mainAccount.number);
+        const updatedCurrency = await getCurrencyBySymbol(config.testCurrencyForAccountSymbol);
+        assert.ok(updatedCurrency.mainCurrencyAccountNumber);
+        assert.ok(updatedCurrency.reconversionAccountNumber);
 
         // Cleanup
-        await deleteAccount(mainAccount.number);
-        await prisma.currency.delete({ where: { id: tempCurrency.id } });
+        await deleteAccount(updatedCurrency.mainCurrencyAccountNumber);
+        await deleteAccount(updatedCurrency.reconversionAccountNumber);
+
+        await prisma.currency.delete({ where: { symbol: config.testCurrencyForAccountSymbol } });
     });
 
 
@@ -183,8 +195,6 @@ describe("Account Service Tests", () => {
     });
 
 
-
-
     it("should retrieve all accounts for a user", async () => {
         const accounts = await getUserAccounts(testUser.id);
 
@@ -199,9 +209,6 @@ describe("Account Service Tests", () => {
         assert.ok(Array.isArray(accounts));
         assert.ok(accounts.length > 0);
     });
-
-
-
 
 
     it("should delete an account", async () => {

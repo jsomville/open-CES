@@ -12,4 +12,5 @@ export default{
     "adminPhone" : "+32471041001",
 
     "testCurrency" : "TCES",
+    "testCurrencyForAccountSymbol" : "TCA",
 };

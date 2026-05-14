@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client"
-  output = "../generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -36,6 +36,7 @@ model Currency {
   //accountFormatNumber String @default("") @map("account_format_number") @db.VarChar(50)
   accountNextNumber         Int    @default(1) @map("account_next_number") @db.Integer()
   mainCurrencyAccountNumber String @default("") @map("main_currency_account_number") @db.VarChar(14)
+  reconversionAccountNumber String @default("") @map("reconversion_account_number") @db.VarChar(14)
 
   Vouchers     Voucher[]     @relation("Vouchers")
   Transactions Transaction[] @relation("CurrencyTransactions")
@@ -91,7 +92,7 @@ model PersonalAccount {
   accountNumber String   @db.VarChar(14)
   createdAt     DateTime @default(now()) @map("created_at")
 
-  User User @relation(fields: [userId], references: [id])
+  User    User    @relation(fields: [userId], references: [id])
   Account Account @relation(fields: [accountNumber], references: [number])
 }
 
@@ -102,7 +103,7 @@ model MerchantAccount {
   createdAt     DateTime @default(now()) @map("created_at")
 
   Merchant Merchant @relation(fields: [merchantId], references: [id])
-  Account Account @relation(fields: [accountNumber], references: [number])
+  Account  Account  @relation(fields: [accountNumber], references: [number])
 }
 
 model Account {
@@ -120,7 +121,7 @@ model Account {
   //User     User       @relation(fields: [userId], references: [id])
   Currency Currency @relation(fields: [currencyId], references: [id])
 
-  Transactions Transaction[] @relation("Transactions")
+  Transactions    Transaction[]     @relation("Transactions")
   //Vouchers     Voucher[]     @relation("ClaimedAccount")
   //user         User?         @relation(fields: [userId], references: [id])
   //userId       Int?

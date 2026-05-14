@@ -4,7 +4,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, getSafeCurrencyList, createCurrency, updateCurrency, deleteCurrency } from '../services/currency_service.ts';
 import { getAccountByNumber, getAccountCountByCurrencyId, createCurrencyMainAccount } from '../services/account_service.ts';
 
-import { transferFunds } from '../services/transfer_service.ts';
+import { transferFunds, doFundAccount, doRefundAccount } from '../services/operation_service.ts';
 
 
 // @desc Get Currencies
@@ -125,16 +125,27 @@ export const removeCurrency = async (req: Request, res: Response, next: NextFunc
         }
 
         //Check Currency Main Account first
-        let mainAccountNumber = null;
+        let mainAccount: any;
         if (currency.mainCurrencyAccountNumber) {
-            const account = await getAccountByNumber(currency.mainCurrencyAccountNumber);
-            if (!account) {
+            mainAccount= await getAccountByNumber(currency.mainCurrencyAccountNumber);
+            if (!mainAccount) {
                 return res.status(404).json({ message: "Currency main account not found" })
             }
-            mainAccountNumber = account.number;
+        }
 
-            //Balance must be zero
-            if (Number(account.balance) !== 0) {
+        //Check Currency Reconversion Account first
+        let reconversionAccount : any;
+        if (currency.reconversionAccountNumber) {
+            reconversionAccount = await getAccountByNumber(currency.reconversionAccountNumber);
+            if (!reconversionAccount) {
+                return res.status(404).json({ message: "Currency reconversion account not found" })
+            }
+        }
+
+        //Balance must be zero
+        if  (mainAccount && reconversionAccount) {
+            const balance : number = Number(mainAccount.balance) + Number(reconversionAccount.balance);
+            if (balance !== 0) {
                 return res.status(422).json({ message: "Balance must be zero" })
             }
         }
@@ -176,18 +187,21 @@ export const fundAccount = async (req: Request, res: Response, next: NextFunctio
             return res.status(404).json({ error: "Destination account not found" })
         }
 
-        const fromAccount = await getAccountByNumber(currency.mainCurrencyAccountNumber);
-        if (!fromAccount) {
+        const currencyAccount = await getAccountByNumber(currency.mainCurrencyAccountNumber);
+        if (!currencyAccount) {
             return res.status(404).json({ error: "Source account not found" })
         }
 
         //Destination account is the same currency
-        if (toAccount.currencyId !== fromAccount.currencyId) {
+        if (toAccount.currencyId !== currencyAccount.currencyId) {
             return res.status(422).json({ error: "Accounts must be from the same currency" })
         }
 
+
+        await doFundAccount(currencyAccount, toAccount, amount);
+
         //Fund the account
-        try {
+        /*try {
             const transferType = "Fund Account"
             const descriptionTo = `Fund from account ${fromAccount.number}`;
             const descriptionFrom = `Fund to account ${toAccount.number}`;
@@ -197,7 +211,7 @@ export const fundAccount = async (req: Request, res: Response, next: NextFunctio
         catch (error : unknown) {
             console.error((error as Error).message);
             return res.status(500).json({ message: "Fund Account Failed" })
-        }
+        }*/
 
         return res.status(201).send()
     }
@@ -233,18 +247,20 @@ export const refundAccount = async (req: Request, res: Response, next: NextFunct
             return res.status(400).json({ error: "Insufficient funds" })
         }
 
-        const toAccount = await getAccountByNumber(currency.mainCurrencyAccountNumber);
-        if (!toAccount) {
+        const currencyAccount = await getAccountByNumber(currency.reconversionAccountNumber);
+        if (!currencyAccount) {
             return res.status(404).json({ error: "Destination account not found" })
         }
 
         //Destination account is the same currency
-        if (toAccount.currencyId !== fromAccount.currencyId) {
+        if (currencyAccount.currencyId !== fromAccount.currencyId) {
             return res.status(422).json({ error: "Accounts must be from the same currency" })
         }
 
+        await doRefundAccount(currencyAccount, fromAccount, amount);
+
         //Refund the account
-        try {
+        /*try {
             const transferType = "Refund Account"
             const descriptionTo = `Refund from account ${fromAccount.number}`;
             const descriptionFrom = `Refund to account ${toAccount.number}`;
@@ -253,7 +269,7 @@ export const refundAccount = async (req: Request, res: Response, next: NextFunct
         catch (error : unknown) {
             console.error((error as Error).message);
             return res.status(500).json({ message: "Refund Account Failed" })
-        }
+        }*/
 
         return res.status(201).send()
     }
