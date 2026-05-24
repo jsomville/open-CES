@@ -2,6 +2,7 @@ import { prisma } from '../utils/prisma.ts';
 
 import { getCurrencyBySymbol } from './currency_service.ts';
 import { getAccountId, AccountType } from '../utils/accountUtil.ts';
+import { SortOrder } from '../generated/prisma/internal/prismaNamespace.ts';
 
 export const createAccount = async (symbol: string, accountType: number) => {
     try {
@@ -113,7 +114,7 @@ export const createCurrencyMainAccount = async (currency: any) => {
 }
 
 export const getAccounts = async () => {
-    const accounts = await prisma.account.findMany();
+    const accounts = await prisma.account.findMany({ orderBy: { number: 'desc' } });
     return accounts;
 };
 
@@ -181,6 +182,22 @@ export const getMerchantAccountCountByCurrencyId = async (currencyId: number) =>
              number :{
                  startsWith: String(AccountType.MERCHANT)
              }
+        }
+    });
+}
+
+export const getActiveAccountCountByCurrencyId = async (currencyId: number) => {
+    // Get the number of accounts that had at least one transaction in the last 30 days
+  
+    return await prisma.account.count({
+        where: {
+            currencyId: currencyId,
+            updatedAt : {
+                gte: new Date(new Date().setDate(new Date().getDate() - 360))
+            },
+            accountType : {
+                not: AccountType.CURRENCY_MAIN
+            }
         }
     });
 }

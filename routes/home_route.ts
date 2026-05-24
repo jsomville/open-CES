@@ -5,10 +5,10 @@ const router = express.Router();
 import { readFile } from 'fs/promises';
 const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url)));
 
-import { getCurrencyListWithStats } from '../services/currency_service.ts';
+import { getCurrencyListWithStats } from '../services/currency_stats_service.ts';
 
-const home_template = (currencyList) => {
-    const currencyRows = currencyList.map(currency => `
+const home_template = (currencyList : any) => {
+    const currencyRows = currencyList.map((currency : any) => `
         <tr>
             <td>
                 <a href="${currency.webSiteURL}" target="_blank" rel="noopener noreferrer" alt="${currency.name} logo">
@@ -17,10 +17,10 @@ const home_template = (currencyList) => {
             </td>
             <td>${currency.symbol}</td>
             <td>${currency.country}</td>
-            <td>${currency.merchantCount}</td>
-            <td>${currency.accountCount}</td>
+            <td>${currency.merchantAccountCount}</td>
+            <td>${currency.personalAccountCount}</td>
             <td>${currency.activeAccount}</td>
-            <td>${currency.balance * -1}</td>
+            <td>${currency.balance}</td>
             <td>${currency.monthlyTransVol}</td>
         </tr>
     `).join('');
@@ -54,7 +54,7 @@ const home_template = (currencyList) => {
                         <th>Symbol</th>
                         <th>Country</th>
                         <th>Merchants</th>
-                        <th>Accounts</th>
+                        <th>Personal</th>
                         <th>Active Accounts</th>
                         <th>Balance</th>
                         <th>Monthly Transaction Volume</th>

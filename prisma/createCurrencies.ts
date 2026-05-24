@@ -1,7 +1,8 @@
 import { connectRedis, redisClient } from '../utils/redisClient.ts';
 
 import { createCurrency } from '../services/currency_service.ts';
-import { createCurrencyMainAccount } from '../services/account_service.ts';
+import { createAccount, createCurrencyMainAccount } from '../services/account_service.ts';
+import { AccountType } from '../utils/accountUtil.ts';
 
 // to run : npx tsx --env-file=.env prisma/createCurrencies.ts
 
@@ -87,6 +88,17 @@ const create_valheureux = async () => {
     }
 }
 
+const createLCESReconversionAccount = async () => {
+    try{
+       
+        await createAccount( "CES", AccountType.CURRENCY_MAIN);
+
+    }
+    catch (error) {
+        console.error("Error creating currency: ", error);
+    }
+}
+
 
 // Make it callable directly from command line
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -94,11 +106,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     await connectRedis();
 
-    await create_zinne();
+    //await create_zinne();
 
-    await create_brawette();
+    //await create_brawette();
 
-    await create_valheureux();
+    //await create_valheureux();
+
+    await createLCESReconversionAccount();
 
     await redisClient.quit();
 

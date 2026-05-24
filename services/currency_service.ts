@@ -2,11 +2,9 @@ import { prisma } from '../utils/prisma.ts';
 
 import redisHelper from '../utils/redisHelper.ts';
 
-import { getPersonnalAccountCountByCurrencyId, getMerchantAccountCountByCurrencyId } from './account_service.ts';
 import { getAccountId } from '../utils/accountUtil.ts';
 
 const CURRENCY_LIST_CACHE_KEY = "currency:list";
-const CURRENCY_LIST_STATS_CACHE_KEY = "currency:list:stats";
 
 export const getCurrencyBySymbol = async (symbol : string) => {
     const currency = await prisma.currency.findUnique({ where: { symbol: symbol } })
@@ -25,7 +23,6 @@ export const getCurrencyById = async (id: number) => {
 
 export const resetCache_CurrencyList = async () => {
     await redisHelper.del(CURRENCY_LIST_CACHE_KEY);
-    await redisHelper.del(CURRENCY_LIST_STATS_CACHE_KEY);
 }
 
 export const getCurrencyList = async () => {
@@ -54,50 +51,7 @@ export const getSafeCurrencyList = async () => {
     return safeCurrency;
 }
 
-export const getCurrencyListWithStats = async () => {
 
-    //Retrieve from cache if exists
-    const cachedCurrencyListStats = await redisHelper.get(CURRENCY_LIST_STATS_CACHE_KEY);
-    if (cachedCurrencyListStats) {
-        return JSON.parse(cachedCurrencyListStats);
-    }
-
-    const currencyList = await getCurrencyList();
-
-    // For each currency, get stats
-    const currencyListWithStats = await Promise.all(currencyList.map(async (currency : any) => {
-        //Get number of merchants
-        const merchantCount = await getMerchantAccountCountByCurrencyId(currency.id);
-
-        //Get number of accounts
-        const accountCount = await getPersonnalAccountCountByCurrencyId(currency.id);
-
-        //Get monthly transaction volume for last 30 days
-        const monthlyTransVol = await prisma.transaction.aggregate({
-            _sum: {
-                amount: true
-            },
-            where: {
-                currencyId: currency.id,
-                createdAt: {
-                    gte: new Date(new Date().setDate(new Date().getDate() - 30))
-                }
-            }
-        });
-
-        return {
-            ...currency,
-            merchantCount: merchantCount,
-            accountCount: accountCount,
-            monthlyTransVol: monthlyTransVol._sum.amount || 0
-        };
-    }));
-
-    // Update Cache
-    await redisHelper.set(CURRENCY_LIST_STATS_CACHE_KEY, JSON.stringify(currencyListWithStats), redisHelper.TTL.one_hour);
-
-    return currencyListWithStats;
-}
 
 export const getSimpleCurrencyList = async () => {
     const currencyList = await getCurrencyList();
