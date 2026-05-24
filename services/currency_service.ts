@@ -5,9 +5,6 @@ import redisHelper from '../utils/redisHelper.ts';
 import { getPersonnalAccountCountByCurrencyId, getMerchantAccountCountByCurrencyId } from './account_service.ts';
 import { getAccountId } from '../utils/accountUtil.ts';
 
-const cached_ttl = 60; //in seconds
-const cached_stats_ttl = 900; //in seconds
-
 const CURRENCY_LIST_CACHE_KEY = "currency:list";
 const CURRENCY_LIST_STATS_CACHE_KEY = "currency:list:stats";
 
@@ -31,11 +28,6 @@ export const resetCache_CurrencyList = async () => {
     await redisHelper.del(CURRENCY_LIST_STATS_CACHE_KEY);
 }
 
-export const resetCache_CurrencyListStats = async (symbol: string) => {
-    const KEY = `currency:${symbol}`;
-    await redisHelper.del(KEY);
-}
-
 export const getCurrencyList = async () => {
     //Check cache first
     const cachedCurrencyList = await redisHelper.get(CURRENCY_LIST_CACHE_KEY);
@@ -47,7 +39,7 @@ export const getCurrencyList = async () => {
     const currencyList = await prisma.currency.findMany();
 
     //Update cache
-    await redisHelper.set(CURRENCY_LIST_CACHE_KEY, JSON.stringify(currencyList), cached_ttl);
+    await redisHelper.set(CURRENCY_LIST_CACHE_KEY, JSON.stringify(currencyList), redisHelper.TTL.one_hour);
 
     return currencyList;
 }
@@ -102,7 +94,7 @@ export const getCurrencyListWithStats = async () => {
     }));
 
     // Update Cache
-    await redisHelper.set(CURRENCY_LIST_STATS_CACHE_KEY, JSON.stringify(currencyListWithStats), cached_stats_ttl);
+    await redisHelper.set(CURRENCY_LIST_STATS_CACHE_KEY, JSON.stringify(currencyListWithStats), redisHelper.TTL.one_hour);
 
     return currencyListWithStats;
 }
