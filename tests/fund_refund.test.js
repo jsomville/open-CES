@@ -60,7 +60,6 @@ describe("Test Fund / Refund", () => {
                     symbol: currency3Symbol,
                     name: 'TestCurrency3',
                     country: 'US',
-                    accountMax: 1000,
                 }
             });
 

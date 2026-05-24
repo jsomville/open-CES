@@ -5,7 +5,7 @@ import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";
-import { getCurrencyBySymbol } from "../services/currency_service.ts";
+import { getCurrencyBySymbol, deleteCurrencyAndRelatedAccountsBySymbol} from "../services/currency_service.ts";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.ts'
 import { createCurrencyMainAccount } from "../services/account_service.ts";
 
@@ -19,7 +19,6 @@ describe("Test Currency", () => {
         symbol: "TST",
         name: "TSTCurrency",
         country: "BE",
-        accountMax: 150,
         regionList: '[1000, 1030]',
         logoURL: "https://www.example.com",
 
@@ -34,6 +33,7 @@ describe("Test Currency", () => {
 
     const testingCurrencySymbol = "TST2";
     const testingCurrencyDelete = "TDEL"
+    const testingCurrencyDuplicate = "TC2"
 
     before(async () => {
         try {
@@ -41,44 +41,11 @@ describe("Test Currency", () => {
             user_access_token = getAccessTokenByEmailAndRole(config.user1Email, "user");
             admin_access_token = getAccessTokenByEmailAndRole(config.adminEmail, "admin");
 
-            //Delete Accounts
-            let currency;
-            currency = await getCurrencyBySymbol(currency_payload.symbol);
-            if (currency) {
-                await prisma.account.deleteMany({
-                    where: {
-                        currencyId: currency.id
-                    }
-                });
-            }
+            await deleteCurrencyAndRelatedAccountsBySymbol(currency_payload.symbol);
+            await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencySymbol);
+            await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencyDelete);
+            await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencyDuplicate);  
 
-            currency = await getCurrencyBySymbol(testingCurrencySymbol);
-            if (currency) {
-                await prisma.account.deleteMany({
-                    where: {
-                        currencyId: currency.id
-                    }
-                });
-            }
-
-            currency = await getCurrencyBySymbol(testingCurrencyDelete);
-            if (currency) {
-                await prisma.account.deleteMany({
-                    where: {
-                        currencyId: currency.id
-                    }
-                });
-            }
-
-            await prisma.currency.deleteMany({
-                where: {
-                    OR: [
-                        { symbol: currency_payload.symbol },
-                        { symbol: testingCurrencySymbol },
-                        { symbol: testingCurrencyDelete },
-                    ]
-                }
-            });
         }
         catch (error) {
             console.log("Currency test Error", error.message);
@@ -87,45 +54,11 @@ describe("Test Currency", () => {
 
     after(async () => {
         try {
-            //Delete Accounts
-            let currency;
-            currency = await getCurrencyBySymbol(currency_payload.symbol);
-            if (currency) {
-                await prisma.account.deleteMany({
-                    where: {
-                        currencyId: currency.id
-                    }
-                });
-            }
 
-            currency = await getCurrencyBySymbol(testingCurrencySymbol);
-            if (currency) {
-                await prisma.account.deleteMany({
-                    where: {
-                        currencyId: currency.id
-                    }
-                });
-            }
-
-            currency = await getCurrencyBySymbol(testingCurrencyDelete);
-            if (currency) {
-                await prisma.account.deleteMany({
-                    where: {
-                        currencyId: currency.id
-                    }
-                });
-            }
-
-
-            await prisma.currency.deleteMany({
-                where: {
-                    OR: [
-                        { symbol: currency_payload.symbol },
-                        { symbol: testingCurrencySymbol },
-                        { symbol: testingCurrencyDelete },
-                    ]
-                }
-            });
+            await deleteCurrencyAndRelatedAccountsBySymbol(currency_payload.symbol);
+            await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencySymbol);
+            await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencyDelete);  
+            await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencyDuplicate);  
         }
         catch (error) {
             console.log("Currency test Error", error.message);
@@ -153,7 +86,6 @@ describe("Test Currency", () => {
          if (Array.isArray(res.body) && res.body.length) {
             const item = res.body[0];
             assert.ok(!('balance' in item));
-            assert.ok(!('accountMax' in item));
             assert.ok(!('createdAt' in item));
             assert.ok(!('updatedAt' in item));
             assert.ok(!('activeAccount' in item));
@@ -170,7 +102,6 @@ describe("Test Currency", () => {
         if (Array.isArray(res.body) && res.body.length) {
             const item = res.body[0];
             assert.ok(!('balance' in item));
-            assert.ok(!('accountMax' in item));
             assert.ok(!('createdAt' in item));
             assert.ok(!('updatedAt' in item));
             assert.ok(!('activeAccount' in item));
@@ -206,7 +137,6 @@ describe("Test Currency", () => {
         assert.equal(res.body.name, currency_payload.name);
         assert.equal(res.body.symbol, currency_payload.symbol);
         assert.equal(res.body.country, currency_payload.country);
-        assert.equal(res.body.accountMax, currency_payload.accountMax);
         assert.equal(res.body.logoURL, currency_payload.logoURL);
         assert.equal(res.body.regionList, currency_payload.regionList);
         assert.equal(res.body.webSiteURL, currency_payload.webSiteURL);
@@ -220,23 +150,6 @@ describe("Test Currency", () => {
         assert.equal(res.body.iphoneAppLatestVersion, currency_payload.iphoneAppLatestVersion);
 
         new_currency_id = res.body.id
-    });
-
-    it('Add currency - accountMax below minimum', async () => {
-        const payload = {
-            name: 'BelowMin',
-            symbol: 'BLW',
-            country: 'BE',
-            accountMax: 50,
-        };
-
-        const res = await request(app)
-            .post('/api/currency')
-            .set('Authorization', `Bearer ${admin_access_token}`)
-            .send(payload);
-
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, 'Validation failed');
     });
 
     it('Add currency - invalid URL formats', async () => {
@@ -460,7 +373,7 @@ describe("Test Currency", () => {
     it('Add currency - Duplicated Name', async () => {
         const payload = {
             name: currency_payload.name,
-            symbol: "TC2",
+            symbol: testingCurrencyDuplicate,
             country: "BE",
         };
 
@@ -499,7 +412,6 @@ describe("Test Currency", () => {
         assert.equal(res.body.name, currency_payload.name);
         assert.equal(res.body.symbol, currency_payload.symbol);
         assert.equal(res.body.country, currency_payload.country);
-        assert.equal(res.body.accountMax, currency_payload.accountMax);
         assert.equal(res.body.logoURL, currency_payload.logoURL);
         assert.equal(res.body.regionList, currency_payload.regionList);
         assert.equal(res.body.webSiteURL, currency_payload.webSiteURL);
@@ -534,7 +446,6 @@ describe("Test Currency", () => {
     it('Modify Currency - Admin', async () => {
         const payload = {
             "country": "BE",
-            "accountMax": 150,
         };
 
         const res = await request(app)
@@ -547,7 +458,6 @@ describe("Test Currency", () => {
         assert.equal(res.body.name, currency_payload.name);
         assert.equal(res.body.symbol, currency_payload.symbol);
         assert.equal(res.body.country, payload.country);
-        assert.equal(res.body.accountMax, payload.accountMax);
         assert.ok(res.body.createdAt);
         assert.ok(res.body.updatedAt);
 

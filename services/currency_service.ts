@@ -53,7 +53,7 @@ export const getSafeCurrencyList = async () => {
     const currencyList = await getCurrencyList();
 
     // Remove unwanted fields in list of Currencies
-    const safeCurrency = currencyList.map(({ balance, accountMax, createdAt, updatedAt, activeAccount, accountNextNumber, ...currencies }: any) => currencies);
+    const safeCurrency = currencyList.map(({ balance, createdAt, updatedAt, activeAccount, accountNextNumber, ...currencies }: any) => currencies);
 
     return safeCurrency;
 }
@@ -105,7 +105,7 @@ export const getSimpleCurrencyList = async () => {
     const currencyList = await getCurrencyList();
 
     // Return only id, name, symbol
-    const simpleCurrencyList = currencyList.map(({id, accountMax, createdAt, updatedAt, webSiteURL, topOffWizardURL, accountNextNumber, mainCurrencyAccountNumber, ...currencies }: any) => currencies );
+    const simpleCurrencyList = currencyList.map(({id, createdAt, updatedAt, webSiteURL, topOffWizardURL, accountNextNumber, mainCurrencyAccountNumber, ...currencies }: any) => currencies );
 
     return simpleCurrencyList;
 }
@@ -164,4 +164,21 @@ export const getNextAccountId = async (symbol: string, accountType: number) => {
     await updateCurrency(currency.id, { accountNextNumber: startAccountNumber });
 
     return accountId;
+}
+
+export const deleteCurrencyAndRelatedAccountsBySymbol = async (symbol : string) => {
+    const currency = await getCurrencyBySymbol(symbol);
+    if (currency) {
+        await prisma.account.deleteMany({
+            where: {
+                currencyId: currency.id
+            }
+        });
+
+        await prisma.currency.delete({
+            where: {
+                id: currency.id
+            }
+        });
+    }
 }

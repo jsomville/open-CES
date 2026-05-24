@@ -33,7 +33,6 @@ async function createCESCurrency(symbol: string) {
         symbol: symbol,
         name: "Open CES",
         country: "EU",
-        accountMax: 1000,
         logoURL: "ces.png",
         webSiteURL: "https://open-ces.org",
         regionList: '[1000, 2000, 3000, 4000]',

@@ -77,7 +77,6 @@ before(async () => {
                 symbol: config.testCurrency,
                 name: "Test Currency",
                 country: "EU",
-                accountMax: 10,
                 logoURL: "image.png",
                 webSiteURL: "https://example.org",
                 regionList: '[1000, 2000, 3000, 4000]',
