@@ -17,13 +17,10 @@ model Currency {
   id         Int      @id @default(autoincrement())
   symbol     String   @unique @db.VarChar(5)
   name       String   @unique @db.VarChar(255)
-  //balance       Decimal  @default(0) @db.Decimal(10, 2)
   country    String   @default("") @db.VarChar(5)
-  //accountMax Int      @default(100) @map("account_max") @db.Integer()
   regionList String   @default("") @map("region_list") @db.VarChar(1024)
   webSiteURL String   @default("") @map("web_site_URL") @db.VarChar(1024)
   logoURL    String   @default("") @map("logo_URL") @db.VarChar(1024)
-  //activeAccount Int      @default(0) @map("active_account") @db.Integer()
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
@@ -33,7 +30,6 @@ model Currency {
   iphoneAppURL              String @default("") @map("iphone_app_URL") @db.VarChar(1024)
   androidAppLatestVersion   String @default("1.0.0") @map("android_app_latest_version") @db.VarChar(20)
   iphoneAppLatestVersion    String @default("1.0.0") @map("iphone_app_latest_version") @db.VarChar(20)
-  //accountFormatNumber String @default("") @map("account_format_number") @db.VarChar(50)
   accountNextNumber         Int    @default(1) @map("account_next_number") @db.Integer()
   mainCurrencyAccountNumber String @default("") @map("main_currency_account_number") @db.VarChar(14)
   reconversionAccountNumber String @default("") @map("reconversion_account_number") @db.VarChar(14)
@@ -45,12 +41,10 @@ model Currency {
 
 model User {
   id           Int      @id @default(autoincrement())
-  //merchantId   Int?     @map("merchant_id")
   firstname    String   @db.VarChar(255)
   lastname     String   @db.VarChar(255)
   email        String   @unique @db.VarChar(255)
   phone        String   @unique @db.VarChar(15)
-  //region       String
   passwordHash String   @map("password_hash") @db.VarChar(255)
   role         String
   createdAt    DateTime @default(now()) @map("created_at")
@@ -58,12 +52,6 @@ model User {
   isActive     Boolean  @default(false) @map("is_active")
 
   lastLoginAt DateTime? @map("last_login_at")
-
-  //isPhoneValidated Boolean  @default(false) @map("is_phone_validated")
-  //isEmailValidated Boolean  @default(false) @map("is_email_validated")
-
-  //Account  Account[]
-  //Merchant Merchant? @relation(fields: [merchantId], references: [id])
 
   PersonalAccount PersonalAccount[]
 }
@@ -81,8 +69,6 @@ model Merchant {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  //User    User[]
-  //Account Account[]
   MerchantAccount MerchantAccount[]
 }
 
@@ -109,24 +95,15 @@ model MerchantAccount {
 model Account {
   id          Int      @id @default(autoincrement())
   number      String   @unique @db.VarChar(14)
-  //userId      Int      @map("user_id")
-  //merchantId  Int?     @map("merchant_id")
   currencyId  Int      @map("currency_id")
   accountType Int      @default(0) @map("account_type")
   balance     Decimal  @default(0) @db.Decimal(10, 2)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  //Merchant Merchant[]
-  //User     User       @relation(fields: [userId], references: [id])
   Currency Currency @relation(fields: [currencyId], references: [id])
 
   Transactions    Transaction[]     @relation("Transactions")
-  //Vouchers     Voucher[]     @relation("ClaimedAccount")
-  //user         User?         @relation(fields: [userId], references: [id])
-  //userId       Int?
-  //merchant     Merchant?     @relation(fields: [merchantId], references: [id])
-  //merchantId   Int?
   PersonalAccount PersonalAccount[]
   MerchantAccount MerchantAccount[]
 }
@@ -138,7 +115,7 @@ model Transaction {
   currencyId      Int      @map("currency_id")
   transactionType String   @map("transaction_type") @db.VarChar(20)
   status          String   @db.VarChar(20)
-  description     String?  @db.VarChar(255)
+  description     String?  @db.VarChar(100)
   createdAt       DateTime @default(now()) @map("created_at")
 
   Account  Account  @relation("Transactions", fields: [accountNumber], references: [number])
