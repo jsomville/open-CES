@@ -5,7 +5,7 @@ import { prisma } from '../utils/prisma.ts';
 
 import { app } from "../app.js";
 import config from "./config.test.js";
-import { getCurrencyBySymbol, deleteCurrencyAndRelatedAccountsBySymbol} from "../services/currency_service.ts";
+import { getCurrencyBySymbol, deleteCurrencyAndRelatedAccountsBySymbol, resetCache_CurrencyList} from "../services/currency_service.ts";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.ts'
 import { createCurrencyMainAccount } from "../services/account_service.ts";
 
@@ -45,7 +45,7 @@ describe("Test Currency", () => {
             await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencySymbol);
             await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencyDelete);
             await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencyDuplicate);  
-
+            await resetCache_CurrencyList();
         }
         catch (error) {
             console.log("Currency test Error", error.message);
@@ -59,6 +59,7 @@ describe("Test Currency", () => {
             await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencySymbol);
             await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencyDelete);  
             await deleteCurrencyAndRelatedAccountsBySymbol(testingCurrencyDuplicate);  
+            await resetCache_CurrencyList();
         }
         catch (error) {
             console.log("Currency test Error", error.message);
@@ -66,6 +67,20 @@ describe("Test Currency", () => {
     });
 
     it('List all currencies - User', async () => {
+        await resetCache_CurrencyList();
+
+        const res = await request(app)
+            .get('/api/currency')
+            .set('Authorization', `Bearer ${user_access_token}`);
+
+        assert.equal(res.statusCode, 200);
+        // ensure balance field is filtered out
+        if (Array.isArray(res.body) && res.body.length) {
+            assert.ok(!('balance' in res.body[0]));
+        }
+    });
+
+     it('List all currencies - From cache', async () => {
         const res = await request(app)
             .get('/api/currency')
             .set('Authorization', `Bearer ${user_access_token}`);
@@ -78,6 +93,8 @@ describe("Test Currency", () => {
     });
 
     it('List all currencies - Admin', async () => {
+        await resetCache_CurrencyList();
+
         const res = await request(app)
             .get('/api/currency')
             .set('Authorization', `Bearer ${admin_access_token}`);
@@ -94,6 +111,25 @@ describe("Test Currency", () => {
     });
 
     it('List currencies details- User', async () => {
+        await resetCache_CurrencyList();
+
+        const res = await request(app)
+            .get('/api/currency/details')
+            .set('Authorization', `Bearer ${user_access_token}`);
+
+        assert.equal(res.statusCode, 200);
+        if (Array.isArray(res.body) && res.body.length) {
+            const item = res.body[0];
+            assert.ok(!('balance' in item));
+            assert.ok(!('createdAt' in item));
+            assert.ok(!('updatedAt' in item));
+            assert.ok(!('activeAccount' in item));
+            assert.ok(!('accountNextNumber' in item));
+        }
+    });
+
+    it('List currencies details- From Cache', async () => {
+
         const res = await request(app)
             .get('/api/currency/details')
             .set('Authorization', `Bearer ${user_access_token}`);
@@ -110,6 +146,8 @@ describe("Test Currency", () => {
     });
 
     it('List currencies details- Admin', async () => {
+        await resetCache_CurrencyList();
+
         const res = await request(app)
             .get('/api/currency/details')
             .set('Authorization', `Bearer ${admin_access_token}`);

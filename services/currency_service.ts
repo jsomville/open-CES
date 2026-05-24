@@ -8,6 +8,9 @@ import { getAccountId } from '../utils/accountUtil.ts';
 const cached_ttl = 60; //in seconds
 const cached_stats_ttl = 900; //in seconds
 
+const CURRENCY_LIST_CACHE_KEY = "currency:list";
+const CURRENCY_LIST_STATS_CACHE_KEY = "currency:list:stats";
+
 export const getCurrencyBySymbol = async (symbol : string) => {
     const currency = await prisma.currency.findUnique({ where: { symbol: symbol } })
     return currency;
@@ -23,27 +26,28 @@ export const getCurrencyById = async (id: number) => {
     return currency;
 }
 
-export const setCurrencyInCache = async (currencyList: any[]) => {
-
-    await redisHelper.set("currencyList", JSON.stringify(currencyList), cached_ttl);
+export const resetCache_CurrencyList = async () => {
+    await redisHelper.del(CURRENCY_LIST_CACHE_KEY);
+    await redisHelper.del(CURRENCY_LIST_STATS_CACHE_KEY);
 }
 
-export const updateCurrencyListCache = async () => {
-    const currencyList = await prisma.currency.findMany();
-
-    await setCurrencyInCache(currencyList);
+export const resetCache_CurrencyListStats = async (symbol: string) => {
+    const KEY = `currency:${symbol}`;
+    await redisHelper.del(KEY);
 }
 
 export const getCurrencyList = async () => {
     //Check cache first
-    const cachedCurrencyList = await redisHelper.get("currencyList");
+    const cachedCurrencyList = await redisHelper.get(CURRENCY_LIST_CACHE_KEY);
     if (cachedCurrencyList) {
         return JSON.parse(cachedCurrencyList);
     }
 
-    //If not in cache, get from DB
+    //get from DB
     const currencyList = await prisma.currency.findMany();
-    await setCurrencyInCache(currencyList); //Update cache
+
+    //Update cache
+    await redisHelper.set(CURRENCY_LIST_CACHE_KEY, JSON.stringify(currencyList), cached_ttl);
 
     return currencyList;
 }
@@ -60,7 +64,8 @@ export const getSafeCurrencyList = async () => {
 
 export const getCurrencyListWithStats = async () => {
 
-    const cachedCurrencyListStats = await redisHelper.get("currencyListStats");
+    //Retrieve from cache if exists
+    const cachedCurrencyListStats = await redisHelper.get(CURRENCY_LIST_STATS_CACHE_KEY);
     if (cachedCurrencyListStats) {
         return JSON.parse(cachedCurrencyListStats);
     }
@@ -96,7 +101,8 @@ export const getCurrencyListWithStats = async () => {
         };
     }));
 
-    await redisHelper.set("currencyListStats", JSON.stringify(currencyListWithStats), cached_stats_ttl);
+    // Update Cache
+    await redisHelper.set(CURRENCY_LIST_STATS_CACHE_KEY, JSON.stringify(currencyListWithStats), cached_stats_ttl);
 
     return currencyListWithStats;
 }
@@ -116,7 +122,7 @@ export const createCurrency = async (data: any) => {
     const currency = await prisma.currency.create({ data });
 
     //Update Currency List Cache
-    await updateCurrencyListCache();
+    await resetCache_CurrencyList();
 
     return currency;
 }
@@ -127,7 +133,7 @@ export const updateCurrency = async (id: number, data: any) => {
         data: data
     });
 
-    await updateCurrencyListCache();
+    await resetCache_CurrencyList();
 
     return updatedCurrency;
 }
@@ -137,7 +143,7 @@ export const deleteCurrency = async (id: number) => {
         where: { id: id }
     });
 
-    await updateCurrencyListCache();
+    await resetCache_CurrencyList();
 }
 
 export const getNextAccountId = async (symbol: string, accountType: number) => {
@@ -181,4 +187,6 @@ export const deleteCurrencyAndRelatedAccountsBySymbol = async (symbol : string) 
             }
         });
     }
+
+    await resetCache_CurrencyList();
 }

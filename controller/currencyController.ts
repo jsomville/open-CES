@@ -200,19 +200,6 @@ export const fundAccount = async (req: Request, res: Response, next: NextFunctio
 
         await doFundAccount(currencyAccount, toAccount, amount);
 
-        //Fund the account
-        /*try {
-            const transferType = "Fund Account"
-            const descriptionTo = `Fund from account ${fromAccount.number}`;
-            const descriptionFrom = `Fund to account ${toAccount.number}`;
-            await transferFunds(transferType, fromAccount, toAccount, amount, descriptionFrom, descriptionTo);
-
-        }
-        catch (error : unknown) {
-            console.error((error as Error).message);
-            return res.status(500).json({ message: "Fund Account Failed" })
-        }*/
-
         return res.status(201).send()
     }
     catch (error : unknown) {
