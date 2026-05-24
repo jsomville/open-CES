@@ -88,31 +88,17 @@ const create_valheureux = async () => {
     }
 }
 
-const createLCESReconversionAccount = async () => {
-    try{
-       
-        await createAccount( "CES", AccountType.CURRENCY_MAIN);
-
-    }
-    catch (error) {
-        console.error("Error creating currency: ", error);
-    }
-}
-
-
 // Make it callable directly from command line
 if (import.meta.url === `file://${process.argv[1]}`) {
     console.log("Create Currencies...")
 
     await connectRedis();
 
-    //await create_zinne();
+    await create_zinne();
 
-    //await create_brawette();
+    await create_brawette();
 
-    //await create_valheureux();
-
-    await createLCESReconversionAccount();
+    await create_valheureux();
 
     await redisClient.quit();
 
