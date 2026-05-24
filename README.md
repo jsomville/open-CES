@@ -1,6 +1,6 @@
 # open-CES
 
-Open **C**urrency **E**xchange **S**ystem is a back-end solution for local currencies. The main features are:
+Open **C**urrency **E**xchange **L**ocal **S**ystem is a back-end solution for local currencies. The main features are:
 
 - Currency Management
 - Account Management

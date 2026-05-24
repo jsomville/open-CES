@@ -4,7 +4,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { getCurrencyById, getCurrencyBySymbol, getCurrencyByName, getSafeCurrencyList, createCurrency, updateCurrency, deleteCurrency } from '../services/currency_service.ts';
 import { getAccountByNumber, getAccountCountByCurrencyId, createCurrencyMainAccount } from '../services/account_service.ts';
 
-import { transferFunds, doFundAccount, doRefundAccount } from '../services/operation_service.ts';
+import { doFundAccount, doRefundAccount } from '../services/operation_service.ts';
 
 
 // @desc Get Currencies
@@ -56,7 +56,6 @@ export const addCurrency = async (req: Request, res: Response, next: NextFunctio
 
         //Create Currency
         const newCurrency = await createCurrency(data);
-
 
         //Create Currency Main account
         await createCurrencyMainAccount(newCurrency);
