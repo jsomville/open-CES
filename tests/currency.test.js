@@ -19,7 +19,7 @@ describe("Test Currency", () => {
         symbol: "TST",
         name: "TSTCurrency",
         country: "BE",
-        regionList: '[1000, 1030]',
+        regionList: '["1000", "1030"]',
         logoURL: "https://www.example.com",
 
         webSiteURL: "https://www.example.com/",

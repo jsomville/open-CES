@@ -39,7 +39,7 @@ export const getCurrenciesDetails = async (req: Request, res: Response, next: Ne
 // @route POST /api/currency
 export const addCurrency = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = req.validatedBody as { name: string; symbol: string; };
+        const data = req.validatedBody as { name: string; symbol: string };
 
         //Check if Name is unique
         let currency;
