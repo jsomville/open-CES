@@ -1,44 +1,27 @@
+import "../types/express.d.ts";
+import type { NextFunction, Request, Response } from "express";
 
-import '../types/express.d.ts';
-import type { NextFunction, Request, Response } from 'express';
+import {
+  createUser,
+  getUserByEmail,
+  getUserByPhone,
+  setEmailVerifiedAtByEmail,
+  setPhoneVerifiedAtByEmail,
+  setUserStatusByEmail,
+} from "../services/user_service.ts";
 
-import { addUserRegistration, getUserRegistrationByEmail, getUserRegistrationByCode, deleteUserRegistrationById} from '../services/register_service.ts';
-//import nodemailer from 'nodemailer';
-import { createUser, getUserByEmail, setActiveUserById} from '../services/user_service.ts';
-import { createAccount } from '../services/account_service.ts';
-import { getCurrencyBySymbol } from '../services/currency_service.ts';
-import { transferFunds } from '../services/operation_service.ts';
+import {
+  generateCode,
+  createValidationChallenge,
+  deleteExpiredValidationChallenges,
+  validateCode,
+} from "../services/validation_challenge_service.ts";
 
-// Create transporter outside for reuse
-/*const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PWD
-  }
-});*/
-
-const sendValidationEmail = async (toEmail: string, code: string) => {
-
-  const header = '<H1>Welcome to Zinne Brussels</H1></br>';
-  const welcome = `<p>Your confirmation code is <b>${code}</b></p>/br>`;
-  const thankYou = '<p>Thank you for registering!</p>';
-
-  const msg = header + welcome + thankYou;
-
-  /*await transporter.sendMail({
-    from: '"No-Reply" <no-reply@zinne.brussels>',
-    to: toEmail,
-    subject: `Your Email Confirmation Code is ${code}`,
-    text: "Your Email confirmation code is " + code,
-    html: msg
-
-  });*/
-}
-
-export const register = async (req: Request, res: Response, next: NextFunction) => {
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const data = req.validatedBody as {
       email: string;
@@ -46,119 +29,110 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       password: string;
       firstname: string;
       lastname: string;
-      region: string;
-      symbol: string;
     };
 
-    // Check if registration already exists
-    const existingUser = await getUserRegistrationByEmail(data.email);
-    if (existingUser) {
-      return res.status(409).json({ message: "Registration already exists" });
-    }
+    //Cleanup Expired Challenges
+    await deleteExpiredValidationChallenges();
 
     // Check if user already exists
-    const user = await getUserByEmail(data.email);
-    if (user) {
-      return res.status(409).json({ message: "User already exists" });
+    let existingUser: any;
+    existingUser = await getUserByEmail(data.email);
+    if (existingUser && existingUser.status !== "ACTIVE") {
+      return res
+        .status(409)
+        .json({ message: "User with this email already exists" });
     }
 
-    // get Currency
-    const currency = await getCurrencyBySymbol(data.symbol);
-    if (!currency) {
-      return res.status(404).json({ message: "Currency not found" });
+    existingUser = await getUserByPhone(data.phone);
+    if (existingUser && existingUser.status !== "ACTIVE") {
+      return res
+        .status(409)
+        .json({ message: "User with this phone number already exists" });
     }
 
-    // Generate a code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Create Registration in DB
-    const registration = await addUserRegistration(
+    //Create the user
+    const user = await createUser(
       data.email,
       data.phone,
       data.password,
+      "user",
       data.firstname,
       data.lastname,
-      data.region,
-      code,
-      data.symbol
     );
 
-    //Send Email with code
-    //await sendValidationEmail(data.email, code);
-    //https://docs.railway.com/reference/outbound-networking#debugging-smtp-issues
+    //Expires in 10 minutes
+    const expiredDate = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-    //TEMP BECAUSE MAIL DOSENT WORK
-     // Create User
-    /*const newUser = await createUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
-    if (!newUser) {
-      return res.status(500).json({ message: "Error creating user" });
-    }*/
+    // Make the email Challenge
+    const emailCode = await generateCode();
+    await createValidationChallenge(
+      "email",
+      user.email,
+      emailCode,
+      expiredDate,
+    );
 
-    // Activate User
-    //await setActiveUserById(newUser.id);
+    //Make the sms Challenge
+    const smsCode = await generateCode();
+    await createValidationChallenge("sms", user.email, smsCode, expiredDate);
 
-    //Create Account
-    /*const accountType : number = 1; // TO FIX
-    const userId :number = newUser.id;
-    const account = await createAccount(userId, accountType);
-    if (!account) {
-      return res.status(500).json({ message: "Error creating account" });
-    }*/
-
-    // *****************************
-    // Temp fund account
-    // *****************************
-    //await transferFunds(currency, account, 10);
-
-    // Delete registration after validation
-    await deleteUserRegistrationById(registration.id);
-
-    return res.status(200).json({ message: "Registration successful, check your email for the confirmation code" });
-  }
-  catch (error : unknown) {
+    return res.status(200).json({
+      message:
+        "User registration request created, please check your email and SMS for validation codes.",
+    });
+  } catch (error: unknown) {
     console.error(error);
-    return res.status(500).json({ message: "Error registering user" })
+    return res
+      .status(500)
+      .json({ message: "Error submitting user registration" });
   }
-}
+};
 
-export const validateRegistration = async (req: Request, res: Response, next: NextFunction) => {
+export const validateRegistration = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const code = req.validatedParams.code as string;
+    const data = req.validatedBody as {
+      email: string;
+      code: string;
+      channel: string;
+    };
 
-    const registration = await getUserRegistrationByCode(code);
-    if (!registration) {
-      return res.status(404).json({ message: "Registration not found" });
+    //Cleanup Expired Challenges
+    await deleteExpiredValidationChallenges();
+
+    // Get the registration request
+    const validated = await validateCode(data.email, data.channel, data.code);
+    if (!validated) {
+      return res.status(404).json({ message: "Invalid Challenge" });
     }
 
-    // get Currency
-    const currency = await getCurrencyBySymbol(registration.symbol);
-    if (!currency) {
-      return res.status(404).json({ message: "Currency not found" });
+    if (data.channel === "email") {
+      await setEmailVerifiedAtByEmail(data.email);
+    } else if (data.channel === "sms") {
+      await setPhoneVerifiedAtByEmail(data.email);
     }
 
-    // Create User
-    /*const newUser = await createUser(registration.email, registration.phone, registration.passwordHash, "user", registration.firstname, registration.lastname, registration.region);
-    if (!newUser) {
-      return res.status(500).json({ message: "Error creating user" });
-    }*/
+    const user = await getUserByEmail(data.email);
+    if (user) {
+      if (user.emailVerifiedAt && user.phoneVerifiedAt) {
+        await setUserStatusByEmail(data.email, "ACTIVE");
 
-    // Activate User
-    //await setActiveUserById(newUser.id);
-
-    //Create Account
-    const accountType : number = 1; // TO FIX
-    /*const account = await createAccount(newUser.id, currency.id, accountType);
-    if (!account) {
-      return res.status(500).json({ message: "Error creating account" });
-    }*/
-
-    // Delete registration after validation
-    await deleteUserRegistrationById(registration.id);
-
-    return res.status(200).json({ message: "Registration validated successfully" })
-  }
-  catch (error : unknown) {
+        return res
+          .status(200)
+          .json({ message: "Registration validated successfully" });
+      }
+      return res
+        .status(200)
+        .json({ message: "Challenge validated, waiting for other channel" });
+    }
+    else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error: unknown) {
     console.error(error);
-    return res.status(500).json({ message: "Error validating registration" })
+    return res.status(500).json({ message: "Error validating registration" });
   }
-}
+};

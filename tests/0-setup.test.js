@@ -93,11 +93,10 @@ before(async () => {
         currencyId = currency.id;
 
         //Create Main Account for Currency
-        const mainAccount = await createCurrencyMainAccount(currency);
-        console.log(" - Currency main account created: " + mainAccount.number);
+        await createCurrencyMainAccount(currency);
     }
     catch (error) {
-        console.log("Setup - Error with Currency")
+        console.log("Setup - Error with Currency");
         console.log(error);
     }
 

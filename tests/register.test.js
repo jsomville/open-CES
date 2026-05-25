@@ -1,288 +1,250 @@
-import assert from 'assert';
+import assert from 'node:assert';
 import request from 'supertest';
 
-import { app } from "../app.js"
+import { prisma } from '../utils/prisma.ts';
+import { app } from '../app.js';
+import { createValidationChallenge } from '../services/validation_challenge_service.ts';
 
-import { getCurrencyBySymbol } from "../services/currency_service.ts";
-import { deleteUserRegistrationByEmail, addUserRegistration } from "../services/register_service.ts";
+describe('Register Route', () => {
+    const emailPrefix = 'register.route.test+';
+    let suffixCounter = 0;
 
-import config from "./config.test.js";
+    const buildIdentity = () => {
+        suffixCounter += 1;
+        const suffix = `${Date.now()}-${suffixCounter}`;
+        return {
+            email: `${emailPrefix}${suffix}@opences.org`,
+            phone: `+329990${String(suffixCounter).padStart(5, '0')}`,
+        };
+    };
 
-describe("Registration", () => {
+    const cleanup = async () => {
+        await prisma.validationChallenge.deleteMany({
+            where: {
+                email: {
+                    startsWith: emailPrefix,
+                },
+            },
+        });
 
-    let testCurrency = null;
-    const registerTestMail = "john.doe@example.com"
-    before(async () => {
-        testCurrency = await getCurrencyBySymbol(config.testCurrency);
+        await prisma.user.deleteMany({
+            where: {
+                email: {
+                    startsWith: emailPrefix,
+                },
+            },
+        });
+    };
 
-        try {
-            await deleteUserRegistrationByEmail(registerTestMail)
-        }
-        catch (err) {
-
-        }
-
-         try {
-            //await deleteUserAndAccount(registerTestMail)
-        }
-        catch (err) {
-
-        }
+    beforeEach(async () => {
+        await cleanup();
     });
 
-    after(async () => {
-        try {
-            await deleteUserRegistrationByEmail(registerTestMail)
-            //await deleteUserAndAccount(registerTestMail)
-        }
-        catch (err) {
-
-        }
+    afterEach(async () => {
+        await cleanup();
     });
 
-    //***************************************** */
-    // Register a user
-    //***************************************** */
-
-    // Check server is running
-    it.skip('Register a user', async () => {
+    it('Register - creates a pending user and challenges', async () => {
+        const identity = buildIdentity();
         const payload = {
-            firstname: "John",
-            lastname: "Doe",
-            email: registerTestMail,
-            region: "EU",
-            phone: "+3269890765",
-            password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
+            firstname: 'John',
+            lastname: 'Doe',
+            email: identity.email,
+            phone: identity.phone,
+            password: 'TestABC123!',
+        };
 
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
+        const res = await request(app).post('/api/register').send(payload);
 
         assert.equal(res.statusCode, 200);
-        assert.equal(res.body.message, "Registration successful, check your email for the confirmation code");
+        assert.equal(
+            res.body.message,
+            'User registration request created, please check your email and SMS for validation codes.',
+        );
 
-        //await deleteUserRegistrationByEmail(registerTestMail);
+        const user = await prisma.user.findUnique({ where: { email: identity.email } });
+        assert.ok(user);
+        assert.equal(user.status, 'PENDING');
+        assert.equal(user.emailVerifiedAt, null);
+        assert.equal(user.phoneVerifiedAt, null);
 
-        //TEMP Because mail dosent work
-        await deleteUserAndAccount(registerTestMail);
-        
+        const challenges = await prisma.validationChallenge.findMany({
+            where: { email: identity.email },
+        });
+        assert.equal(challenges.length, 2);
+        assert.ok(challenges.some((challenge) => challenge.channel === 'email'));
+        assert.ok(challenges.some((challenge) => challenge.channel === 'sms'));
     });
 
-    it('Register a user - firstname missing', async () => {
+    it('Register - returns 400 when firstname is missing', async () => {
+        const identity = buildIdentity();
         const payload = {
-            //firstname: "John",
-            lastname: "Doe",
-            email: registerTestMail,
-            region: "EU",
-            phone: "+3269890765",
-            password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
+            lastname: 'Doe',
+            email: identity.email,
+            phone: identity.phone,
+            password: 'TestABC123!',
+        };
 
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
+        const res = await request(app).post('/api/register').send(payload);
 
         assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
+        assert.equal(res.body.message, 'Validation failed');
     });
 
-    it('Register a user - lastname missing', async () => {
-        const payload = {
-            firstname: "John",
-            //lastname: "Doe",
-            email: registerTestMail,
-            region: "EU",
-            phone: "+3269890765",
-            password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
+    it('Register - returns 409 when pending user with same email exists', async () => {
+        const identity = buildIdentity();
 
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
+        await prisma.user.create({
+            data: {
+                firstname: 'Jane',
+                lastname: 'Doe',
+                email: identity.email,
+                phone: identity.phone,
+                passwordHash: 'not-a-real-hash',
+                role: 'user',
+                status: 'PENDING',
+            },
+        });
 
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
-    });
-
-    it('Register a user - email missing', async () => {
-        const payload = {
-            firstname: "John",
-            lastname: "Doe",
-            //email: registerTestMail,
-            region: "EU",
-            phone: "+3269890765",
-            password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
-
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
-
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
-    });
-
-    it('Register a user - region missing', async () => {
-        const payload = {
-            firstname: "John",
-            lastname: "Doe",
-            email: registerTestMail,
-            //region: "EU",
-            phone: "+3269890765",
-            password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
-
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
-
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
-    });
-
-    it('Register a user - phone missing', async () => {
-        const payload = {
-            firstname: "John",
-            lastname: "Doe",
-            email: registerTestMail,
-            region: "EU",
-            //phone: "+3269890765",
-            password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
-
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
-
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
-    });
-
-    it('Register a user - password missing', async () => {
-        const payload = {
-            firstname: "John",
-            lastname: "Doe",
-            email: registerTestMail,
-            region: "EU",
-            phone: "+3269890765",
-            //password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
-
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
-
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
-
-    });
-
-    it('Register a user - symbol missing', async () => {
-        const payload = {
-            firstname: "John",
-            lastname: "Doe",
-            email: registerTestMail,
-            region: "EU",
-            phone: "+3269890765",
-            password: "TestABC123!",
-            //symbol: testCurrency.symbol
-        }
-
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
-
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
-    });
-
-    it.skip('Register a user - registration already exists', async () => {
-        const payload = {
-            firstname: "John",
-            lastname: "Doe",
-            email: registerTestMail,
-            region: "EU",
-            phone: "+3269890765",
-            password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
-        await addUserRegistration(payload.email, payload.phone, payload.password, payload.firstname, payload.lastname, payload.region, "somecode", payload.symbol);
-
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
+        const res = await request(app).post('/api/register').send({
+            firstname: 'John',
+            lastname: 'Doe',
+            email: identity.email,
+            phone: buildIdentity().phone,
+            password: 'TestABC123!',
+        });
 
         assert.equal(res.statusCode, 409);
-        assert.equal(res.body.message, "Registration already exists");
-
-        await deleteUserRegistrationByEmail(registerTestMail);
+        assert.equal(res.body.message, 'User with this email already exists');
     });
 
-    it('Register a user - user already exists', async () => {
-        const payload = {
-            firstname: "John",
-            lastname: "Doe",
-            email: String(config.testUserEmail),
-            region: "EU",
-            phone: "+3269890765",
-            password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
+    it('Register - returns 409 when pending user with same phone exists', async () => {
+        const firstIdentity = buildIdentity();
+        const secondIdentity = buildIdentity();
 
-        const res = await request(app)
-            .post('/api/register')
-            .send(payload);
+        await prisma.user.create({
+            data: {
+                firstname: 'Jane',
+                lastname: 'Doe',
+                email: firstIdentity.email,
+                phone: firstIdentity.phone,
+                passwordHash: 'not-a-real-hash',
+                role: 'user',
+                status: 'PENDING',
+            },
+        });
 
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
+        const res = await request(app).post('/api/register').send({
+            firstname: 'John',
+            lastname: 'Doe',
+            email: secondIdentity.email,
+            phone: firstIdentity.phone,
+            password: 'TestABC123!',
+        });
+
+        assert.equal(res.statusCode, 409);
+        assert.equal(res.body.message, 'User with this phone number already exists');
     });
 
-    //***************************************** */
-    // Validate
-    //***************************************** */
-    xit('Validate', async () => {
-        const code = "123456";
+    it('Challenge - validates one channel and keeps user pending', async () => {
+        const identity = buildIdentity();
+        await prisma.user.create({
+            data: {
+                firstname: 'John',
+                lastname: 'Doe',
+                email: identity.email,
+                phone: identity.phone,
+                passwordHash: 'not-a-real-hash',
+                role: 'user',
+                status: 'PENDING',
+            },
+        });
 
-        const payload = {
-            firstname: "John",
-            lastname: "Doe",
-            email: registerTestMail,
-            region: "EU",
-            phone: "+3269890765",
-            password: "TestABC123!",
-            symbol: testCurrency.symbol
-        }
-        await addUserRegistration(payload.email, payload.phone, payload.password, payload.firstname, payload.lastname, payload.region, code, payload.symbol);
+        await createValidationChallenge('email', identity.email, '123456', new Date(Date.now() + 60_000));
 
-        const res = await request(app)
-            .post(`/api/register/validate/${code}`)
-            .send();
+        const res = await request(app).post('/api/register/challenge').send({
+            email: identity.email,
+            channel: 'email',
+            code: '123456',
+        });
 
         assert.equal(res.statusCode, 200);
-        assert.equal(res.body.message, "Registration validated successfully");
+        assert.equal(res.body.message, 'Challenge validated, waiting for other channel');
 
-        await deleteUserAndAccount(registerTestMail);
-        
+        const user = await prisma.user.findUnique({ where: { email: identity.email } });
+        assert.ok(user);
+        assert.ok(user.emailVerifiedAt instanceof Date);
+        assert.equal(user.phoneVerifiedAt, null);
+        assert.equal(user.status, 'PENDING');
     });
 
-    xit('Validate - Invalid Code format', async () => {
+    it('Challenge - activates user after both channels are verified', async () => {
+        const identity = buildIdentity();
 
-        const code = "validcode12345"
+        await prisma.user.create({
+            data: {
+                firstname: 'John',
+                lastname: 'Doe',
+                email: identity.email,
+                phone: identity.phone,
+                passwordHash: 'not-a-real-hash',
+                role: 'user',
+                status: 'PENDING',
+                emailVerifiedAt: new Date(),
+            },
+        });
 
-        const res = await request(app)
-            .post(`/api/register/validate/${code}`)
-            .send();
+        await createValidationChallenge('sms', identity.email, '654321', new Date(Date.now() + 60_000));
+
+        const res = await request(app).post('/api/register/challenge').send({
+            email: identity.email,
+            channel: 'sms',
+            code: '654321',
+        });
+
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.body.message, 'Registration validated successfully');
+
+        const user = await prisma.user.findUnique({ where: { email: identity.email } });
+        assert.ok(user);
+        assert.ok(user.phoneVerifiedAt instanceof Date);
+        assert.equal(user.status, 'ACTIVE');
+    });
+
+    it('Challenge - returns 404 for invalid challenge', async () => {
+        const identity = buildIdentity();
+
+        await prisma.user.create({
+            data: {
+                firstname: 'John',
+                lastname: 'Doe',
+                email: identity.email,
+                phone: identity.phone,
+                passwordHash: 'not-a-real-hash',
+                role: 'user',
+                status: 'PENDING',
+            },
+        });
+
+        const res = await request(app).post('/api/register/challenge').send({
+            email: identity.email,
+            channel: 'sms',
+            code: '999999',
+        });
+
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.message, 'Invalid Challenge');
+    });
+
+    it('Challenge - returns 400 when code format is invalid', async () => {
+        const identity = buildIdentity();
+        const res = await request(app).post('/api/register/challenge').send({
+            email: identity.email,
+            channel: 'email',
+            code: '12345',
+        });
 
         assert.equal(res.statusCode, 400);
-        assert.equal(res.body.message, "Validation failed");
+        assert.equal(res.body.message, 'Validation failed');
     });
-
 });

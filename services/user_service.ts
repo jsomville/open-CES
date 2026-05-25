@@ -110,3 +110,29 @@ export const updateLastLogin = async (id: number) => {
     where: { id: id }
   });
 }
+
+export const setEmailVerifiedAtByEmail = async (email: string) => {
+  await prisma.user.update({
+    data: {
+      emailVerifiedAt: new Date()
+    },
+    where: { email: email }
+  });
+}
+
+export const setPhoneVerifiedAtByEmail = async (email: string) => {
+  await prisma.user.update({
+    data: {
+      phoneVerifiedAt: new Date()
+    },
+    where: { email: email }
+  });
+}
+export const setUserStatusByEmail = async (email: string, status: string) => {
+  await prisma.user.update({
+    data: {
+      status: status
+    },
+    where: { email: email }
+  });
+}

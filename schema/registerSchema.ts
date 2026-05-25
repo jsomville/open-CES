@@ -9,17 +9,16 @@ export const registerSchema = z.strictObject({
 
     email: z.email(),
     phone: z.string().min(8).max(15),
-    region: z.string().min(2).max(50),
 
     password: passwordSchema,
-    
-    symbol: z.string().min(1).max(6),
   }),
 });
 
-export const registerValidationSchema = z.strictObject({
-  params: z.strictObject({
+export const registerChallengeSchema = z.strictObject({
+  params: z.strictObject({}).optional(),
+  body: z.strictObject({
+    email: z.email(),
+    channel: z.enum(["email", "sms"]),
     code: z.string().min(6).max(6),
   }),
-  body: z.strictObject({}).optional(),
 });

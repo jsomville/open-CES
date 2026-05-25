@@ -6,7 +6,7 @@ import { validate } from '../middleware/validate.ts';
 
 import { register, validateRegistration } from '../controller/registerController.ts';
 
-import { registerSchema, registerValidationSchema} from '../schema/registerSchema.ts';
+import { registerChallengeSchema, registerSchema} from '../schema/registerSchema.ts';
 
 const router = express.Router();
 
@@ -15,6 +15,6 @@ router.use(rate_limiter_by_ip);
 // Register
 router.post('/', validate(registerSchema), register)
 
-router.post('/validate/:code', validate(registerValidationSchema), validateRegistration)
+router.post('/challenge', validate(registerChallengeSchema), validateRegistration)
 
 export default router;

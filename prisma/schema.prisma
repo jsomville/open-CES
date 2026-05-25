@@ -49,11 +49,15 @@ model User {
   role         String
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
-  isActive     Boolean  @default(false) @map("is_active")
-
   lastLoginAt DateTime? @map("last_login_at")
 
+  isActive     Boolean  @default(false) @map("is_active")
+
   PersonalAccount PersonalAccount[]
+
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  phoneVerifiedAt DateTime? @map("phone_verified_at")
+  status          String   @default("PENDING") @db.VarChar(20)
 }
 
 model Merchant {
@@ -134,21 +138,16 @@ model Voucher {
   claimedAt        DateTime? @map("claimed_at")
 
   Currency Currency @relation("Vouchers", fields: [currencyId], references: [id])
-  //ClaimedAccount Account? @relation("ClaimedAccount", fields: [claimedAccountId], references: [id])
-  //account   Account? @relation(fields: [accountId], references: [id])
-  //accountId Int?
 }
 
-model UserRegistration {
-  id           Int    @id @default(autoincrement())
-  firstname    String @db.VarChar(255)
-  lastname     String @db.VarChar(255)
-  email        String @unique @db.VarChar(255)
-  phone        String @db.VarChar(15)
-  region       String @db.VarChar(50)
-  code         String @unique @db.VarChar(36)
-  passwordHash String @map("password_hash") @db.VarChar(255)
-  symbol       String @db.VarChar(5)
-
-  createdAt DateTime @default(now()) @map("created_at")
+model ValidationChallenge {
+  id             Int      @id @default(autoincrement())
+  channel        String   @db.VarChar(20)
+  email          String   @db.VarChar(255)
+  code           String   @map("code_hash") @db.VarChar(255)
+  
+  createdAt      DateTime @default(now()) @map("created_at")
+  expiresAt      DateTime @map("expires_at")
+  consumedAt     DateTime? @map("consumed_at")
+  attemptCount   Int      @default(0)
 }
