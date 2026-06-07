@@ -9,7 +9,7 @@ export const getUserList = async () => {
   return safeUsers;
 }
 
-export const createUser = async (email:string, phone:string, hashedPassword:string, role:string, firstname:string , lastname:string) => {
+export const createUser = async (email:string, phone:string, passwordHash:string, role:string, firstname:string , lastname:string) => {
   //Create User
   const user = await prisma.user.create({
     data: {
@@ -17,13 +17,13 @@ export const createUser = async (email:string, phone:string, hashedPassword:stri
       firstname: firstname,
       lastname: lastname,
       phone: phone,
-      passwordHash: hashedPassword,
+      passwordHash: passwordHash,
       role: role,
     }
   })
 
   // Remove password hash
-  const { passwordHash, ...safeUser } = user;
+  const { passwordHash: _, ...safeUser } = user;
 
   return safeUser;
 }

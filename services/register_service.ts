@@ -3,7 +3,7 @@ import argon2 from 'argon2';
 
 export const addUserRegistration = async (email: string, phone: string, password: string, firstname: string, lastname: string, region: string, code: string, symbol: string) => {
   
-    const hashedPassword = await argon2.hash(password);
+    const passwordHash = await argon2.hash(password);
 
     const userRegistration = await prisma.userRegistration.create({
     data: {
@@ -12,7 +12,7 @@ export const addUserRegistration = async (email: string, phone: string, password
       lastname: lastname,
       phone: phone,
       region: region,
-      passwordHash: hashedPassword,
+      passwordHash: passwordHash,
       code: code,
       symbol: symbol,
     }

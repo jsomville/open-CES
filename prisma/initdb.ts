@@ -2,7 +2,7 @@ import argon2 from 'argon2';
 import { prisma } from '../utils/prisma.ts';
 
 import { createCurrency, getCurrencyBySymbol } from '../services/currency_service.ts';
-import { createpersonalAccount, createCurrencyMainAccount, getAccountByNumber } from '../services/account_service.ts';
+import { createPersonalAccount, createCurrencyMainAccount, getAccountByNumber } from '../services/account_service.ts';
 import { createUser, setActiveUserById } from '../services/user_service.ts'
 import { doFundAccount } from '../services/operation_service.ts';
 
@@ -17,14 +17,14 @@ async function createAdminUser() {
     
     const email = "admin@opences.org"
 
-    const userPwdHash = await argon2.hash(admin_password);
+    const passwordHash = await argon2.hash(admin_password);
     await prisma.user.create({
         data: {
             firstname: "admin",
             lastname: "admin",
             email: email,
             phone: "+32488040204",
-            passwordHash: userPwdHash,
+            passwordHash: passwordHash,
             role: "admin",
             isActive: true,
         }
@@ -63,7 +63,7 @@ async function createDummyUsersAndAccount(symbol: string) {
 
     if (currency) {
 
-        const hashedPassword = await argon2.hash(user_password);
+        const passwordHash = await argon2.hash(user_password);
 
         // user data
         const userData = [
@@ -73,7 +73,7 @@ async function createDummyUsersAndAccount(symbol: string) {
                 lastname: "Doe",
                 phone: "+32123456789",
                 region: "EU",
-                hashedPassword: hashedPassword,
+                passwordHash: passwordHash,
             },
             {
                 email: "jane.doe@opences.org",
@@ -81,18 +81,18 @@ async function createDummyUsersAndAccount(symbol: string) {
                 lastname: "Doe",
                 phone: "+32223456789",
                 region: "EU",
-                hashedPassword: hashedPassword,
+                passwordHash: passwordHash,
             }
         ];
 
         for (const userInfo of userData) {
             console.log("Creating user: " + userInfo.email);
 
-            const user = await createUser(userInfo.email, userInfo.phone, userInfo.hashedPassword, "user", userInfo.firstname, userInfo.lastname);
+            const user = await createUser(userInfo.email, userInfo.phone, userInfo.passwordHash, "user", userInfo.firstname, userInfo.lastname);
 
             await setActiveUserById(user.id);
 
-            const account = await createpersonalAccount(user, symbol);
+            const account = await createPersonalAccount(user, symbol);
 
             const mainCurrencyAccount = await getAccountByNumber(currency.mainCurrencyAccountNumber);
 

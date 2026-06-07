@@ -47,21 +47,21 @@ export const addUser = async (req: Request, res: Response, next: NextFunction) =
     const data = req.validatedBody as { email: string; phone: string; password: string; firstname: string; lastname: string};
 
     //Check email is unique
-    const user_email = await getUserByEmail(data.email);
-    if (user_email) {
+    const userEmail = await getUserByEmail(data.email);
+    if (userEmail) {
       return res.status(409).json({ message: "Email already used" })
     }
 
     //Check phone is unique
-    const user_phone = await getUserByPhone(data.phone);
-    if (user_phone) {
+    const userPhone = await getUserByPhone(data.phone);
+    if (userPhone) {
       return res.status(409).json({ message: "Phone already used" })
     }
 
     const role = "user";
-    const hashedPassword = await argon2.hash(data.password);
+    const passwordHash = await argon2.hash(data.password);
 
-    const user = await createUser(data.email, data.phone, hashedPassword, role, data.firstname, data.lastname);
+    const user = await createUser(data.email, data.phone, passwordHash, role, data.firstname, data.lastname);
 
     //Activate user
     await setActiveUserById(user.id);

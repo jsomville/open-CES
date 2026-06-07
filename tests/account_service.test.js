@@ -5,7 +5,7 @@ import { prisma } from '../utils/prisma.ts';
 import config from "./config.test.js";
 import {
     createAccount,
-    createpersonalAccount,
+    createPersonalAccount,
     createMerchantAccount,
     createCurrencyMainAccount,
     getAccountById,
@@ -13,7 +13,7 @@ import {
     getUserAccounts,
     getMerchantAccounts,
     deleteAccount,
-    getpersonalAccountCountByCurrencyId,
+    getPersonalAccountCountByCurrencyId,
     getMerchantAccountCountByCurrencyId
 } from '../services/account_service.ts';
 
@@ -62,8 +62,8 @@ describe("Account Service Tests", () => {
                 lastname: "Lastname"
             }
             // Create test user
-            const hashedPassword = await argon2.hash(userInfo.password);
-            testUser = await createUser(userInfo.email, userInfo.phone, hashedPassword, userInfo.role, userInfo.firstname, userInfo.lastname);
+            const passwordHash = await argon2.hash(userInfo.password);
+            testUser = await createUser(userInfo.email, userInfo.phone, passwordHash, userInfo.role, userInfo.firstname, userInfo.lastname);
 
             // Get test currency
             testCurrency = await getCurrencyBySymbol(config.testCurrency);
@@ -117,7 +117,7 @@ describe("Account Service Tests", () => {
 
 
     it("should create a personal account for a user", async () => {
-        testPersonalAccount = await createpersonalAccount(testUser, testCurrency.symbol);
+        testPersonalAccount = await createPersonalAccount(testUser, testCurrency.symbol);
 
         assert.ok(testPersonalAccount);
         assert.equal(testPersonalAccount.currencyId, testCurrency.id);
@@ -225,12 +225,12 @@ describe("Account Service Tests", () => {
         assert.equal(deletedAccount, null);
     });
 
-    it(" get getpersonalAccountCountByCurrencyId", async () => {
-        const countBefore = await getpersonalAccountCountByCurrencyId(testCurrency.id);
+    it(" get getPersonalAccountCountByCurrencyId", async () => {
+        const countBefore = await getPersonalAccountCountByCurrencyId(testCurrency.id);
 
         const tempAccount = await createAccount(testCurrency.symbol, AccountType.PERSONAL);
 
-        const countAfter = await getpersonalAccountCountByCurrencyId(testCurrency.id);
+        const countAfter = await getPersonalAccountCountByCurrencyId(testCurrency.id);
 
         assert.equal(countAfter, countBefore + 1);
 

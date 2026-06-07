@@ -41,8 +41,8 @@ describe("Login Test", () => {
       //Check and create for validated user
       userTemp = await getUserByEmail(okUser.email);
       if (!userTemp) {
-        const hashedPassword = await argon2.hash(okUser.password);
-        const user = await createUser(okUser.email, okUser.phone, hashedPassword, "user", "firstname", "lastname");
+        const passwordHash = await argon2.hash(okUser.password);
+        const user = await createUser(okUser.email, okUser.phone, passwordHash, "user", "firstname", "lastname");
 
         await setActiveUserById(user.id);
       }
@@ -50,8 +50,8 @@ describe("Login Test", () => {
       //Check and create for validated admin
       userTemp = await getUserByEmail(okAdmin.email);
       if (!userTemp) {
-        const hashedPassword = await argon2.hash(okAdmin.password);
-        const user = await createUser(okAdmin.email, okAdmin.phone, hashedPassword, "admin", "firstname", "lastname");
+        const passwordHash = await argon2.hash(okAdmin.password);
+        const user = await createUser(okAdmin.email, okAdmin.phone, passwordHash, "admin", "firstname", "lastname");
 
         await setActiveUserById(user.id);
       }
@@ -59,15 +59,15 @@ describe("Login Test", () => {
       //Check and create for not validated user
       userTemp = await getUserByEmail(notValidatedUser.email);
       if (!userTemp) {
-        const hashedPassword = await argon2.hash(notValidatedUser.password);
-        await createUser(notValidatedUser.email, notValidatedUser.phone, hashedPassword, "user", "firstname", "lastname");
+        const passwordHash = await argon2.hash(notValidatedUser.password);
+        await createUser(notValidatedUser.email, notValidatedUser.phone, passwordHash, "user", "firstname", "lastname");
       }
 
       //Check and create for validated admin
       userTemp = await getUserByEmail(lockedUser.email);
       if (!userTemp) {
-        const hashedPassword = await argon2.hash(lockedUser.password);
-        const user = await createUser(lockedUser.email, lockedUser.phone, hashedPassword, "user", "firstname", "lastname");
+        const passwordHash = await argon2.hash(lockedUser.password);
+        const user = await createUser(lockedUser.email, lockedUser.phone, passwordHash, "user", "firstname", "lastname");
 
         await setActiveUserById(user.id);
       }

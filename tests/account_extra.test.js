@@ -8,7 +8,7 @@ import { prisma } from '../utils/prisma.ts';
 import { app } from "../app.js";
 import config from "./config.test.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.ts';
-import { createpersonalAccount } from '../services/account_service.ts';
+import { createPersonalAccount } from '../services/account_service.ts';
 import { getUserByEmail, createUser, deleteUser } from '../services/user_service.ts';
 import { getCurrencyBySymbol } from '../services/currency_service.ts';
 import { AccountType } from '../utils/accountUtil.ts';
@@ -46,8 +46,8 @@ describe("Test Account Extra", () => {
                 lastname: "Extra"
             }
             // Create test user
-            const hashedPassword = await argon2.hash(userInfo.password);
-            testUser = await createUser(userInfo.email, userInfo.phone, hashedPassword, userInfo.role, userInfo.firstname, userInfo.lastname);
+            const passwordHash = await argon2.hash(userInfo.password);
+            testUser = await createUser(userInfo.email, userInfo.phone, passwordHash, userInfo.role, userInfo.firstname, userInfo.lastname);
 
             user_token = getAccessTokenByEmailAndRole(testUser.email, "user");
 
@@ -55,7 +55,7 @@ describe("Test Account Extra", () => {
             testCurrency = await getCurrencyBySymbol(config.testCurrency);
 
             // Create personal Account
-            personalAccount = await createpersonalAccount(testUser, config.testCurrency);
+            personalAccount = await createPersonalAccount(testUser, config.testCurrency);
 
             //Create Transactions
             for (let i = 0; i < 15; i++) {

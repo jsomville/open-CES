@@ -13,7 +13,7 @@ import { daysFrom, daysFromNow } from "../controller/voucherController.ts";
 import { VoucherStatus, createVoucher, getVoucherByCode, claimVoucherService } from "../services/voucher_service.ts";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.ts'
 import { getUserByEmail, createUser, deleteUser } from "../services/user_service.ts";
-import { getAccountByNumber, createpersonalAccount } from "../services/account_service.ts";
+import { getAccountByNumber, createPersonalAccount } from "../services/account_service.ts";
 import { AccountType } from '../utils/accountUtil.ts';
 
 describe("Voucher Test", () => {
@@ -50,13 +50,13 @@ describe("Voucher Test", () => {
                 lastname: "Test"
             }
             // Create test user
-            const hashedPassword = await argon2.hash(userInfo.password);
-            testUser = await createUser(userInfo.email, userInfo.phone, hashedPassword, userInfo.role, userInfo.firstname, userInfo.lastname);
+            const passwordHash = await argon2.hash(userInfo.password);
+            testUser = await createUser(userInfo.email, userInfo.phone, passwordHash, userInfo.role, userInfo.firstname, userInfo.lastname);
 
             user_token = getAccessTokenByEmailAndRole(testUser.email, "user");
 
             // Create personal Account
-            personalAccount = await createpersonalAccount(testUser, config.testCurrency);
+            personalAccount = await createPersonalAccount(testUser, config.testCurrency);
 
             voucher_payload = {
                 currencyId: currency.id,

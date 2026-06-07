@@ -7,7 +7,7 @@ import { shutdown } from '../app.js'
 import config from "./config.test.js";
 import { createCurrency, getCurrencyBySymbol } from '../services/currency_service.ts';
 import { createUser, setActiveUserById } from '../services/user_service.ts';
-import { createpersonalAccount, createCurrencyMainAccount } from '../services/account_service.ts';
+import { createPersonalAccount, createCurrencyMainAccount } from '../services/account_service.ts';
 
 //To calculate global test duration
 let test_start_time;
@@ -112,15 +112,15 @@ before(async () => {
             lastname: "Doe",
             phone: config.user1Phone,
             region: "EU",
-            hashedPassword: await argon2.hash(config.user1Password),
+            passwordHash: await argon2.hash(config.user1Password),
         }
-        user = await createUser(userData.email, userData.phone, userData.hashedPassword, "user", userData.firstname, userData.lastname);
+        user = await createUser(userData.email, userData.phone, userData.passwordHash, "user", userData.firstname, userData.lastname);
         console.log(" - User created: " + user.email);
 
         await setActiveUserById(user.id);
         console.log(" - Active user set: " + user.email);
 
-        account = await createpersonalAccount(user, config.testCurrency);
+        account = await createPersonalAccount(user, config.testCurrency);
         console.log(" - Account created for user " + user.email + " with account number " + account.number);
 
         userData = {
@@ -129,15 +129,15 @@ before(async () => {
             lastname: "Doe",
             phone: config.user2Phone,
             region: "EU",
-            hashedPassword: await argon2.hash(config.user2Password),
+            passwordHash: await argon2.hash(config.user2Password),
         }
-        user = await createUser(userData.email, userData.phone, userData.hashedPassword, "user", userData.firstname, userData.lastname);
+        user = await createUser(userData.email, userData.phone, userData.passwordHash, "user", userData.firstname, userData.lastname);
         console.log(" - User created: " + user.email);
 
         //await setActiveUserById(user.id);
         //console.log("Active user set: " + user.email);
 
-        account = await createpersonalAccount(user, config.testCurrency);
+        account = await createPersonalAccount(user, config.testCurrency);
         console.log(" - Account created for user " + user.email + " with account number " + account.number);
 
         userData = {
@@ -146,15 +146,15 @@ before(async () => {
             lastname: "Doe",
             phone: config.adminPhone,
             region: "EU",
-            hashedPassword: await argon2.hash(config.adminPassword),
+            passwordHash: await argon2.hash(config.adminPassword),
         }
-        user = await createUser(userData.email, userData.phone, userData.hashedPassword, "user", userData.firstname, userData.lastname);
+        user = await createUser(userData.email, userData.phone, userData.passwordHash, "user", userData.firstname, userData.lastname);
         console.log(" - User created: " + user.email);
 
         await setActiveUserById(user.id);
         console.log(" - Active user set: " + user.email);
 
-        account = await createpersonalAccount(user, config.testCurrency);
+        account = await createPersonalAccount(user, config.testCurrency);
         console.log(" - Account created for user " + user.email + " with account number " + account.number);
 
     }

@@ -53,7 +53,7 @@ export const createAccount = async (symbol: string, accountType: number) => {
         throw error
     }
 }
-export const createpersonalAccount = async (user: any, symbol: string) => {
+export const createPersonalAccount = async (user: any, symbol: string) => {
     try {
         const account = await createAccount(symbol, AccountType.PERSONAL);
 
@@ -164,7 +164,7 @@ export const getAccountCountByCurrencyId = async (currencyId: number) => {
     });
 }
 
-export const getpersonalAccountCountByCurrencyId = async (currencyId: number) => {
+export const getPersonalAccountCountByCurrencyId = async (currencyId: number) => {
     return await prisma.account.count({
         where: {
             currencyId: currencyId,

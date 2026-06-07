@@ -40,8 +40,8 @@ describe('Test User_service', () => {
         // ensure clean slate for test users
         await prisma.user.deleteMany({ where: { email: { in: [user1Payload.email, user2Email] } } });
 
-        const hashedPassword = await argon2.hash(user1Payload.password);
-        user1 = await createUser(user1Payload.email, user1Payload.phone, hashedPassword, 'user', 'First', 'Last');
+        const passwordHash = await argon2.hash(user1Payload.password);
+        user1 = await createUser(user1Payload.email, user1Payload.phone, passwordHash, 'user', 'First', 'Last');
     });
 
     after(async () => {

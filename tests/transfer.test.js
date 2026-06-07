@@ -7,7 +7,7 @@ import { app } from "../app.js";
 import config from "./config.test.js";
 import { createUser, getUserByEmail, deleteUser } from "../services/user_service.ts";
 import { getAccessToken } from "../services/auth_service.ts";
-import { createpersonalAccount, getAccountByNumber, getUserAccounts, deleteAccount } from "../services/account_service.ts";
+import { createPersonalAccount, getAccountByNumber, getUserAccounts, deleteAccount } from "../services/account_service.ts";
 import { getCurrencyBySymbol } from "../services/currency_service.ts";
 
 describe("Test Transfer", () => {
@@ -63,7 +63,7 @@ describe("Test Transfer", () => {
             user2 = await createUser(user2Email, "+32123456888", "FAKE_HASH", "user", "Transfer", "User2");
 
             // Create accounts for users
-            account1 = await createpersonalAccount(user1, currency.symbol);
+            account1 = await createPersonalAccount(user1, currency.symbol);
 
 
             // Fund user1's account
@@ -72,7 +72,7 @@ describe("Test Transfer", () => {
                 data: { balance: fundAmount },
             });
 
-            account2 = await createpersonalAccount(user2, currency.symbol);
+            account2 = await createPersonalAccount(user2, currency.symbol);
 
             // Create tokens
             user1Token = getAccessToken({ email: user1Email, role: "user" });

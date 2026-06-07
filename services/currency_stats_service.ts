@@ -1,7 +1,7 @@
 import redisHelper from '../utils/redisHelper.ts';
 import { prisma } from '../utils/prisma.ts';
 
-import { getAccountByNumber, getpersonalAccountCountByCurrencyId, getMerchantAccountCountByCurrencyId, getActiveAccountCountByCurrencyId } from './account_service.ts';
+import { getAccountByNumber, getPersonalAccountCountByCurrencyId, getMerchantAccountCountByCurrencyId, getActiveAccountCountByCurrencyId } from './account_service.ts';
 
 import {getCurrencyList} from './currency_service.ts';
 
@@ -23,7 +23,7 @@ export const getCurrencyListWithStats = async () => {
         const merchantAccountCount = await getMerchantAccountCountByCurrencyId(currency.id);
 
         //Get number of accounts
-        const personalAccountCount = await getpersonalAccountCountByCurrencyId(currency.id);
+        const personalAccountCount = await getPersonalAccountCountByCurrencyId(currency.id);
 
         //Get monthly transaction volume for last 30 days
         const monthlyTransVol = await prisma.transaction.aggregate({
