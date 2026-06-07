@@ -8,7 +8,7 @@ import {
 	createMerchant,
 	updateMerchant,
 	deleteMerchantByName,
-    resetCache_MerchantList,
+    resetMerchantListCache,
 } from '../services/merchant_service.ts';
 
 describe('Merchant Service Tests', () => {
@@ -27,7 +27,7 @@ describe('Merchant Service Tests', () => {
 
 	before(async () => {
 		await deleteMerchantByName(baseMerchantPayload.name);
-		await resetCache_MerchantList();
+		await resetMerchantListCache();
 
 		const merchant = await prisma.merchant.create({ data: baseMerchantPayload });
 		baseMerchantId = merchant.id;
@@ -37,11 +37,11 @@ describe('Merchant Service Tests', () => {
 		await deleteMerchantByName(baseMerchantPayload.name);
 		await deleteMerchantByName('MerchantService-Create');
 		await deleteMerchantByName('MerchantService-Update');
-		await resetCache_MerchantList();
+		await resetMerchantListCache();
 	});
 
 	it('getMerchantList returns the seeded merchant', async () => {
-		await resetCache_MerchantList();
+		await resetMerchantListCache();
 
 		const merchants = await getMerchantList();
 
@@ -93,7 +93,7 @@ describe('Merchant Service Tests', () => {
 		};
 
 		try {
-			await resetCache_MerchantList();
+			await resetMerchantListCache();
 
 			const created = await createMerchant(createPayload);
 
@@ -115,7 +115,7 @@ describe('Merchant Service Tests', () => {
 			assert.strictEqual(persisted.email, createPayload.email);
 		} finally {
 			await deleteMerchantByName(createPayload.name);
-			await resetCache_MerchantList();
+			await resetMerchantListCache();
 		}
 	});
 
@@ -163,7 +163,7 @@ describe('Merchant Service Tests', () => {
 			assert.strictEqual(persisted.address, updatePayload.address);
 		} finally {
 			await deleteMerchantByName(createPayload.name);
-			await resetCache_MerchantList();
+			await resetMerchantListCache();
 		}
 	});
 });

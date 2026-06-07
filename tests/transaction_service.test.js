@@ -7,7 +7,7 @@ import { getLatestTransactionByAccountNumber, getTransactionByAccountNumber } fr
 
 import { getUserByEmail, createUser, deleteUser } from '../services/user_service.ts';
 import { getCurrencyBySymbol } from '../services/currency_service.ts';
-import { createpersonalAccount, deleteAccount } from '../services/account_service.ts';
+import { createPersonalAccount, deleteAccount } from '../services/account_service.ts';
 
 
 describe("Transaction Service Tests", () => {
@@ -38,7 +38,7 @@ describe("Transaction Service Tests", () => {
             // Get test currency
             currency = await getCurrencyBySymbol(config.testCurrency);
 
-            account = await createpersonalAccount(user, currency.symbol);
+            account = await createPersonalAccount(user, currency.symbol);
             if (!account) {
                 throw new Error("Failed to create personal account for test user");
             }
