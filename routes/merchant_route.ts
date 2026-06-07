@@ -5,7 +5,7 @@ import { authorizeRole } from '../middleware/authorizeRole.ts'
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.ts";
 import { validate } from '../middleware/validate.ts';
 
-import { getAllMerchant, getMerchant, addMerchant, modifyMerchant, removeMerchant } from '../controller/merchantController.ts'
+import { getAllMerchants, getMerchant, addMerchant, modifyMerchant, removeMerchant } from '../controller/merchantController.ts'
 
 import { createMerchantSchema, modifyMerchantSchema, merchantIdSchema } from '../schema/merchant.schema.ts'
 
@@ -16,7 +16,7 @@ router.use(authenticateToken);
 router.use(rate_limiter_by_sub);
 
 // get all
-router.get('/', authorizeRole("admin"), getAllMerchant);
+router.get('/', authorizeRole("admin"), getAllMerchants);
 
 // get one
 router.get('/:id', authorizeRole("admin"), validate(merchantIdSchema), getMerchant);

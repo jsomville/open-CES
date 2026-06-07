@@ -8,9 +8,9 @@ import { getTransactionByAccountNumber, getTransactionByAccountNumberAndPage } f
 import { transferFunds } from '../services/operation_service.ts';
 import { AccountType } from '../utils/accountUtil.ts';
 
-// @desc Get Account
+// @desc Get Accounts
 // @route GET /api/account
-export const getAllAccount = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllAccounts = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const accounts = await getAccounts();
 

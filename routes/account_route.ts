@@ -5,7 +5,7 @@ import { authorizeRole } from '../middleware/authorizeRole.ts'
 import { rate_limiter_by_sub } from "../middleware/rate-limiter.ts";
 import { validate } from '../middleware/validate.ts';
 
-import { getAllAccount, getAccount, addAccount, removeAccount, transferToAccount, getTransactions, getTransactionsByPage, getAccountInfoByEmailAndSymbol, getAccountInfoByPhoneAndSymbol } from '../controller/accountController.ts'
+import { getAllAccounts, getAccount, addAccount, removeAccount, transferToAccount, getTransactions, getTransactionsByPage, getAccountInfoByEmailAndSymbol, getAccountInfoByPhoneAndSymbol } from '../controller/accountController.ts'
 import { createAccountSchema, accountIdSchema, accountTransferSchema, accountInfoByEmail, accountInfoByPhone, accountIdTransactionPageSchema} from '../schema/account.schema.ts'
 
 const router = express.Router();
@@ -14,8 +14,8 @@ const router = express.Router();
 router.use(authenticateToken);
 router.use(rate_limiter_by_sub);
 
-//get All account
-router.get('/', authorizeRole("admin"), getAllAccount);
+//get All accounts
+router.get('/', authorizeRole("admin"), getAllAccounts);
 
 //get account by number
 router.get('/:number', authorizeRole("admin"), validate(accountIdSchema), getAccount);

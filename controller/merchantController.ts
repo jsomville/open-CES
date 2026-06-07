@@ -6,7 +6,7 @@ import { getMerchantAccounts } from '../services/account_service.ts'
 
 // @desc Get Merchants
 // @route GET /api/merchant
-export const getAllMerchant = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllMerchants = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const merchants = await getMerchantList();
 
