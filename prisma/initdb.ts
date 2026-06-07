@@ -8,8 +8,8 @@ import { doFundAccount } from '../services/operation_service.ts';
 
 import { connectRedis, redisClient } from '../utils/redisClient.ts';
 
-const admin_password = process.env.ADMIN_PASSWORD || "1234";
-const user_password = process.env.USER_PASSWORD || "1234";
+const adminPassword = process.env.ADMIN_PASSWORD || "1234";
+const userPassword = process.env.USER_PASSWORD || "1234";
 
 // to run : npx tsx --env-file=.env prisma/initdb.ts
 
@@ -17,7 +17,7 @@ async function createAdminUser() {
     
     const email = "admin@opences.org"
 
-    const passwordHash = await argon2.hash(admin_password);
+    const passwordHash = await argon2.hash(adminPassword);
     await prisma.user.create({
         data: {
             firstname: "admin",
@@ -63,7 +63,7 @@ async function createDummyUsersAndAccount(symbol: string) {
 
     if (currency) {
 
-        const passwordHash = await argon2.hash(user_password);
+        const passwordHash = await argon2.hash(userPassword);
 
         // user data
         const userData = [

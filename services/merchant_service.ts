@@ -26,13 +26,13 @@ export const getMerchantById = async (id: number) => {
 
 export const createMerchant = async (data: any) => {
 
-    await resetCache_MerchantList();
+    await resetMerchantListCache();
 
     const newMerchant = await prisma.merchant.create({ data });
     return newMerchant;
 }
 
-export const resetCache_MerchantList = async () => {
+export const resetMerchantListCache = async () => {
     await redisHelper.del(MERCHANT_LIST_CACHE_KEY);
 }   
 
@@ -41,16 +41,16 @@ export const updateMerchant = async (id: number, data : any) => {
         where: { id: id },
         data: data
     });
-    await resetCache_MerchantList();
+    await resetMerchantListCache();
     return updatedMerchant;
 }
 
 export const deleteMerchant = async (id: number) => {
     await prisma.merchant.delete({ where: { id: id } });
-    await resetCache_MerchantList();
+    await resetMerchantListCache();
 }
 
 export const deleteMerchantByName = async (name: string) => {
     await prisma.merchant.deleteMany({ where: { name: name } });
-    await resetCache_MerchantList();
+    await resetMerchantListCache();
 }   

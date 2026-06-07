@@ -54,13 +54,13 @@ export const addVoucher = async (req: Request, res: Response, next: NextFunction
         }
 
         //Generate Unique Code
-        const new_code = uuidv4()
+        const newCode = uuidv4()
 
         //Calculate the Expiration Date
         const expiration = daysFromNow(data.duration);
 
         //Create Voucher
-        const newVoucher = await createVoucher(new_code, data.amount, data.currencyId, expiration);
+        const newVoucher = await createVoucher(newCode, data.amount, data.currencyId, expiration);
 
         return res.status(201).json(newVoucher)
     }
