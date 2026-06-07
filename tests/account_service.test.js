@@ -5,7 +5,7 @@ import { prisma } from '../utils/prisma.ts';
 import config from "./config.test.js";
 import {
     createAccount,
-    createPersonnalAccount,
+    createpersonalAccount,
     createMerchantAccount,
     createCurrencyMainAccount,
     getAccountById,
@@ -13,7 +13,7 @@ import {
     getUserAccounts,
     getMerchantAccounts,
     deleteAccount,
-    getPersonnalAccountCountByCurrencyId,
+    getpersonalAccountCountByCurrencyId,
     getMerchantAccountCountByCurrencyId
 } from '../services/account_service.ts';
 
@@ -117,7 +117,7 @@ describe("Account Service Tests", () => {
 
 
     it("should create a personal account for a user", async () => {
-        testPersonalAccount = await createPersonnalAccount(testUser, testCurrency.symbol);
+        testPersonalAccount = await createpersonalAccount(testUser, testCurrency.symbol);
 
         assert.ok(testPersonalAccount);
         assert.equal(testPersonalAccount.currencyId, testCurrency.id);
@@ -225,12 +225,12 @@ describe("Account Service Tests", () => {
         assert.equal(deletedAccount, null);
     });
 
-    it(" get getPersonnalAccountCountByCurrencyId", async () => {
-        const countBefore = await getPersonnalAccountCountByCurrencyId(testCurrency.id);
+    it(" get getpersonalAccountCountByCurrencyId", async () => {
+        const countBefore = await getpersonalAccountCountByCurrencyId(testCurrency.id);
 
         const tempAccount = await createAccount(testCurrency.symbol, AccountType.PERSONAL);
 
-        const countAfter = await getPersonnalAccountCountByCurrencyId(testCurrency.id);
+        const countAfter = await getpersonalAccountCountByCurrencyId(testCurrency.id);
 
         assert.equal(countAfter, countBefore + 1);
 

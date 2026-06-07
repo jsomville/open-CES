@@ -2,7 +2,7 @@ import argon2 from 'argon2';
 import { prisma } from '../utils/prisma.ts';
 
 import { createCurrency, getCurrencyBySymbol } from '../services/currency_service.ts';
-import { createPersonnalAccount, createCurrencyMainAccount, getAccountByNumber } from '../services/account_service.ts';
+import { createpersonalAccount, createCurrencyMainAccount, getAccountByNumber } from '../services/account_service.ts';
 import { createUser, setActiveUserById } from '../services/user_service.ts'
 import { doFundAccount } from '../services/operation_service.ts';
 
@@ -92,7 +92,7 @@ async function createDummyUsersAndAccount(symbol: string) {
 
             await setActiveUserById(user.id);
 
-            const account = await createPersonnalAccount(user, symbol);
+            const account = await createpersonalAccount(user, symbol);
 
             const mainCurrencyAccount = await getAccountByNumber(currency.mainCurrencyAccountNumber);
 

@@ -7,7 +7,7 @@ import { shutdown } from '../app.js'
 import config from "./config.test.js";
 import { createCurrency, getCurrencyBySymbol } from '../services/currency_service.ts';
 import { createUser, setActiveUserById } from '../services/user_service.ts';
-import { createPersonnalAccount, createCurrencyMainAccount } from '../services/account_service.ts';
+import { createpersonalAccount, createCurrencyMainAccount } from '../services/account_service.ts';
 
 //To calculate global test duration
 let test_start_time;
@@ -120,7 +120,7 @@ before(async () => {
         await setActiveUserById(user.id);
         console.log(" - Active user set: " + user.email);
 
-        account = await createPersonnalAccount(user, config.testCurrency);
+        account = await createpersonalAccount(user, config.testCurrency);
         console.log(" - Account created for user " + user.email + " with account number " + account.number);
 
         userData = {
@@ -137,7 +137,7 @@ before(async () => {
         //await setActiveUserById(user.id);
         //console.log("Active user set: " + user.email);
 
-        account = await createPersonnalAccount(user, config.testCurrency);
+        account = await createpersonalAccount(user, config.testCurrency);
         console.log(" - Account created for user " + user.email + " with account number " + account.number);
 
         userData = {
@@ -154,7 +154,7 @@ before(async () => {
         await setActiveUserById(user.id);
         console.log(" - Active user set: " + user.email);
 
-        account = await createPersonnalAccount(user, config.testCurrency);
+        account = await createpersonalAccount(user, config.testCurrency);
         console.log(" - Account created for user " + user.email + " with account number " + account.number);
 
     }

@@ -8,7 +8,7 @@ import config from "./config.test.js";
 import { getCurrencyBySymbol } from '../services/currency_service.ts';
 import { getAccessTokenByEmailAndRole } from "../services/auth_service.ts";
 import { createUser } from "../services/user_service.ts";
-import { createPersonnalAccount, getAccountByNumber, createCurrencyMainAccount} from "../services/account_service.ts";
+import { createpersonalAccount, getAccountByNumber, createCurrencyMainAccount} from "../services/account_service.ts";
 
 describe("Test Fund / Refund", () => {
     let admin_access_token;
@@ -50,7 +50,7 @@ describe("Test Fund / Refund", () => {
                 throw new Error("FundRefund Test - Before - User not found")
             }
 
-            account = await createPersonnalAccount(user, currency.symbol);
+            account = await createpersonalAccount(user, currency.symbol);
 
             await prisma.account.deleteMany({ where: { Currency: { symbol: currency3Symbol } } });
             await prisma.currency.deleteMany({ where: { symbol: currency3Symbol } });

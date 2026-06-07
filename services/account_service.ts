@@ -53,11 +53,11 @@ export const createAccount = async (symbol: string, accountType: number) => {
         throw error
     }
 }
-export const createPersonnalAccount = async (user: any, symbol: string) => {
+export const createpersonalAccount = async (user: any, symbol: string) => {
     try {
         const account = await createAccount(symbol, AccountType.PERSONAL);
 
-        // Update Personnal Account Table
+        // Update personal Account Table
         await prisma.personalAccount.create({
             data: {
                 userId: user.id,
@@ -129,7 +129,7 @@ export const getAccountByNumber = async (accountNumber: string) => {
 };
 
 export const getUserAccounts = async (userId: number) => {
-    // Get the personnal account numbers
+    // Get the personal account numbers
     const accountIdList = await prisma.personalAccount.findMany({ where: { userId: userId }, select: { accountNumber: true } });
     const accounts = [];
 
@@ -164,7 +164,7 @@ export const getAccountCountByCurrencyId = async (currencyId: number) => {
     });
 }
 
-export const getPersonnalAccountCountByCurrencyId = async (currencyId: number) => {
+export const getpersonalAccountCountByCurrencyId = async (currencyId: number) => {
     return await prisma.account.count({
         where: {
             currencyId: currencyId,

@@ -18,7 +18,7 @@ describe("Test Account", () => {
     let user_id;
     let test_currency
 
-    let personnal_account_number;
+    let personal_account_number;
 
     const userEmail = "account.test@openced.org";
 
@@ -92,7 +92,7 @@ describe("Test Account", () => {
     /********************************* */
     // Add Account
     /********************************* */
-    it('Add Personnal account - User', async () => {
+    it('Add personal account - User', async () => {
         const payload = {
             ownerId: user_id,
             symbol: config.testCurrency,
@@ -108,7 +108,7 @@ describe("Test Account", () => {
         assert.equal(res.body.message, "Forbidden: Insufficient role");
     });
 
-    it('Add Personnal account - Admin', async () => {
+    it('Add personal account - Admin', async () => {
         const payload = {
             ownerId: user_id,
             symbol: config.testCurrency,
@@ -128,7 +128,7 @@ describe("Test Account", () => {
         assert.ok(res.body.createdAt);
         assert.ok(res.body.updatedAt);
 
-        personnal_account_number = res.body.number;
+        personal_account_number = res.body.number;
     });
 
     it('Add account - Currency not found', async () => {
@@ -270,7 +270,7 @@ describe("Test Account", () => {
 
     it('Get account - Admin', async () => {
         const res = await request(app)
-            .get(`/api/account/${personnal_account_number}`)
+            .get(`/api/account/${personal_account_number}`)
             .set('Authorization', `Bearer ${admin_access_token}`)
 
         assert.equal(res.statusCode, 200);
@@ -293,7 +293,7 @@ describe("Test Account", () => {
 
     it('Get account - User', async () => {
         const res = await request(app)
-            .get(`/api/account/${personnal_account_number}`)
+            .get(`/api/account/${personal_account_number}`)
             .set('Authorization', `Bearer ${user_access_token}`)
 
         assert.equal(res.statusCode, 403);
@@ -333,7 +333,7 @@ describe("Test Account", () => {
 
     it('Delete Account - user', async () => {
         const res = await request(app)
-            .delete(`/api/account/${personnal_account_number}`)
+            .delete(`/api/account/${personal_account_number}`)
             .set('Authorization', `Bearer ${user_access_token}`)
 
         assert.equal(res.statusCode, 403);

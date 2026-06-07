@@ -13,7 +13,7 @@ import { daysFrom, daysFromNow } from "../controller/voucherController.ts";
 import { VoucherStatus, createVoucher, getVoucherByCode, claimVoucherService } from "../services/voucher_service.ts";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.ts'
 import { getUserByEmail, createUser, deleteUser } from "../services/user_service.ts";
-import { getAccountByNumber, createPersonnalAccount } from "../services/account_service.ts";
+import { getAccountByNumber, createpersonalAccount } from "../services/account_service.ts";
 import { AccountType } from '../utils/accountUtil.ts';
 
 describe("Voucher Test", () => {
@@ -55,8 +55,8 @@ describe("Voucher Test", () => {
 
             user_token = getAccessTokenByEmailAndRole(testUser.email, "user");
 
-            // Create Personnal Account
-            personalAccount = await createPersonnalAccount(testUser, config.testCurrency);
+            // Create personal Account
+            personalAccount = await createpersonalAccount(testUser, config.testCurrency);
 
             voucher_payload = {
                 currencyId: currency.id,

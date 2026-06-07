@@ -8,7 +8,7 @@ import { prisma } from '../utils/prisma.ts';
 import { app } from "../app.js";
 import config from "./config.test.js";
 import { getAccessTokenByEmailAndRole } from '../services/auth_service.ts';
-import { createPersonnalAccount } from '../services/account_service.ts';
+import { createpersonalAccount } from '../services/account_service.ts';
 import { getUserByEmail, createUser, deleteUser } from '../services/user_service.ts';
 import { getCurrencyBySymbol } from '../services/currency_service.ts';
 import { AccountType } from '../utils/accountUtil.ts';
@@ -54,8 +54,8 @@ describe("Test Account Extra", () => {
             // Get test currency
             testCurrency = await getCurrencyBySymbol(config.testCurrency);
 
-            // Create Personnal Account
-            personalAccount = await createPersonnalAccount(testUser, config.testCurrency);
+            // Create personal Account
+            personalAccount = await createpersonalAccount(testUser, config.testCurrency);
 
             //Create Transactions
             for (let i = 0; i < 15; i++) {

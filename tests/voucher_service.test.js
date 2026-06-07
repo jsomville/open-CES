@@ -16,7 +16,7 @@ import {
     claimVoucherService 
 } from "../services/voucher_service.ts";
 import { getUserByEmail, createUser, deleteUser } from "../services/user_service.ts";
-import { createPersonnalAccount, getAccountByNumber } from "../services/account_service.ts";
+import { createpersonalAccount, getAccountByNumber } from "../services/account_service.ts";
 
 describe("Voucher Service Tests", () => {
     let currency;
@@ -62,7 +62,7 @@ describe("Voucher Service Tests", () => {
             );
 
             // Create test account
-            testAccount = await createPersonnalAccount(testUser, currency.symbol);
+            testAccount = await createpersonalAccount(testUser, currency.symbol);
 
             // Clean up existing test vouchers
             await prisma.voucher.deleteMany({
