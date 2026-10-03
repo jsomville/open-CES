@@ -1,0 +1,152 @@
+// SQLite variant of the Prisma schema, used for local testing (test.db).
+// Mirrors prisma/schema.prisma without PostgreSQL-specific native types.
+// Regenerate the client with:
+//   npx prisma generate --schema prisma/schema.sqlite.prisma
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma-sqlite"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Currency {
+  id         Int      @id @default(autoincrement())
+  symbol     String   @unique
+  name       String   @unique
+  country    String   @default("")
+  regionList String   @default("") @map("region_list")
+  webSiteURL String   @default("") @map("web_site_URL")
+  logoURL    String   @default("") @map("logo_URL")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  newAccountWizardURL       String @default("") @map("new_account_wizard_URL")
+  topOffWizardURL           String @default("") @map("top_off_wizard_URL")
+  androidAppURL             String @default("") @map("android_app_URL")
+  iphoneAppURL              String @default("") @map("iphone_app_URL")
+  androidAppLatestVersion   String @default("1.0.0") @map("android_app_latest_version")
+  iphoneAppLatestVersion    String @default("1.0.0") @map("iphone_app_latest_version")
+  accountNextNumber         Int    @default(1) @map("account_next_number")
+  mainCurrencyAccountNumber String @default("") @map("main_currency_account_number")
+  reconversionAccountNumber String @default("") @map("reconversion_account_number")
+
+  Vouchers     Voucher[]     @relation("Vouchers")
+  Transactions Transaction[] @relation("CurrencyTransactions")
+  Account      Account[]
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  firstname    String
+  lastname     String
+  email        String   @unique
+  phone        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  lastLoginAt  DateTime? @map("last_login_at")
+
+  isActive Boolean @default(false) @map("is_active")
+
+  PersonalAccount PersonalAccount[]
+
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  phoneVerifiedAt DateTime? @map("phone_verified_at")
+  status          String    @default("PENDING")
+}
+
+model Merchant {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String?
+  phone     String?
+  region    String
+  latitude  Decimal?
+  longitude Decimal?
+  address   String?
+  website   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  MerchantAccount MerchantAccount[]
+}
+
+model PersonalAccount {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  accountNumber String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  User    User    @relation(fields: [userId], references: [id])
+  Account Account @relation(fields: [accountNumber], references: [number])
+}
+
+model MerchantAccount {
+  id            Int      @id @default(autoincrement())
+  merchantId    Int
+  accountNumber String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  Merchant Merchant @relation(fields: [merchantId], references: [id])
+  Account  Account  @relation(fields: [accountNumber], references: [number])
+}
+
+model Account {
+  id          Int      @id @default(autoincrement())
+  number      String   @unique
+  currencyId  Int      @map("currency_id")
+  accountType Int      @default(0) @map("account_type")
+  balance     Decimal  @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  Currency Currency @relation(fields: [currencyId], references: [id])
+
+  Transactions    Transaction[]     @relation("Transactions")
+  PersonalAccount PersonalAccount[]
+  MerchantAccount MerchantAccount[]
+}
+
+model Transaction {
+  id              Int      @id @default(autoincrement())
+  accountNumber   String   @map("account_number")
+  amount          Decimal
+  currencyId      Int      @map("currency_id")
+  transactionType String   @map("transaction_type")
+  status          String
+  description     String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  Account  Account  @relation("Transactions", fields: [accountNumber], references: [number])
+  Currency Currency @relation("CurrencyTransactions", fields: [currencyId], references: [id])
+}
+
+model Voucher {
+  id               Int       @id @default(autoincrement())
+  code             String    @unique
+  currencyId       Int       @map("currency_id")
+  amount           Decimal
+  expiration       DateTime
+  status           String
+  claimedAccountId String?   @map("claimed_account_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  claimedAt        DateTime? @map("claimed_at")
+
+  Currency Currency @relation("Vouchers", fields: [currencyId], references: [id])
+}
+
+model ValidationChallenge {
+  id           Int      @id @default(autoincrement())
+  channel      String
+  email        String
+  code         String   @map("code_hash")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  expiresAt    DateTime @map("expires_at")
+  consumedAt   DateTime? @map("consumed_at")
+  attemptCount Int      @default(0)
+}

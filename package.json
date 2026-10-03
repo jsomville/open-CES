@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node server --omit=dev",
     "dev": "node --watch --env-file=.env server",
-    "test": "cross-env NODE_ENV=test mocha --timeout 10000 tests/*.js"
+    "test": "cross-env NODE_ENV=test mocha --timeout 10000 tests/setup.ts tests/*.js"
   },
   "repository": {
     "type": "git",
@@ -39,8 +39,10 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.10.0",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "better-sqlite3": "^12.11.1",
     "cross-env": "^10.1.0",
     "mocha": "^11.7.6",
     "prisma": "^7.8.0",

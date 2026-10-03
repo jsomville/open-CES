@@ -5,3 +5,5 @@ prisma/migrations/*
 .vscode/
 docs/bruno/environments/*
 generated/*
+generated/**.db
+test.db

@@ -2,7 +2,11 @@ import { prisma } from '../utils/prisma.ts';
 
 import { getCurrencyBySymbol } from './currency_service.ts';
 import { getAccountId, AccountType } from '../utils/accountUtil.ts';
-import { SortOrder } from '../generated/prisma/internal/prismaNamespace.ts';
+// SortOrder is provider-agnostic; import it from the client selected for the active DB provider
+// (resolves either generated/prisma or generated/prisma-sqlite).
+const { SortOrder } = await import(((process.env.DB_PROVIDER ?? '').toLowerCase() === 'sqlite' || (process.env.DATABASE_URL ?? '').startsWith('file:'))
+    ? '../generated/prisma-sqlite/internal/prismaNamespace.ts'
+    : '../generated/prisma/internal/prismaNamespace.ts');
 
 export const createAccount = async (symbol: string, accountType: number) => {
     try {
